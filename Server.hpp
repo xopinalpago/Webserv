@@ -3,8 +3,6 @@
 
 #include <iostream>
 #include <string>
-#include <sstream>
-#include <fstream>
 #include <cstring>
 #include <fcntl.h>
 
@@ -13,6 +11,10 @@
 #include <netinet/in.h>
 #include <sys/time.h>
 #include <signal.h>
+#include <map>
+
+#include "User.hpp"
+#include "Pages.hpp"
 
 #ifndef PORT
 #define PORT 8080
@@ -31,7 +33,8 @@ class Server
         int                 rc;
         int                 max_sd;
         int                 new_sd;
-        int                 len;   
+        int                 len;
+        int                 end_server;
         struct sockaddr_in6 address;
         struct timeval      timeout;
         fd_set	            readfds;
@@ -40,13 +43,18 @@ class Server
         fd_set	            tmp_writefds;
         char                buffer[BUFFER_SIZE];
 
-        void errorFunction(std::string word);
+        void	errorFunction(std::string word);
+        int		readServer(int i);
+        void	sendServer(int i);
+        void    listenServer(void);
 
     public:
         int initServer(void);
         int runServer(void);
         Server(void);
         ~Server(void);
+        std::map<int, User> Users;
+
 };
 
 #endif

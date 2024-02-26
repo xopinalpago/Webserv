@@ -64,11 +64,91 @@ int Server::initServer(void)
     return (0);
 }
 
+void Server::listenServer(void)
+{
+	int addrlen = sizeof(address);
+	printf("  Listening socket is readable\n");
+	new_sd = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
+	if (new_sd < 0)
+	{
+		strerror(errno);
+		end_server = true;
+		return ;
+	}
+	printf("  New incoming connection - %d\n", new_sd);
+	Users[new_sd] = User(new_sd);
+	FD_SET(new_sd, &readfds);
+	if (new_sd > max_sd)
+		max_sd = new_sd;
+	return ;
+}
+
+int Server::readServer(int i)
+{
+	printf("  Descriptor %d is readable\n", i);
+	std::string all = "";
+	int rc2 = BUFFER_SIZE;
+	while (rc2 == BUFFER_SIZE)
+	{
+		char bf[BUFFER_SIZE + 1];
+		rc2 = recv(i, buffer, BUFFER_SIZE, 0);
+		if (rc2 <= 0)
+		{
+			if (rc2 == -1)
+				strerror(errno);
+			return (rc2);
+		}
+		bf[rc2] = 0;
+		std::string str(bf, bf + rc2);
+		all.append(str);
+		len = rc2;		
+		printf("  %d bytes received\n", len);
+		rc2 = 1;
+	}
+	printf("****************************\n");
+	printf("%s\n", buffer);
+	printf("****************************\n");
+	Users[i].request = buffer;
+	FD_CLR(i, &readfds);
+	FD_SET(i, &writefds);
+	return (1);
+}
+
+void	Server::sendServer(int i)
+{
+	// printf("*********** i = %d *****************\n", i);
+	// printf("%s\n", Users[i].request.c_str());
+	// printf("****************************\n");
+	// int fpos = Users[i].request.find(" ", 0);
+	// int lpos = Users[i].request.find(" ", fpos + 1);
+	// std::string path_file =  Users[i].request.substr(fpos + 1, lpos - fpos - 1);
+	// // printf("fpos = %d lpos = %d path_file = %s\n", fpos, lpos, path_file.c_str());
+	// // std::ifstream file("/index.html");
+	// if (!path_file.compare("/"))
+	// 	path_file = "/index.html";
+	// path_file = path_file.insert(0, ".");
+
+	// std::ifstream file(Users[i].getPath().c_str());
+
+	// std::stringstream htmlResponse;
+	// htmlResponse << file.rdbuf();
+	// file.close();
+	// std::string content = htmlResponse.str();
+	// printf("  Send to %d\n", i);
+	// printf("  %lu bytes received\n", content.size());
+	Pages page;
+	std::string content = page.displayPage(Users[i].getPath().c_str());
+	int rc3 = send(i, content.c_str(), content.size(), 0);
+	if (rc3 < 0)
+		strerror(errno);
+	FD_CLR(i, &writefds);
+	FD_SET(i, &readfds);	
+}
+
+
 int Server::runServer(void)
 {
-    int end_server = false;
-    int addrlen = sizeof(address);
-
+	end_server = false;
 	signal(SIGINT, handleSigint);
     while (end_server == false)
 	{
@@ -92,46 +172,12 @@ int Server::runServer(void)
 			{
 				if (i == server_fd)
 				{
-					printf("  Listening socket is readable\n");
-					new_sd = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
-					if (new_sd < 0)
-					{
-						if (errno != EWOULDBLOCK)
-						{
-						perror("  accept() failed");
-						end_server = true;
-						}
-						break;
-					}
-					printf("  New incoming connection - %d\n", new_sd);
-					FD_SET(new_sd, &readfds);
-					if (new_sd > max_sd)
-						max_sd = new_sd;
+					listenServer();
 				}
 				else
 				{
-					printf("  Descriptor %d is readable\n", i);
-					std::string all = "";
-					int rc2 = BUFFER_SIZE;
-					while (rc2 == BUFFER_SIZE)
-					{
-						char bf[BUFFER_SIZE + 1];
-						rc2 = recv(i, buffer, sizeof(buffer), 0);
-						if (rc2 <= 0)
-						{
-							if (rc2 == -1)
-								strerror(errno);
-							break;
-						}
-						bf[rc2] = 0;
-						std::string str(bf, bf + rc2);
-						all.append(str);
-						len = rc2;		
-						printf("  %d bytes received\n", len);
-						FD_CLR(i, &readfds);
-						FD_SET(i, &writefds);
-					}
-					if (rc2 == 0)
+					int res = readServer(i);
+					if (res == 0)
 					{
 						printf("  Connection closeddddddddddddd\n");
 					    close(i);
@@ -147,20 +193,7 @@ int Server::runServer(void)
 			}
 			if (FD_ISSET(i, &tmp_writefds))
 			{
-				printf("Send\n");
-				std::ifstream file("./index.html");
-				std::stringstream htmlResponse;
-				htmlResponse << file.rdbuf();
-				file.close();
-				std::string content = htmlResponse.str();
-				printf("%lu\n", content.size());
-				int rc3 = send(i, content.c_str(), content.size(), 0);
-				if (rc3 < 0)
-                {
-					perror("  send() failed");
-				}
-				FD_CLR(i, &writefds);
-				FD_SET(i, &readfds);
+				sendServer(i);
 			}
 		}
 		if (g_exit == 1)
