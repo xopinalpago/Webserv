@@ -28,7 +28,7 @@ std::string User::getPath(void)
 	printf("****************************\n");
 	int fpos = request.find(" ", 0);
 	int lpos = request.find(" ", fpos + 1);
-	std::string path_file =  request.substr(fpos + 1, lpos - fpos - 1);
+	std::string path_file = request.substr(fpos + 1, lpos - fpos - 1);
 	// printf("fpos = %d lpos = %d path_file = %s\n", fpos, lpos, path_file.c_str());
 
 	// std::ifstream file("/index.html");
