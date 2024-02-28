@@ -29,7 +29,7 @@ int Server::initServer(void)
 {
     int on = 1;
 
-    if ((server_fd = socket(AF_INET6, SOCK_STREAM, 0)) < 0)
+    if ((server_fd = socket(AF_INET6, SOCK_STREAM, 0)) < 0) //pk AF_INET6 pour IPV6 et pas IPV4 ?
         return(errorFunction("socket"), 1);
     if ((rc = setsockopt(server_fd, SOL_SOCKET,  SO_REUSEADDR, (char *)&on, sizeof(on)) < 0))
 	{
@@ -44,7 +44,8 @@ int Server::initServer(void)
 	std::memset(&address, 0, sizeof(address));
     address.sin6_family = AF_INET6;
 	memcpy(&address.sin6_addr, &in6addr_any, sizeof(in6addr_any));
-    address.sin6_port = htons(PORT);
+    // le serveur doit pouvoir ecouter plusieurs ports mais ici on en defini qu'un ?
+	address.sin6_port = htons(PORT);
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
 	{
         close(server_fd);
@@ -58,6 +59,7 @@ int Server::initServer(void)
 	FD_ZERO(&readfds);
 	FD_ZERO(&writefds);
 	FD_SET(server_fd, &readfds);
+	// pourquoi le plus grand fd est celui du socket ?
 	max_sd = server_fd;
 	timeout.tv_sec  = 3 * 60;
 	timeout.tv_usec = 0;
@@ -152,6 +154,7 @@ int Server::runServer(void)
 	signal(SIGINT, handleSigint);
     while (end_server == false)
 	{
+		// pourquoi des fd temporaires ?
 		std::memcpy(&tmp_readfds, &readfds, sizeof(readfds));
 		std::memcpy(&tmp_writefds, &writefds, sizeof(writefds));
 		std::cout << "Waiting for select..." << std::endl;

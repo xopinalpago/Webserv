@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: rmeriau <rmeriau@student.42.fr>            +#+  +:+       +#+         #
+#    By: aducobu <aducobu@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/07/10 16:29:29 by dlu               #+#    #+#              #
-#    Updated: 2024/02/26 17:15:01 by rmeriau          ###   ########.fr        #
+#    Updated: 2024/02/28 10:21:33 by aducobu          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,8 +15,13 @@ CFLAGS = -Wall -Wextra -Werror -std=c++98 -MMD
 RM = rm -rf
 NAME = webserv
 
-SRCS = main.cpp Server.cpp User.cpp Pages.cpp
-OBJS = $(SRCS:.cpp=.o)
+SRCS = ${addprefix sources/, \
+			main.cpp \
+			Server.cpp \
+			User.cpp \
+			Pages.cpp \
+		}
+OBJS = $(SRCS:sources/%.cpp=objects/%.o)
 DEPS = $(SRCS:.cpp=.d)
 INCLUDE = -I.
 
@@ -27,11 +32,12 @@ $(NAME): $(OBJS)
 
 -include $(DEPS)
 
-%.o: %.cpp
+objects/%.o: sources/%.cpp
+	mkdir -p $(dir $@)
 	${CC} ${CFLAGS} ${INCLUDE} -c $< -o $@
 
 clean:
-	$(RM) $(OBJS) $(DEPS)
+	$(RM) objects
 
 fclean: clean
 	$(RM) $(NAME)
