@@ -36,7 +36,8 @@ std::string Pages::displayPage(std::string file_path)
 	}
 	file.close();
 
-	ctype = "text/html";
+	std::string file_extension = file_path.substr(file_path.find_last_of(".") + 1);
+    file_extension == "css" ? ctype = "text/css" : ctype = "text/html";
 
 	std::stringstream content;
 	content << "HTTP/1.1 " << status << " " << message << std::endl;
