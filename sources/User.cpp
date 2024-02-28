@@ -23,9 +23,9 @@ void User::getRequest(void)
 
 std::string User::getPath(void)
 {
-    printf("****************************\n");
-	printf("%s\n", request.c_str());
-	printf("****************************\n");
+    // printf("****************************\n");
+	// printf("%s\n", request.c_str());
+	// printf("****************************\n");
 	int fpos = request.find(" ", 0);
 	int lpos = request.find(" ", fpos + 1);
 	std::string path_file = request.substr(fpos + 1, lpos - fpos - 1);

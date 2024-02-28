@@ -6,7 +6,7 @@
 #    By: aducobu <aducobu@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/07/10 16:29:29 by dlu               #+#    #+#              #
-#    Updated: 2024/02/28 10:21:33 by aducobu          ###   ########.fr        #
+#    Updated: 2024/02/28 13:46:23 by aducobu          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,11 +23,11 @@ SRCS = ${addprefix sources/, \
 		}
 OBJS = $(SRCS:sources/%.cpp=objects/%.o)
 DEPS = $(SRCS:.cpp=.d)
-INCLUDE = -I.
+INCLUDE = -I includes
 
 all: $(NAME)
 
-$(NAME): $(OBJS)
+$(NAME): $(OBJS) 
 	$(CC) $(CFLAGS) ${INCLUDE} $(OBJS) -o $(NAME)
 
 -include $(DEPS)

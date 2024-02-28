@@ -107,9 +107,9 @@ int Server::readServer(int i)
 		printf("  %d bytes received\n", len);
 		rc2 = 1;
 	}
-	printf("****************************\n");
-	printf("%s\n", buffer);
-	printf("****************************\n");
+	// printf("****************************\n");
+	// printf("%s\n", buffer);
+	// printf("****************************\n");
 	Users[i].request = buffer;
 	FD_CLR(i, &readfds);
 	FD_SET(i, &writefds);
@@ -143,6 +143,9 @@ void	Server::sendServer(int i)
 	int rc3 = send(i, content.c_str(), content.size(), 0);
 	if (rc3 < 0)
 		strerror(errno);
+	std::cout << "******* content dans sendServer *******" << std::endl;
+	std::cout << content << std::endl;
+	std::cout << "***************************************" << std::endl;
 	FD_CLR(i, &writefds);
 	FD_SET(i, &readfds);	
 }
@@ -151,13 +154,14 @@ void	Server::sendServer(int i)
 int Server::runServer(void)
 {
 	end_server = false;
-	signal(SIGINT, handleSigint);
+	signal(SIGINT, handleSigint); //?
     while (end_server == false)
 	{
 		// pourquoi des fd temporaires ?
 		std::memcpy(&tmp_readfds, &readfds, sizeof(readfds));
 		std::memcpy(&tmp_writefds, &writefds, sizeof(writefds));
 		std::cout << "Waiting for select..." << std::endl;
+		// signifcation rc ?
 		rc = select(max_sd + 1, &tmp_readfds, &tmp_writefds, NULL, &timeout);
 		if (rc < 0)
 		{

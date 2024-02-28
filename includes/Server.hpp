@@ -38,8 +38,8 @@ class Server
         struct sockaddr_in6 address;
         struct timeval      timeout;
         fd_set	            readfds;
-        // pourquoi ne pas set des errorfds pour les fd a surveiller pour les erreurs
         fd_set	            writefds;
+        // pourquoi ne pas set des errorfds pour les fd a surveiller pour les erreurs
         fd_set	            tmp_readfds;
         fd_set	            tmp_writefds;
         char                buffer[BUFFER_SIZE];
