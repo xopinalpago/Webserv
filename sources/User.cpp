@@ -29,13 +29,16 @@ std::string User::getPath(void)
 	int fpos = request.find(" ", 0);
 	int lpos = request.find(" ", fpos + 1);
 	std::string path_file = request.substr(fpos + 1, lpos - fpos - 1);
-	// printf("fpos = %d lpos = %d path_file = %s\n", fpos, lpos, path_file.c_str());
-
-	// std::ifstream file("/index.html");
 	if (!path_file.compare("/"))
 		path_file = "/pages/index.html";
 	else
 		path_file = "/pages" + path_file;
 	path_file = path_file.insert(0, ".");
     return (path_file);
+}
+
+std::string User::getMethod(void) {
+	int lpos = request.find(" ", 0);
+	std::string method = request.substr(0, lpos);
+	return method;
 }

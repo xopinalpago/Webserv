@@ -6,6 +6,8 @@
 #include <sstream>
 #include <fstream>
 
+#include "User.hpp"
+
 class Pages
 {
 	private:
@@ -15,7 +17,8 @@ class Pages
 		int clength;
 		std::string message;
 		std::string ctype;
-		std::string displayPage(std::string file);
+		std::string displayPage(std::string file, std::string method);
+		bool cgiExtension(std::string file_path, std::string extension);
 		Pages(void);
 		~Pages(void);
 };

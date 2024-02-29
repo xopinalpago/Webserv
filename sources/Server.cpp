@@ -107,9 +107,9 @@ int Server::readServer(int i)
 		printf("  %d bytes received\n", len);
 		rc2 = 1;
 	}
-	printf("****************************\n");
-	printf("%s\n", buffer);
-	printf("****************************\n");
+	// printf("****************************\n");
+	// printf("%s\n", buffer);
+	// printf("****************************\n");
 	Users[i].request = buffer;
 	FD_CLR(i, &readfds);
 	FD_SET(i, &writefds);
@@ -119,7 +119,8 @@ int Server::readServer(int i)
 void	Server::sendServer(int i)
 {
 	Pages page;
-	std::string content = page.displayPage(Users[i].getPath().c_str());
+	std::string method = Users[i].getMethod();
+	std::string content = page.displayPage(Users[i].getPath().c_str(), method);
 	int rc3 = send(i, content.c_str(), content.size(), 0);
 	if (rc3 < 0)
 		strerror(errno);

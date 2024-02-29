@@ -13,6 +13,7 @@ class User
 		std::string request;
 		void getRequest(void);
 		std::string getPath(void);
+		std::string getMethod(void);
 		User(void);
 		User(int id);
 		~User(void);

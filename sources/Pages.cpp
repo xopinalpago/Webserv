@@ -10,10 +10,40 @@ Pages::~Pages(void)
     return ;
 }
 
-std::string Pages::displayPage(std::string file_path)
+bool Pages::cgiExtension(std::string file_path, std::string extension)
 {
-	// std::cout << file_path.c_str() << std::endl;
-	// determiner si 
+	if (file_path.length() >= extension.length()) {
+		return (file_path.compare(file_path.length() - extension.length() , extension.length(), extension) == 0);
+	}
+	return false;
+}
+std::string Pages::displayPage(std::string file_path, std::string method)
+{
+	// determiner si il s'agit d'un script cgi : (accepter en fonction du fichier de config)
+	if (cgiExtension(file_path, ".php") || cgiExtension(file_path, ".py"))
+	{
+		// verifier que la methode est autorisee : (en fonction du fichier de config)
+		std::cout << "METHODE=" << method << std::endl;
+		if (method == "GET" || method == "POST" || method == "DELETE") {
+			std::cout << "--- necessite un script CGI ---" << std::endl;
+		}
+
+	}
+	else { // ce n'est pas un script cgi
+		std::cout << "--- ne necessite pas un script CGI ---" << std::endl;
+		// requete autorisee ?
+		// requete GET ou POST ou DELETE ?
+		if (method == "GET") {
+			std::cout << "Requete GET\n";
+		} else if (method == "POST") {
+			std::cout << "Requete POST\n";
+		} else if(method == "DELETE") {
+			std::cout << "Requete DELETE\n";
+		} else {
+			std::cout << "Requete NON AUTORISEE\n";
+		}
+	}
+
 	std::ifstream file(file_path.c_str());
 	std::stringstream htmlResponse;
 	std::string data;
