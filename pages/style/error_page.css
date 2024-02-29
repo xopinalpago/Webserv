@@ -1,0 +1,21 @@
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    text-transform: uppercase;
+}
+
+h1 {
+    margin-bottom: 0;
+    font-size:3em;
+    color: #4b4b4b;
+}
+
+#comment {
+    font-weight: bold;
+    margin-bottom: 30px;
+    font-size: smaller;
+    color:dimgray;
+}

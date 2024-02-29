@@ -6,6 +6,7 @@ body, html {
 
 button {
     font-size: larger;
+    text-transform: uppercase;
     width: 200px;
     font-family: 'Times';
     background-color: white;
@@ -14,4 +15,8 @@ button {
     border-radius: 10px;
     border: 4px double #cccccc;
     padding: 20px;
+}
+
+button:active {
+    border-style: inset;
 }

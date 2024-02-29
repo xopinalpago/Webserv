@@ -61,7 +61,7 @@ int Server::initServer(void)
 	FD_SET(server_fd, &readfds);
 	// pourquoi le plus grand fd est celui du socket ?
 	max_sd = server_fd;
-	timeout.tv_sec  = 3 * 60;
+	timeout.tv_sec  = 15 * 60;
 	timeout.tv_usec = 0;
     return (0);
 }
@@ -107,9 +107,9 @@ int Server::readServer(int i)
 		printf("  %d bytes received\n", len);
 		rc2 = 1;
 	}
-	// printf("****************************\n");
-	// printf("%s\n", buffer);
-	// printf("****************************\n");
+	printf("****************************\n");
+	printf("%s\n", buffer);
+	printf("****************************\n");
 	Users[i].request = buffer;
 	FD_CLR(i, &readfds);
 	FD_SET(i, &writefds);
@@ -118,34 +118,14 @@ int Server::readServer(int i)
 
 void	Server::sendServer(int i)
 {
-	// printf("*********** i = %d *****************\n", i);
-	// printf("%s\n", Users[i].request.c_str());
-	// printf("****************************\n");
-	// int fpos = Users[i].request.find(" ", 0);
-	// int lpos = Users[i].request.find(" ", fpos + 1);
-	// std::string path_file =  Users[i].request.substr(fpos + 1, lpos - fpos - 1);
-	// // printf("fpos = %d lpos = %d path_file = %s\n", fpos, lpos, path_file.c_str());
-	// // std::ifstream file("/index.html");
-	// if (!path_file.compare("/"))
-	// 	path_file = "/index.html";
-	// path_file = path_file.insert(0, ".");
-
-	// std::ifstream file(Users[i].getPath().c_str());
-
-	// std::stringstream htmlResponse;
-	// htmlResponse << file.rdbuf();
-	// file.close();
-	// std::string content = htmlResponse.str();
-	// printf("  Send to %d\n", i);
-	// printf("  %lu bytes received\n", content.size());
 	Pages page;
 	std::string content = page.displayPage(Users[i].getPath().c_str());
 	int rc3 = send(i, content.c_str(), content.size(), 0);
 	if (rc3 < 0)
 		strerror(errno);
-	std::cout << "******* content dans sendServer *******" << std::endl;
-	std::cout << content << std::endl;
-	std::cout << "***************************************" << std::endl;
+	// std::cout << "******* content dans sendServer *******" << std::endl;
+	// std::cout << content << std::endl;
+	// std::cout << "***************************************" << std::endl;
 	FD_CLR(i, &writefds);
 	FD_SET(i, &readfds);	
 }

@@ -12,7 +12,8 @@ Pages::~Pages(void)
 
 std::string Pages::displayPage(std::string file_path)
 {
-	std::cout << file_path.c_str() << std::endl;
+	// std::cout << file_path.c_str() << std::endl;
+	// determiner si 
 	std::ifstream file(file_path.c_str());
 	std::stringstream htmlResponse;
 	std::string data;
@@ -21,7 +22,7 @@ std::string Pages::displayPage(std::string file_path)
 		std::cout << "Page not found" << std::endl;
 		status = 404;
 		message = "Not Found";
-		std::ifstream file_error("./error_page_404.html");
+		std::ifstream file_error("./pages/error_page_404.html");
 		htmlResponse << file_error.rdbuf();
 		data = htmlResponse.str();
 		clength = data.length();

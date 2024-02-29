@@ -33,7 +33,9 @@ std::string User::getPath(void)
 
 	// std::ifstream file("/index.html");
 	if (!path_file.compare("/"))
-		path_file = "/index.html";
+		path_file = "/pages/index.html";
+	else
+		path_file = "/pages" + path_file;
 	path_file = path_file.insert(0, ".");
     return (path_file);
 }
