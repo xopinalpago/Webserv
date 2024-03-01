@@ -107,9 +107,11 @@ int Server::readServer(int i)
 		printf("  %d bytes received\n", len);
 		rc2 = 1;
 	}
-	// printf("****************************\n");
+	printf("****************************\n");
+	std::cout << buffer << std::endl;
 	// printf("%s\n", buffer);
-	// printf("****************************\n");
+	std::cout << "TAILLE : " << strlen(buffer) << std::endl; 
+	printf("****************************\n");
 	Users[i].request = buffer;
 	FD_CLR(i, &readfds);
 	FD_SET(i, &writefds);
