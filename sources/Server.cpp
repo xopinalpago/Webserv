@@ -158,37 +158,21 @@ int Server::runServer(void)
 		}
 		for (int i = 0; i <= max_sd; i++)
 		{
-			if (FD_ISSET(i, &tmp_readfds))
+			if (FD_ISSET(i, &tmp_readfds) && i == server_fd)
 			{
-				if (i == server_fd)
-				{
-					listenServer();
-				}
-				else
-				{
-					int res = readServer(i);
-					if (res == 0)
-					{
-						printf("  Connection closeddddddddddddd\n");
-					    close(i);
-						FD_CLR(i, &readfds);
-						FD_CLR(i, &writefds);
-						if (i == max_sd)
-						{
-							while (FD_ISSET(max_sd, &readfds) == false)
-								max_sd -= 1;
-						}
-					}
-				}
+				listenServer();
 			}
-			if (FD_ISSET(i, &tmp_writefds))
+			else if (FD_ISSET(i, &tmp_readfds) && Users.count(i))
+			{
+				readServer(i);
+			}
+			else if (FD_ISSET(i, &tmp_writefds) && Users.count(i))
 			{
 				sendServer(i);
 			}
 		}
 		if (g_exit == 1)
 		{
-			dprintf(2, "ddddddddddddddddddd\n");
 			break ;
 		}
     }
