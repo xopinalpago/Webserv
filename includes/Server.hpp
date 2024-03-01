@@ -29,6 +29,7 @@ extern int		g_exit;
 class Server
 {
     private:
+
         int                 server_fd;
         int                 rc;
         int                 max_sd;
@@ -44,6 +45,15 @@ class Server
         fd_set	            tmp_writefds;
         char                buffer[BUFFER_SIZE];
 
+        int port;
+        std::string host;
+        std::string server_name;
+        std::string root;
+        std::string index;
+        std::string error_page;
+        std::string client_max_body_size;
+        std::string directory_listing;
+
         void	errorFunction(std::string word);
         int		readServer(int i);
         void	sendServer(int i);
@@ -54,6 +64,25 @@ class Server
         int runServer(void);
         Server(void);
         ~Server(void);
+
+        void setPort(int port);
+        void setHost(std::string host);
+        void setServerName(std::string server_name);
+        void setRoot(std::string root);
+        void setIndex(std::string index);
+        void setErrorPage(std::string error_page);
+        void setClientMax(std::string client_max_body_size);
+        void setDirectory(std::string directory_listing);
+
+        int         getPort(void);
+        std::string getHost(void);
+        std::string getServerName(void);
+        std::string getRoot(void);
+        std::string getIndex(void);
+        std::string getErrorPage(void);
+        std::string getClientMax(void);
+        std::string getDirectory(void);
+
         std::map<int, User> Users;
 
 };

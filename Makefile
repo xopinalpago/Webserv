@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: aducobu <aducobu@student.42.fr>            +#+  +:+       +#+         #
+#    By: rmeriau <rmeriau@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/07/10 16:29:29 by dlu               #+#    #+#              #
-#    Updated: 2024/03/01 09:56:42 by aducobu          ###   ########.fr        #
+#    Updated: 2024/03/01 15:13:20 by rmeriau          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,6 +20,7 @@ SRCS = ${addprefix sources/, \
 			Server.cpp \
 			User.cpp \
 			Pages.cpp \
+			Config.cpp \
 		}
 OBJS = $(SRCS:sources/%.cpp=objects/%.o)
 DEPS = $(SRCS:.cpp=.d)

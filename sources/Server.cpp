@@ -12,6 +12,94 @@ Server::~Server(void)
     return ;
 }
 
+void Server::setPort(int port)
+{
+	this->port = port;
+    return ;
+}
+
+void Server::setHost(std::string host)
+{
+	this->host = host;
+    return ;
+}
+
+void Server::setServerName(std::string server_name)
+{
+	this->server_name = server_name;
+    return ;
+}
+
+void Server::setRoot(std::string root)
+{
+	this->root = root;
+    return ;
+}
+
+void Server::setIndex(std::string index)
+{
+	this->index = index;
+    return ;
+}
+
+void Server::setErrorPage(std::string error_page)
+{
+	this->error_page = error_page;
+    return ;
+}
+
+void Server::setClientMax(std::string client_max_body_size)
+{
+	this->client_max_body_size = client_max_body_size;
+    return ;
+}
+
+void Server::setDirectory(std::string directory_listing)
+{
+	this->directory_listing = directory_listing;
+    return ;
+}
+
+int Server::getPort(void)
+{
+    return (this->port);
+}
+
+std::string Server::getHost(void)
+{
+    return (this->host);
+}
+
+std::string Server::getServerName(void)
+{
+    return (this->server_name);
+}
+
+std::string Server::getRoot(void)
+{
+    return (this->root);
+}
+
+std::string Server::getIndex(void)
+{
+    return (this->index);
+}
+
+std::string Server::getErrorPage(void)
+{
+    return (this->error_page);
+}
+
+std::string Server::getClientMax(void)
+{
+    return (this->client_max_body_size);
+}
+
+std::string Server::getDirectory(void)
+{
+    return (this->directory_listing);
+}
+
 void Server::errorFunction(std::string word)
 {
 	std::cerr << word << " failed" << std::endl;

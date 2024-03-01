@@ -1,12 +1,16 @@
 #include "Server.hpp"
+#include "Config.hpp"
 
 int main()
 {
 	Server server;
-
-	if (server.initServer())
-		return (1);
-	if (server.runServer())
-		return (1);	
+	Config config;
+	
+	config.GetLineFile();
+	config.ParseFile();
+	// if (server.initServer())
+	// 	return (1);
+	// if (server.runServer())
+	// 	return (1);	
     return (0);
 }
