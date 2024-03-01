@@ -14,10 +14,37 @@ std::string Config::trim(const std::string& str)
     return str.substr(first, (last - first + 1));
 }
 
+int countOccurrences(const std::string& filename, const std::string& to_find)
+{
+    std::ifstream file(filename.c_str());
+    std::string line;
+    int count = 0;
+
+    if (file.is_open()) {
+        while (getline(file, line)) {
+            size_t pos = 0;
+            while ((pos = line.find(to_find, pos)) != std::string::npos) {
+                ++count;
+                pos += to_find.length();
+            }
+        }
+        file.close();
+    } else {
+        std::cerr << "Impossible d'ouvrir le fichier." << std::endl;
+		return (0);
+    }
+    return (count);
+}
+
+
 int Config::GetLineFile(void)
 {
     std::ifstream infile("server.conf"); // Assurez-vous que le fichier est dans le même répertoire que votre exécutable
 
+	nb_config = countOccurrences("server.conf", "server ");
+	std::cout << nb_config << std::endl;
+
+	
     if (infile) {
         std::string line;
         bool insideMethod = false; // Pour savoir si nous sommes à l'intérieur de la section "method"
@@ -49,9 +76,9 @@ int Config::GetLineFile(void)
     }
 
     // Affichage du contenu du vecteur
-    // for (size_t i = 0; i < serverConfig.size(); ++i) {
-    //     std::cout << serverConfig[i] << std::endl;
-    // }
+    for (size_t i = 0; i < serverConfig.size(); ++i) {
+        std::cout << serverConfig[i] << std::endl;
+    }
 
     return 0;
 }
@@ -59,11 +86,11 @@ int Config::GetLineFile(void)
 int	Config::StringToInt(std::string str) {
 
 	if (str.length() > 10)
-		return (-42);
+		return (0);
 	for (int i = 0; str[i] != '\0'; i++)
 	{
 		if (std::isdigit(str[i] == 0))
-			return (-42);
+			return (0);
 	}
 	std::stringstream stream(str);
 	int n;
@@ -83,6 +110,36 @@ int Config::ParseFile(void)
 		{
 			int first_sp = serverConfig[i].find(' ');
 			server.setHost(serverConfig[i].substr(first_sp + 1, serverConfig[i].size() - 2 - first_sp));	
+		}
+		else if (serverConfig[i].find("server_name") == 0)
+		{
+			int first_sp = serverConfig[i].find(' ');
+			server.setServerName(serverConfig[i].substr(first_sp + 1, serverConfig[i].size() - 2 - first_sp));	
+		}
+		else if (serverConfig[i].find("root") == 0)
+		{
+			int first_sp = serverConfig[i].find(' ');
+			server.setRoot(serverConfig[i].substr(first_sp + 1, serverConfig[i].size() - 2 - first_sp));	
+		}
+		else if (serverConfig[i].find("index") == 0)
+		{
+			int first_sp = serverConfig[i].find(' ');
+			server.setIndex(serverConfig[i].substr(first_sp + 1, serverConfig[i].size() - 2 - first_sp));	
+		}
+		else if (serverConfig[i].find("error_page") == 0)
+		{
+			int first_sp = serverConfig[i].find(' ');
+			server.setErrorPage(serverConfig[i].substr(first_sp + 1, serverConfig[i].size() - 2 - first_sp));	
+		}
+		else if (serverConfig[i].find("client_max_body_size") == 0)
+		{
+			int first_sp = serverConfig[i].find(' ');
+			server.setClientMax(serverConfig[i].substr(first_sp + 1, serverConfig[i].size() - 2 - first_sp));	
+		}
+		else if (serverConfig[i].find("directory_listing") == 0)
+		{
+			int first_sp = serverConfig[i].find(' ');
+			server.setDirectory(serverConfig[i].substr(first_sp + 1, serverConfig[i].size() - 2 - first_sp));	
 		}
     }
 	return (1);

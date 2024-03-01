@@ -113,9 +113,11 @@ void	handleSigint(int sig)
 	}
 }
 
-int Server::initServer(void)
+int Server::initServer(Server server)
 {
     int on = 1;
+	FD_ZERO(&readfds);
+	FD_ZERO(&writefds);
 
     if ((server_fd = socket(AF_INET6, SOCK_STREAM, 0)) < 0) //pk AF_INET6 pour IPV6 et pas IPV4 ?
         return(errorFunction("socket"), 1);
@@ -133,7 +135,7 @@ int Server::initServer(void)
     address.sin6_family = AF_INET6;
 	memcpy(&address.sin6_addr, &in6addr_any, sizeof(in6addr_any));
     // le serveur doit pouvoir ecouter plusieurs ports mais ici on en defini qu'un ?
-	address.sin6_port = htons(PORT);
+	address.sin6_port = htons(server.getPort());
     if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
 	{
         close(server_fd);
@@ -144,9 +146,8 @@ int Server::initServer(void)
         close(server_fd);
         return(errorFunction("listen"), 1);
     }
-	FD_ZERO(&readfds);
-	FD_ZERO(&writefds);
 	FD_SET(server_fd, &readfds);
+	Servers[server_fd] = server;
 	// pourquoi le plus grand fd est celui du socket ?
 	max_sd = server_fd;
 	timeout.tv_sec  = 15 * 60;
@@ -246,7 +247,7 @@ int Server::runServer(void)
 		}
 		for (int i = 0; i <= max_sd; i++)
 		{
-			if (FD_ISSET(i, &tmp_readfds) && i == server_fd)
+			if (FD_ISSET(i, &tmp_readfds) && Servers.count(i))
 			{
 				listenServer();
 			}

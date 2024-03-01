@@ -14,11 +14,12 @@
 #include <map>
 
 #include "User.hpp"
+#include "Server.hpp"
 #include "Pages.hpp"
 
-#ifndef PORT
-#define PORT 8080
-#endif
+// #ifndef PORT
+// #define PORT 8080
+// #endif
 
 #ifndef BUFFER_SIZE
 #define BUFFER_SIZE 1024
@@ -60,7 +61,7 @@ class Server
         void    listenServer(void);
 
     public:
-        int initServer(void);
+        int initServer(Server server);
         int runServer(void);
         Server(void);
         ~Server(void);
@@ -84,6 +85,7 @@ class Server
         std::string getDirectory(void);
 
         std::map<int, User> Users;
+        std::map<int, Server> Servers;
 
 };
 

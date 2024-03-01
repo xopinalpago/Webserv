@@ -8,9 +8,9 @@ int main()
 	
 	config.GetLineFile();
 	config.ParseFile();
-	// if (server.initServer())
-	// 	return (1);
-	// if (server.runServer())
-	// 	return (1);	
+	if (server.initServer(config.server))
+		return (1);
+	if (server.runServer())
+		return (1);	
     return (0);
 }

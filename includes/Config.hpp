@@ -16,11 +16,13 @@ class Config {
 		int ParseFile(void);
         int GetLineFile(void);
         int	StringToInt(std::string str);
+        int GetNbConfig(const std::string& filename, const std::string& to_find);
         std::string trim(const std::string& str);
         std::vector<std::string> serverConfig;
         std::vector<std::string> method;
         std::vector<std::string> cgi_extension;
         Server server;
+        int nb_config;
     private :
 
 };
