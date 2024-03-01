@@ -4,6 +4,8 @@
 #include <iostream>
 #include <stdio.h>
 
+#include "Pages.hpp"
+
 class User
 {
 	private:

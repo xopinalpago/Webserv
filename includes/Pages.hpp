@@ -7,6 +7,9 @@
 #include <fstream>
 
 #include "User.hpp"
+#include "Cgi.hpp"
+
+class Cgi;
 
 class Pages
 {
@@ -22,7 +25,7 @@ class Pages
 		// mettre en prive et ajouter des getters
 		
 		std::string displayPage(std::string file, std::string method);
-		bool cgiExtension(std::string file_path, std::string extension);
+		static bool cgiExtension(std::string file_path, std::string extension);
 };
 
 #endif

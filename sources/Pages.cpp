@@ -23,18 +23,20 @@ std::string Pages::displayPage(std::string file_path, std::string method)
 	if (cgiExtension(file_path, ".php") || cgiExtension(file_path, ".py"))
 	{
 		// verifier que la methode est autorisee : (en fonction du fichier de config)
-		std::cout << "METHODE=" << method << std::endl;
+		// std::cout << "METHODE=" << method << std::endl;
 		if (method == "GET" || method == "POST" || method == "DELETE") {
-			std::cout << "--- necessite un script CGI ---" << std::endl;
+			// std::cout << "--- necessite un script CGI ---" << std::endl;
+			Cgi cgi;
+			cgi.execCGI(file_path);
 		}
 
 	}
 	else { // ce n'est pas un script cgi
-		std::cout << "--- ne necessite pas un script CGI ---" << std::endl;
+		// std::cout << "--- ne necessite pas un script CGI ---" << std::endl;
 		// requete autorisee ?
 		// requete GET ou POST ou DELETE ?
 		if (method == "GET") {
-			std::cout << "Requete GET\n";
+			// std::cout << "Requete GET\n";
 		} else if (method == "POST") {
 			std::cout << "Requete POST\n";
 		} else if(method == "DELETE") {
@@ -44,6 +46,8 @@ std::string Pages::displayPage(std::string file_path, std::string method)
 		}
 	}
 
+	if (Pages::cgiExtension(file_path, ".py") || Pages::cgiExtension(file_path, ".php"))
+		file_path = "pages/index.html";
 	std::ifstream file(file_path.c_str());
 	std::stringstream htmlResponse;
 	std::string data;
