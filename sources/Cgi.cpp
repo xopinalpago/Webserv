@@ -22,15 +22,15 @@ int Cgi::mapToChar() {
 
     memset(&_cenv, 0, sizeof(_cenv));
     std::map<std::string, std::string>::iterator it;
-    std::cout << "ENV SIZE = " << (_env.size() + 1) << std::endl; 
+    // std::cout << "ENV SIZE = " << (_env.size() + 1) << std::endl; 
     _cenv = (char**)malloc(sizeof(char*) * (_env.size() + 1));
     if (!_cenv)
         return 1;
     int i = 0;
     for (it = _env.begin() ; it != _env.end() ; ++it) {
-    std::cout << "first : " << it->first << " - second : " << it->second << std::endl;
+    // std::cout << "first : " << it->first << " - second : " << it->second << std::endl;
         int len = (it->first).length() + 1 + (it->second).length() + 1;
-        std::cout << "ENV[" << i << "] SIZE = " << len << std::endl;
+        // std::cout << "ENV[" << i << "] SIZE = " << len << std::endl;
         _cenv[i] = (char*)malloc(sizeof(char) * len);
         if (!_cenv[i])
             return 1;
@@ -68,7 +68,7 @@ int Cgi::execCGI(std::string file_path) {
     args = (char **)malloc(sizeof(char *) * 3);
     args[0] = (char *)malloc(sizeof(char) * 16);
     args[1] = (char *)malloc(sizeof(char) * 8);
-    strcpy(args[0], "/usr/bin/python\0");
+    strcpy(args[0], "python3");
     strcpy(args[1], "test.py\0");
     args[2] = NULL;
     /******************************************/
@@ -87,8 +87,9 @@ int Cgi::execCGI(std::string file_path) {
         // pour l'instant la requete est dans une string : User[i].request
         // rediriger l'entree standart vers le fichier dans lequel il y aurait la requete ?
         // dup2(fd, STDOUT_FILENO);
-        std::cout << "args[1] = " << args[1] << std::endl; 
-        if (execve(args[0], args, _cenv) == -1) {
+        // char *argss[] = {"python3", "test.py", NULL};
+        // execve("/usr/bin/python3", argss, NULL);
+        if (execve("/usr/bin/python3", args, _cenv) == -1) {
             std::cout << strerror(errno) << std::endl;
             std::cout << "ERROR execve" << std::endl;
             free(args[0]);

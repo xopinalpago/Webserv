@@ -20,10 +20,11 @@ bool Pages::cgiExtension(std::string file_path, std::string extension)
 std::string Pages::displayPage(std::string file_path, std::string method)
 {
 	// determiner si il s'agit d'un script cgi : (accepter en fonction du fichier de config)
+
+	std::cout << "METHODE=" << method << std::endl;
 	if (cgiExtension(file_path, ".php") || cgiExtension(file_path, ".py"))
 	{
 		// verifier que la methode est autorisee : (en fonction du fichier de config)
-		// std::cout << "METHODE=" << method << std::endl;
 		if (method == "GET" || method == "POST" || method == "DELETE") {
 			// std::cout << "--- necessite un script CGI ---" << std::endl;
 			Cgi cgi;

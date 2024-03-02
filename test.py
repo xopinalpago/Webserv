@@ -1,7 +1,7 @@
 # header
-print("HTTP/1.1 200 OK")
-print("Content-Type: text/html")
-print("Content-Length: 170")
+# print("HTTP/1.1 200 OK")
+# print("Content-Type: text/html")
+# print("Content-Length: 170")
 
 
 # corps de la reponse
@@ -12,5 +12,5 @@ print("Content-Length: 170")
 # print("<body><h1 class="title">Form</h1>")
 # print()
 
-print("<html><head><title>Ma page web</title></head>")
-print("<body><h1>Hello, World!</h1></body></html>")
+# print("<html><head><title>Ma page web</title></head>")
+# print("<body><h1>Hello, World!</h1></body></html>")
