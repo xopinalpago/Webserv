@@ -14,16 +14,16 @@ class Config {
         Config(void);
         ~Config(void);
 		int ParseFile(int serverToRead, Server &server);
-        int GetLineFile(void);
         int	StringToInt(std::string str);
-        int GetNbConfig(const std::string& filename, const std::string& to_find);
-        std::string trim(const std::string& str);
+        int GetLineFile(std::string &filename);
+        int GetNbConfig(std::string &filename, std::string to_find);
+        int MissElement(Server &server);
+        int cleanMethod(int serverToRead, Server &server);
+        std::string trim(std::string& str);
         std::vector<std::string> serverConfig;
         std::vector<std::string> method;
         std::vector<std::string> cgi_extension;
-        // Server server;
         int nb_config;
-        int countOccurrences(const std::string& filename, const std::string& to_find);
     private :
 
 };

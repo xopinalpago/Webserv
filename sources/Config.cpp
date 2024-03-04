@@ -4,17 +4,17 @@ Config::Config(void) {}
 
 Config::~Config(void) {}
 
-std::string Config::trim(const std::string& str)
+std::string Config::trim(std::string& str)
 {
     size_t first = str.find_first_not_of(' ');
     if (std::string::npos == first) {
         return str;
     }
     size_t last = str.find_last_not_of(' ');
-    return str.substr(first, (last - first + 1));
+    return (str.substr(first, (last - first + 1)));
 }
 
-int Config::countOccurrences(const std::string& filename, const std::string& to_find)
+int Config::GetNbConfig(std::string &filename, std::string to_find)
 {
     std::ifstream file(filename.c_str());
     std::string line;
@@ -36,14 +36,10 @@ int Config::countOccurrences(const std::string& filename, const std::string& to_
     return (count);
 }
 
-
-int Config::GetLineFile(void)
+int Config::GetLineFile(std::string &filename)
 {
-    std::ifstream infile("server.conf"); // Assurez-vous que le fichier est dans le même répertoire que votre exécutable
-	// nb_config = countOccurrences("server.conf", "server ");
-	// std::cout << nb_config << std::endl;
+    std::ifstream infile(filename.c_str()); // Assurez-vous que le fichier est dans le même répertoire que votre exécutable
 
-	
     if (infile) {
         std::string line;
         bool insideMethod = false; // Pour savoir si nous sommes à l'intérieur de la section "method"
@@ -71,15 +67,15 @@ int Config::GetLineFile(void)
         infile.close();
     } else {
         std::cerr << "Erreur lors de l'ouverture du fichier." << std::endl;
-        return 1;
+        return (1);
     }
 
     // Affichage du contenu du vecteur
-    // for (size_t i = 0; i < serverConfig.size(); ++i) {
-    //     std::cout << serverConfig[i] << std::endl;
+    // for (size_t i = 0; i < method.size(); ++i) {
+    //     std::cout << method[i] << std::endl;
     // }
 
-    return 0;
+    return (0);
 }
 
 int	Config::StringToInt(std::string str) {
@@ -97,60 +93,144 @@ int	Config::StringToInt(std::string str) {
 	return (n);
 }
 
+int Config::cleanMethod(int serverToRead, Server &server)
+{
+	int servernb = 0;
+	std::cerr << "serverToRead = " << serverToRead << std::endl;
+    for (size_t i = 0; i < method.size(); ++i)
+	{
+		if (method[i].length() > 0)
+		{
+			if (method[i].find("method ") == 0)
+			{
+				servernb += 1;
+			}
+			if (servernb == serverToRead)
+			{
+				std::string tmp = trim(method[i]).substr(0, method[i].size() - 1);
+				if (tmp == "GET" || tmp == "HEAD" || tmp == "PATCH" || tmp == "POST" || tmp == "PUT" || tmp == "OPTIONS" || tmp == "DELETE")
+				{
+					server.method.push_back(tmp);
+				}
+			}
+		}
+	}
+	if (server.method.empty())
+		return (1);
+	return (0);
+}
+
+std::string getValue(std::string line)
+{
+	int first_sp = line.find(' ');
+	if (first_sp < 0)
+		return ("");
+	return(line.substr(first_sp + 1, line.size() - 2 - first_sp));
+}
+
+int Config::MissElement(Server &server)
+{
+	if (server.getHost().length() == 0)
+		return (1);
+	if (server.getServerName().length() == 0)
+		return (1);
+	if (server.getRoot().length() == 0)
+		return (1);
+	if (server.getIndex().length() == 0)
+		return (1);
+	if (server.getErrorPage().length() == 0)
+		return (1);
+	if (server.getClientMax().length() == 0)
+		return (1);
+	if (server.getDirectory().length() == 0)
+		return (1);
+	return (0);
+}
+
 int Config::ParseFile(int serverToRead, Server &server)
 {
 	int servernb = 0;
+	std::cout << "serverToRead = " << serverToRead << std::endl;
     for (size_t i = 0; i < serverConfig.size(); ++i)
 	{
 		if (serverConfig[i].find("server ") == 0)
 		{
 			servernb += 1;
-			// std::cout << servernb << std::endl;
 		}
 		if (servernb == serverToRead)
 		{
-			// std::cout << servernb << std::endl;
 			if (serverConfig[i].find("listen") == 0)
 			{
-				int first_sp = serverConfig[i].find(' ');
-				server.setPort(StringToInt((serverConfig[i].substr(first_sp + 1, serverConfig[i].size() - 2 - first_sp))));	
+				int port = StringToInt(getValue(serverConfig[i]));
+				if (port <= 0)
+					return (1);
+				if (server.setPort(port))
+					return (1);
 			}
 			else if (serverConfig[i].find("host") == 0)
 			{
-				int first_sp = serverConfig[i].find(' ');
-				server.setHost(serverConfig[i].substr(first_sp + 1, serverConfig[i].size() - 2 - first_sp));	
+				std::string host = getValue(serverConfig[i]);
+				if (host.length() == 0)
+					return (1);
+				if (server.setHost(host))
+					return (1);
 			}
 			else if (serverConfig[i].find("server_name") == 0)
 			{
-				int first_sp = serverConfig[i].find(' ');
-				server.setServerName(serverConfig[i].substr(first_sp + 1, serverConfig[i].size() - 2 - first_sp));	
+				std::string server_name = getValue(serverConfig[i]);
+				if (server_name.length() == 0)
+					return (1);
+				if (server.setServerName(server_name))
+					return (1);
 			}
 			else if (serverConfig[i].find("root") == 0)
 			{
-				int first_sp = serverConfig[i].find(' ');
-				server.setRoot(serverConfig[i].substr(first_sp + 1, serverConfig[i].size() - 2 - first_sp));	
+				std::string root = getValue(serverConfig[i]);
+				if (root.length() == 0)
+					return (1);
+				if (server.setRoot(root))
+					return (1);
 			}
 			else if (serverConfig[i].find("index") == 0)
 			{
-				int first_sp = serverConfig[i].find(' ');
-				server.setIndex(serverConfig[i].substr(first_sp + 1, serverConfig[i].size() - 2 - first_sp));	
+				std::string index = getValue(serverConfig[i]);
+				if (index.length() == 0)
+					return (1);
+				if (server.setIndex(index))
+					return (1);
 			}
 			else if (serverConfig[i].find("error_page") == 0)
 			{
-				int first_sp = serverConfig[i].find(' ');
-				server.setErrorPage(serverConfig[i].substr(first_sp + 1, serverConfig[i].size() - 2 - first_sp));	
+				std::string error_page = getValue(serverConfig[i]);
+				if (error_page.length() == 0)
+					return (1);
+				if (server.setErrorPage(error_page))
+					return (1);
 			}
 			else if (serverConfig[i].find("client_max_body_size") == 0)
 			{
-				int first_sp = serverConfig[i].find(' ');
-				server.setClientMax(serverConfig[i].substr(first_sp + 1, serverConfig[i].size() - 2 - first_sp));	
+				std::string client_max_body_size = getValue(serverConfig[i]);
+				if (client_max_body_size.length() == 0)
+					return (1);
+				if (server.setClientMax(client_max_body_size))
+					return (1);
 			}
 			else if (serverConfig[i].find("directory_listing") == 0)
 			{
-				int first_sp = serverConfig[i].find(' ');
-				server.setDirectory(serverConfig[i].substr(first_sp + 1, serverConfig[i].size() - 2 - first_sp));	
+				std::string directory_listing = getValue(serverConfig[i]);
+				if (directory_listing.length() == 0)
+					return (1);
+				if (server.setDirectory(directory_listing))
+					return (1);
 			}
 		}
     }
-	return (1);
+	
+	if (cleanMethod(serverToRead, server))
+		return (1);
+	for (size_t i = 0; i < server.method.size(); ++i) {
+        std::cout << server.method[i] << " ";
+    }
+    std::cout << std::endl;
+	return (0);
 }
