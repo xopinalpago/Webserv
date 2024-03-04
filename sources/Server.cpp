@@ -101,10 +101,10 @@ int Server::readServer(int i) {
         bytes += rc;
     }
     // std::cout << "Total bytes = " << bytes << std::endl;
-	std::cout << "****************************" << std::endl;
-	std::cout << request; // << std::endl;
-	std::cout << "TAILLE : " << request.length() << std::endl; 
-	std::cout << "****************************" << std::endl;
+	// std::cout << "****************************" << std::endl;
+	// std::cout << request; // << std::endl;
+	// std::cout << "TAILLE : " << request.length() << std::endl; 
+	// std::cout << "****************************" << std::endl;
 	Users[i].request = request;
 	FD_CLR(i, &readfds);
 	FD_SET(i, &writefds);
@@ -119,9 +119,9 @@ void	Server::sendServer(int i)
 	int rc3 = send(i, content.c_str(), content.size(), 0);
 	if (rc3 < 0)
 		strerror(errno);
-	// std::cout << "******* content dans sendServer *******" << std::endl;
-	// std::cout << content << std::endl;
-	// std::cout << "***************************************" << std::endl;
+	std::cout << "******* content dans sendServer *******" << std::endl;
+	std::cout << content << std::endl;
+	std::cout << "***************************************" << std::endl;
 	FD_CLR(i, &writefds);
 	FD_SET(i, &readfds);	
 }

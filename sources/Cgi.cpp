@@ -22,15 +22,12 @@ int Cgi::mapToChar() {
 
     memset(&_cenv, 0, sizeof(_cenv));
     std::map<std::string, std::string>::iterator it;
-    // std::cout << "ENV SIZE = " << (_env.size() + 1) << std::endl; 
     _cenv = (char**)malloc(sizeof(char*) * (_env.size() + 1));
     if (!_cenv)
         return 1;
     int i = 0;
     for (it = _env.begin() ; it != _env.end() ; ++it) {
-    // std::cout << "first : " << it->first << " - second : " << it->second << std::endl;
         int len = (it->first).length() + 1 + (it->second).length() + 1;
-        // std::cout << "ENV[" << i << "] SIZE = " << len << std::endl;
         _cenv[i] = (char*)malloc(sizeof(char) * len);
         if (!_cenv[i])
             return 1;
@@ -81,7 +78,7 @@ int Cgi::execCGI(std::string file_path) {
         std::cout << "ERROR fork" << std::endl;
         return 0;
     }
-    int fd = open("outfile.txt", O_WRONLY | O_CREAT | O_TRUNC);
+    int fd = open(".cgi.txt", O_WRONLY | O_CREAT | O_TRUNC);
     if (pid == 0) {
         // pour l'instant la requete est dans une string : User[i].request
         // rediriger l'entree standart vers le fichier dans lequel il y aurait la requete ?
