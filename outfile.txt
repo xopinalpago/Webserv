@@ -1,0 +1,13 @@
+HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 306
+
+<!DOCTYPE html>
+<html lang="en"><head>
+<link href="./style/style.css" rel="stylesheet"><link href="./style/form.css" rel="stylesheet">
+<title>Form</title></head>
+<body><h1 class="title">Response</h1>
+<html><head><title>Ma page web</title></head>
+<body><h2>Hello, World!</h2>
+<p>name=Ducobu&firstname=Aurore</p>
+</body></html>

@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: aurore <aurore@student.42.fr>              +#+  +:+       +#+         #
+#    By: aducobu <aducobu@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/07/10 16:29:29 by dlu               #+#    #+#              #
-#    Updated: 2024/03/03 17:27:17 by aurore           ###   ########.fr        #
+#    Updated: 2024/03/04 10:11:21 by aducobu          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,7 @@ NAME = webserv
 
 SRCS = ${addprefix sources/, \
 			main.cpp \
-			Server2.cpp \
+			Server.cpp \
 			User.cpp \
 			Pages.cpp \
 			Cgi.cpp \
