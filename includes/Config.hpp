@@ -13,7 +13,7 @@ class Config {
     public :
         Config(void);
         ~Config(void);
-		int ParseFile(void);
+		int ParseFile(int serverToRead, Server &server);
         int GetLineFile(void);
         int	StringToInt(std::string str);
         int GetNbConfig(const std::string& filename, const std::string& to_find);
@@ -21,8 +21,9 @@ class Config {
         std::vector<std::string> serverConfig;
         std::vector<std::string> method;
         std::vector<std::string> cgi_extension;
-        Server server;
+        // Server server;
         int nb_config;
+        int countOccurrences(const std::string& filename, const std::string& to_find);
     private :
 
 };

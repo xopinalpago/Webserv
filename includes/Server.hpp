@@ -12,6 +12,7 @@
 #include <sys/time.h>
 #include <signal.h>
 #include <map>
+#include <vector>
 
 #include "User.hpp"
 #include "Server.hpp"
@@ -31,7 +32,7 @@ class Server
 {
     private:
 
-        int                 server_fd;
+        int                 fd;
         int                 rc;
         int                 max_sd;
         int                 new_sd;
@@ -58,7 +59,7 @@ class Server
         void	errorFunction(std::string word);
         int		readServer(int i);
         void	sendServer(int i);
-        void    listenServer(void);
+        void    listenServer(Server server);
 
     public:
         int initServer(Server server);
@@ -67,6 +68,7 @@ class Server
         ~Server(void);
 
         void setPort(int port);
+        void setFd(int port);
         void setHost(std::string host);
         void setServerName(std::string server_name);
         void setRoot(std::string root);
@@ -74,8 +76,10 @@ class Server
         void setErrorPage(std::string error_page);
         void setClientMax(std::string client_max_body_size);
         void setDirectory(std::string directory_listing);
+        int initializeSets(void);
 
         int         getPort(void);
+        int         getFd(void);
         std::string getHost(void);
         std::string getServerName(void);
         std::string getRoot(void);
@@ -86,7 +90,7 @@ class Server
 
         std::map<int, User> Users;
         std::map<int, Server> Servers;
-
+        int nb_servers;
 };
 
 #endif

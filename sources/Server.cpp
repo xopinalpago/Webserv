@@ -18,6 +18,12 @@ void Server::setPort(int port)
     return ;
 }
 
+void Server::setFd(int fd)
+{
+	this->fd = fd;
+    return ;
+}
+
 void Server::setHost(std::string host)
 {
 	this->host = host;
@@ -63,6 +69,11 @@ void Server::setDirectory(std::string directory_listing)
 int Server::getPort(void)
 {
     return (this->port);
+}
+
+int Server::getFd(void)
+{
+    return (this->fd);
 }
 
 std::string Server::getHost(void)
@@ -116,52 +127,76 @@ void	handleSigint(int sig)
 int Server::initServer(Server server)
 {
     int on = 1;
-	FD_ZERO(&readfds);
+	// FD_ZERO(&readfds);
 	FD_ZERO(&writefds);
+	int fd_temp = 0;
 
-    if ((server_fd = socket(AF_INET6, SOCK_STREAM, 0)) < 0) //pk AF_INET6 pour IPV6 et pas IPV4 ?
+    if ((fd_temp = socket(AF_INET6, SOCK_STREAM, 0)) < 0) //pk AF_INET6 pour IPV6 et pas IPV4 ?
         return(errorFunction("socket"), 1);
-    if ((rc = setsockopt(server_fd, SOL_SOCKET,  SO_REUSEADDR, (char *)&on, sizeof(on)) < 0))
+    server.setFd(fd_temp);
+	if ((rc = setsockopt(server.getFd(), SOL_SOCKET,  SO_REUSEADDR, (char *)&on, sizeof(on)) < 0))
 	{
-		close(server_fd);
+		close(server.getFd());
 		return(errorFunction("setsockopt"), 1);
 	}
-    if ((rc = fcntl(server_fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC)) < 0)
-	{
-        close(server_fd);
-        return(errorFunction("fcntl"), 1);
-	}
+    // if ((rc = fcntl(server_fd, F_SETFL, O_NONBLOCK, FD_CLOEXEC)) < 0)
+	// {
+    //     close(server_fd);
+    //     return(errorFunction("fcntl"), 1);
+	// }
 	std::memset(&address, 0, sizeof(address));
     address.sin6_family = AF_INET6;
 	memcpy(&address.sin6_addr, &in6addr_any, sizeof(in6addr_any));
     // le serveur doit pouvoir ecouter plusieurs ports mais ici on en defini qu'un ?
 	address.sin6_port = htons(server.getPort());
-    if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) < 0)
+    if (bind(server.getFd(), (struct sockaddr *)&address, sizeof(address)) < 0)
 	{
-        close(server_fd);
+        close(server.getFd());
         return(errorFunction("bind"), 1);
     }
-    if (listen(server_fd, 10) < 0)
-	{
-        close(server_fd);
-        return(errorFunction("listen"), 1);
-    }
-	FD_SET(server_fd, &readfds);
-	Servers[server_fd] = server;
+    // if (listen(server_fd, 10) < 0)
+	// {
+    //     close(server_fd);
+    //     return(errorFunction("listen"), 1);
+    // }
+	// FD_SET(server_fd, &readfds);
+	Servers[server.getFd()] = server;
 	// pourquoi le plus grand fd est celui du socket ?
-	max_sd = server_fd;
+	max_sd = server.getFd();
 	timeout.tv_sec  = 15 * 60;
 	timeout.tv_usec = 0;
     return (0);
 }
 
-void Server::listenServer(void)
+int	Server::initializeSets(void)
+{
+	FD_ZERO(&readfds);
+	FD_ZERO(&writefds);
+    for(std::map<int, Server>::iterator it = Servers.begin(); it != Servers.end(); ++it)
+    {
+		if (listen(it->first, 10) < 0)
+		{
+			close(it->first);
+			return(errorFunction("listen"), 1);
+		}
+		if ((rc = fcntl(it->first, F_SETFL, O_NONBLOCK, FD_CLOEXEC)) < 0)
+		{
+		    close(it->first);
+		    return(errorFunction("fcntl"), 1);
+		}
+		FD_SET(it->first, &readfds);
+	}
+	return (0);
+}
+
+void Server::listenServer(Server server)
 {
 	int addrlen = sizeof(address);
 	printf("  Listening socket is readable\n");
-	new_sd = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
+	new_sd = accept(server.getFd(), (struct sockaddr *)&address, (socklen_t*)&addrlen);
 	if (new_sd < 0)
 	{
+		std::cout << "config.nb_config" << std::endl;
 		strerror(errno);
 		end_server = true;
 		return ;
@@ -227,6 +262,7 @@ int Server::runServer(void)
 {
 	end_server = false;
 	signal(SIGINT, handleSigint); //?
+	initializeSets();
     while (end_server == false)
 	{
 		// pourquoi des fd temporaires ?
@@ -249,7 +285,7 @@ int Server::runServer(void)
 		{
 			if (FD_ISSET(i, &tmp_readfds) && Servers.count(i))
 			{
-				listenServer();
+				listenServer(Servers.find(i)->second);
 			}
 			else if (FD_ISSET(i, &tmp_readfds) && Users.count(i))
 			{
