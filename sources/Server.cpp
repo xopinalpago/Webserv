@@ -85,7 +85,7 @@ void Server::listenServer(void)
 
 int Server::readServer(int i) {
 	
-    int bytes = 0, rc = BUFFER_SIZE;
+    int rc = BUFFER_SIZE;
 	char bf[BUFFER_SIZE + 1];
     std::string request = "";
     while (rc == BUFFER_SIZE) {
@@ -98,7 +98,7 @@ int Server::readServer(int i) {
         }
 		bf[rc] = 0;
 		request.append(bf, rc);
-        bytes += rc;
+        // bytes += rc;
     }
     // std::cout << "Total bytes = " << bytes << std::endl;
 	// std::cout << "****************************" << std::endl;
