@@ -17,72 +17,69 @@ bool Pages::cgiExtension(std::string file_path, std::string extension)
 	}
 	return false;
 }
-std::string Pages::displayPage(std::string file_path, std::string method)
+std::string Pages::displayPage(std::string file_path, std::string method, std::map<int, User> Users, int i)
 {
-	// determiner si il s'agit d'un script cgi : (accepter en fonction du fichier de config)
+	// verifier la taille de la requete :
+	if (Users[i].request.size() <= 10000) { // depend du fichier de config
+		// verifier methode valide en fonction du fichier de config :
+			if (method == "GET" || method == "POST") {
+				if (cgiExtension(file_path, ".php") || cgiExtension(file_path, ".py")) {
+					Cgi cgi;
+					std::cout << "...... Execution du cgi ......" << std::endl;
+					std::cout << "...... filepath : " << file_path << " ......" << std::endl;
+					cgi.execCGI(file_path);
+				} else {
+					std::cout << "File or Directory" << std::endl;
+				}
+			} else if (method == "DELETE") {
+				std::cout << "Methode DELETE" << std::endl;
+			} else {
+				std::cout << "Methode not implemented" << std::endl;
+				status = 501;
+			}
+		// Si ce n'est pas une methode valide :
+			// status = 405
 
-	std::cout << "METHODE=" << method << std::endl;
-	if (cgiExtension(file_path, ".php") || cgiExtension(file_path, ".py"))
-	{
-		// verifier que la methode est autorisee : (en fonction du fichier de config)
-		if (method == "GET" || method == "POST" || method == "DELETE") {
-			std::cout << "--- necessite un script CGI ---" << std::endl;
-			Cgi cgi;
-			cgi.execCGI(file_path);
-		}
+			std::stringstream content;
+			if (Pages::cgiExtension(file_path, ".py") || Pages::cgiExtension(file_path, ".php")) {
+					std::ifstream infile("outfile.txt");
+				if (infile) {
+					content << infile.rdbuf();
+				}
+			}
+			else {
+				std::ifstream file(file_path.c_str());
+				std::stringstream htmlResponse;
+				std::string data;
+				if (file.fail())
+				{
+					std::cout << "Page not found" << std::endl;
+					status = 404;
+					message = "Not Found";
+					std::ifstream file_error("./pages/error_page_404.html");
+					htmlResponse << file_error.rdbuf();
+					data = htmlResponse.str();
+					clength = data.length();
+				}
+				else
+				{
+					status = 200;
+					message = "OK";
+					htmlResponse << file.rdbuf();
+					data = htmlResponse.str();
+					clength = data.length();
+				}
+				file.close();
+				std::string file_extension = file_path.substr(file_path.find_last_of(".") + 1);
+				file_extension == "css" ? ctype = "text/css" : ctype = "text/html";
 
+				content << "HTTP/1.1 " << status << " " << message << std::endl;
+				content << "Content-Type: " << ctype << std::endl;
+				content << "Content-Length: " << clength << std::endl << std::endl;
+				content << data;
+			}
+			return (content.str());
 	}
-	else { // ce n'est pas un script cgi
-		// std::cout << "--- ne necessite pas un script CGI ---" << std::endl;
-		// requete autorisee ?
-		// requete GET ou POST ou DELETE ?
-		if (method == "GET") {
-			std::cout << "Requete GET\n";
-		} else if (method == "POST") {
-			std::cout << "Requete POST\n";
-		} else if(method == "DELETE") {
-			std::cout << "Requete DELETE\n";
-		} else {
-			std::cout << "Requete NON AUTORISEE\n";
-		}
-	}
-
-	std::stringstream content;
-	if (Pages::cgiExtension(file_path, ".py") || Pages::cgiExtension(file_path, ".php")) {
-		std::ifstream infile("outfile.txt");
-		content << infile.rdbuf();
-	}
-	else {
-		std::ifstream file(file_path.c_str());
-		std::stringstream htmlResponse;
-		std::string data;
-		if (file.fail())
-		{
-			std::cout << "Page not found" << std::endl;
-			status = 404;
-			message = "Not Found";
-			std::ifstream file_error("./pages/error_page_404.html");
-			htmlResponse << file_error.rdbuf();
-			data = htmlResponse.str();
-			clength = data.length();
-		}
-		else
-		{
-			status = 200;
-			message = "OK";
-			htmlResponse << file.rdbuf();
-			data = htmlResponse.str();
-			clength = data.length();
-		}
-		file.close();
-		std::string file_extension = file_path.substr(file_path.find_last_of(".") + 1);
-    	file_extension == "css" ? ctype = "text/css" : ctype = "text/html";
-
-		content << "HTTP/1.1 " << status << " " << message << std::endl;
-		content << "Content-Type: " << ctype << std::endl;
-		content << "Content-Length: " << clength << std::endl << std::endl;
-		content << data;
-	}
-
-	return (content.str());
+	std::cout << "Too large request !" << std::endl;
+	return NULL;
 }

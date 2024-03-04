@@ -115,7 +115,7 @@ void	Server::sendServer(int i)
 {
 	Pages page;
 	std::string method = Users[i].getMethod();
-	std::string content = page.displayPage(Users[i].getPath().c_str(), method);
+	std::string content = page.displayPage(Users[i].getPath().c_str(), method, Users, i);
 	int rc3 = send(i, content.c_str(), content.size(), 0);
 	if (rc3 < 0)
 		strerror(errno);
