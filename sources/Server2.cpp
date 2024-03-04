@@ -83,88 +83,99 @@ void Server::listenServer(void)
 	return ;
 }
 
-// int Server::readServer(int i) {
-	
-// 	char bf[BUFFER_SIZE + 1];
-// 	int rc2 = BUFFER_SIZE;
-// 	std::string res = "";
-// 	while (rc2 == BUFFER_SIZE) {
-// 		memset(buffer, 0, sizeof(buffer));
-// 		rc2 = recv(i, buffer, BUFFER_SIZE, 0);
-// 		if (rc2 <= 0) {
-// 			if (rc2 == -1)
-// 				strerror(errno);
-// 			return rc2;
-// 		}
-// 		bf[rc2] = '\0';
-// 		std::string str(bf, bf + rc2);
-// 		res.append(str);
-// 		len = rc2;
-// 		printf("  %d bytes received\n", len);
-// 	}
-// 	std::cout << "****************************" << std::endl;
-// 	std::cout << buffer; // << std::endl;
-// 	std::cout << "TAILLE : " << strlen(buffer) << std::endl; 
-// 	std::cout << "****************************" << std::endl;
-// 	Users[i].request = buffer;
-// 	FD_CLR(i, &readfds);
-// 	FD_SET(i, &writefds);
-// 	return (1);
-// }
-
-
-int Server::readServer(int i)
+int recving(int currSd, std::string *req)
 {
-	// printf("  Descriptor %d is readable\n", i);
-	std::string request_data;
-	int bytes;
-	memset(buffer, 0, sizeof(buffer));
-	while ((bytes = recv(i, buffer, BUFFER_SIZE, 0)) > 0) {
-		buffer[bytes] = '\0';
-		request_data.append(buffer, bytes);
-		// Vérifier si nous avons atteint la fin de l'en-tête de la requête
-        size_t header_end = request_data.find("\r\n\r\n");
-        if (header_end != std::string::npos) {
-			std::cout << "fin du header" << std::endl;
-            // Nous avons atteint la fin de l'en-tête de la requête
-            // Extraire le corps de la requête
-			memset(buffer, 0, sizeof(buffer));
-			bytes = recv(i, buffer, BUFFER_SIZE, 0);
-			buffer[bytes] = '\0';
-			std::cout << "bbuffer" << std::endl;
-			std::cout << "|" << buffer << "|" << std::endl;
-			// request_data.append(buffer, bytes);
-			// header_end = request_data.find("\r\n\r\n");
-            // std::string request_body = request_data.substr(header_end + 4);
+    char bf[BUFFER_SIZE + 1];
+    int rc = recv(currSd, bf, BUFFER_SIZE, 0);
+    if (rc <= 0)
+    {
+        if (rc == -1)
+            strerror(errno);
+        return rc;
+    }
+    bf[rc] = 0;
+    std::string str(bf, bf + rc);
+    (*req).append(str);
+    return rc;
+}
 
-            // Traiter le corps de la requête
-            // std::cout << "Corps de la requête :" << std::endl;
-            // std::cout << "****************************" << std::endl;
-            // std::cout << buffer << std::endl;
-            // std::cout << "****************************" << std::endl;
-
-            break;
-		}
-	}
-	if (bytes == -1) {
-		std::cout << strerror(errno) << std::endl;
-		// strerror(errno);
-	}
-	std::cout << "Bytes recus = " << bytes << std::endl;
-	// std::cout << "	Requete recue : " << request_data.size() << std::endl;
+int Server::readServer(int i) {
+	
+    int bytes = 0, rc = BUFFER_SIZE;
+    std::string request = "";
+    while (rc == BUFFER_SIZE) {
+        rc = recving(i, &request);
+        if (rc <= 0) {
+            if (rc == -1)
+                std::cout << strerror(errno) << std::endl;
+            return rc;
+        }
+        bytes += rc;
+    }
+    std::cout << "Total bytes = " << bytes << std::endl;
 	// std::cout << "****************************" << std::endl;
-	// std::cout << request_data << std::endl;
+	// std::cout << request; // << std::endl;
+	// std::cout << "TAILLE : " << request.length() << std::endl; 
 	// std::cout << "****************************" << std::endl;
-	// std::cout << "	Buffer :" << std::endl;
-	// std::cout << "****************************" << std::endl;
-	// std::cout << buffer << std::endl;
-	// std::cout << "****************************" << std::endl;
-
-	Users[i].request = request_data;
+	Users[i].request = request;
 	FD_CLR(i, &readfds);
 	FD_SET(i, &writefds);
 	return (1);
 }
+
+
+// int Server::readServer(int i)
+// {
+// 	// printf("  Descriptor %d is readable\n", i);
+// 	std::string request_data;
+// 	int bytes;
+// 	memset(buffer, 0, sizeof(buffer));
+// 	while ((bytes = recv(i, buffer, BUFFER_SIZE, 0)) > 0) {
+// 		buffer[bytes] = '\0';
+// 		request_data.append(buffer, bytes);
+// 		// Vérifier si nous avons atteint la fin de l'en-tête de la requête
+//         size_t header_end = request_data.find("\r\n\r\n");
+//         if (header_end != std::string::npos) {
+// 			std::cout << "fin du header" << std::endl;
+//             // Nous avons atteint la fin de l'en-tête de la requête
+//             // Extraire le corps de la requête
+// 			memset(buffer, 0, sizeof(buffer));
+// 			bytes = recv(i, buffer, BUFFER_SIZE, 0);
+// 			buffer[bytes] = '\0';
+// 			std::cout << "bbuffer" << std::endl;
+// 			std::cout << "|" << buffer << "|" << std::endl;
+// 			// request_data.append(buffer, bytes);
+// 			// header_end = request_data.find("\r\n\r\n");
+//             // std::string request_body = request_data.substr(header_end + 4);
+
+//             // Traiter le corps de la requête
+//             // std::cout << "Corps de la requête :" << std::endl;
+//             // std::cout << "****************************" << std::endl;
+//             // std::cout << buffer << std::endl;
+//             // std::cout << "****************************" << std::endl;
+
+//             break;
+// 		}
+// 	}
+// 	if (bytes == -1) {
+// 		std::cout << strerror(errno) << std::endl;
+// 		// strerror(errno);
+// 	}
+// 	std::cout << "Bytes recus = " << bytes << std::endl;
+// 	// std::cout << "	Requete recue : " << request_data.size() << std::endl;
+// 	// std::cout << "****************************" << std::endl;
+// 	// std::cout << request_data << std::endl;
+// 	// std::cout << "****************************" << std::endl;
+// 	// std::cout << "	Buffer :" << std::endl;
+// 	// std::cout << "****************************" << std::endl;
+// 	// std::cout << buffer << std::endl;
+// 	// std::cout << "****************************" << std::endl;
+
+// 	Users[i].request = request_data;
+// 	FD_CLR(i, &readfds);
+// 	FD_SET(i, &writefds);
+// 	return (1);
+// }
 
 // int Server::readServer(int i)
 // {

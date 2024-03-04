@@ -6,7 +6,7 @@
 #    By: aurore <aurore@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/07/10 16:29:29 by dlu               #+#    #+#              #
-#    Updated: 2024/03/01 22:59:31 by aurore           ###   ########.fr        #
+#    Updated: 2024/03/03 17:27:17 by aurore           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,7 @@ NAME = webserv
 
 SRCS = ${addprefix sources/, \
 			main.cpp \
-			Server.cpp \
+			Server2.cpp \
 			User.cpp \
 			Pages.cpp \
 			Cgi.cpp \

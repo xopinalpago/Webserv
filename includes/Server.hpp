@@ -33,7 +33,7 @@ class Server
         int                 rc;
         int                 max_sd;
         int                 new_sd;
-        int                 len;
+        // int                 len;
         int                 end_server;
         struct sockaddr_in6 address;
         struct timeval      timeout;
@@ -42,7 +42,7 @@ class Server
         // pourquoi ne pas set des errorfds pour les fd a surveiller pour les erreurs
         fd_set	            tmp_readfds;
         fd_set	            tmp_writefds;
-        char                buffer[BUFFER_SIZE];
+        // char                buffer[BUFFER_SIZE];
 
         void	errorFunction(std::string word);
         int		readServer(int i);
