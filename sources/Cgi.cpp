@@ -79,6 +79,9 @@ int Cgi::execCGI(std::string file_path) {
         return 0;
     }
     int fd = open(".cgi.txt", O_WRONLY | O_CREAT | O_TRUNC);
+    if (fd < 0) {
+        std::cout << "FAIL TO OPEN\n";
+    }
     if (pid == 0) {
         // pour l'instant la requete est dans une string : User[i].request
         // rediriger l'entree standart vers le fichier dans lequel il y aurait la requete ?

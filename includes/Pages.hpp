@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <sstream>
 #include <fstream>
+#include <string>
 
 #include "User.hpp"
 #include "Cgi.hpp"
