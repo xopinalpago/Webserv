@@ -6,7 +6,7 @@
 #    By: rmeriau <rmeriau@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/07/10 16:29:29 by dlu               #+#    #+#              #
-#    Updated: 2024/03/04 14:52:21 by rmeriau          ###   ########.fr        #
+#    Updated: 2024/03/05 10:42:45 by rmeriau          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -24,7 +24,7 @@ SRCS = ${addprefix sources/, \
 			Launcher.cpp \
 		}
 OBJS = $(SRCS:sources/%.cpp=objects/%.o)
-DEPS = $(SRCS:.cpp=.d)
+DEPS = $(SRCS:sources/%.cpp=objects/%.d)
 INCLUDE = -I includes
 
 all: $(NAME)

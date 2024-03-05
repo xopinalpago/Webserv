@@ -19,10 +19,12 @@ class Config {
         int GetNbConfig(std::string &filename, std::string to_find);
         int MissElement(Server &server);
         int cleanMethod(int serverToRead, Server &server);
+        int cleanError(int serverToRead, Server &server);
         std::string trim(std::string& str);
         std::vector<std::string> serverConfig;
         std::vector<std::string> method;
         std::vector<std::string> cgi_extension;
+        std::vector<std::string> error_page;
         int nb_config;
     private :
 

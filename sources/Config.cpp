@@ -38,14 +38,15 @@ int Config::GetNbConfig(std::string &filename, std::string to_find)
 
 int Config::GetLineFile(std::string &filename)
 {
-    std::ifstream infile(filename.c_str()); // Assurez-vous que le fichier est dans le même répertoire que votre exécutable
+    std::ifstream infile(filename.c_str());
 
     if (infile) {
         std::string line;
-        bool insideMethod = false; // Pour savoir si nous sommes à l'intérieur de la section "method"
-        bool insideCgi = false; // Pour savoir si nous sommes à l'intérieur de la section "method"
+        bool insideMethod = false;
+        bool insideCgi = false;
+		bool insideError = false; 
         while (std::getline(infile, line)) {
-            line = trim(line); // Supprimer les espaces au début et à la fin de la ligne
+            line = trim(line);
             if (!line.empty())
 			{
 				if (line.find("method") == 0)
@@ -55,13 +56,19 @@ int Config::GetLineFile(std::string &filename)
 				else if (line.find("cgi_extension") == 0)
 					insideCgi = true;
 				else if (line == "}" && insideCgi)
-                    insideCgi = false;                
-				if (!insideMethod && !insideCgi) // Si nous ne sommes pas à l'intérieur de "method"
-                    serverConfig.push_back(line); // Ajouter la ligne au vecteur
+                    insideCgi = false;
+				else if (line.find("error_page") == 0)
+					insideError = true;
+				else if (line == "}" && insideError)
+                    insideError = false;              
+				if (!insideMethod && !insideCgi && !insideError) 
+                    serverConfig.push_back(line);
 				else if (insideMethod)
 					method.push_back(line);
 				else if (insideCgi)
 					cgi_extension.push_back(line);
+				else if (insideError)
+					error_page.push_back(line);
             }
         }
         infile.close();
@@ -71,8 +78,8 @@ int Config::GetLineFile(std::string &filename)
     }
 
     // Affichage du contenu du vecteur
-    // for (size_t i = 0; i < method.size(); ++i) {
-    //     std::cout << method[i] << std::endl;
+    // for (size_t i = 0; i < error_page.size(); ++i) {
+    //     std::cout << error_page[i] << std::endl;
     // }
 
     return (0);
@@ -96,8 +103,7 @@ int	Config::StringToInt(std::string str) {
 int Config::cleanMethod(int serverToRead, Server &server)
 {
 	int servernb = 0;
-	std::cerr << "serverToRead = " << serverToRead << std::endl;
-    for (size_t i = 0; i < method.size(); ++i)
+    for (size_t i = 0; i < method.size(); i++)
 	{
 		if (method[i].length() > 0)
 		{
@@ -112,6 +118,38 @@ int Config::cleanMethod(int serverToRead, Server &server)
 				{
 					server.method.push_back(tmp);
 				}
+			}
+		}
+	}
+	if (server.method.empty())
+		return (1);
+	return (0);
+}
+
+int Config::cleanError(int serverToRead, Server &server)
+{
+	int servernb = 0;
+    for (size_t i = 0; i < error_page.size(); i++)
+	{
+		if (error_page[i].length() > 0)
+		{
+			if (error_page[i].find("error_page ") == 0)
+			{
+				servernb += 1;
+			}
+			if (servernb == serverToRead)
+			{
+				int first_sp = error_page[i].find(' ');
+				if (first_sp < 0)
+					return (1);
+				std::cout << error_page[i].substr(0, first_sp) << std::endl;
+				// int error_num = StringToInt(error_page[i].substr(0, first_sp));
+				std::string tmp = trim(error_page[i]).substr(first_sp, error_page[i].size() - 1);
+				std::cout << tmp << std::endl;
+				// if (tmp == "GET" || tmp == "HEAD" || tmp == "PATCH" || tmp == "POST" || tmp == "PUT" || tmp == "OPTIONS" || tmp == "DELETE")
+				// {
+				// 	server.method.push_back(tmp);
+				// }
 			}
 		}
 	}
@@ -138,8 +176,6 @@ int Config::MissElement(Server &server)
 		return (1);
 	if (server.getIndex().length() == 0)
 		return (1);
-	if (server.getErrorPage().length() == 0)
-		return (1);
 	if (server.getClientMax().length() == 0)
 		return (1);
 	if (server.getDirectory().length() == 0)
@@ -150,7 +186,6 @@ int Config::MissElement(Server &server)
 int Config::ParseFile(int serverToRead, Server &server)
 {
 	int servernb = 0;
-	std::cout << "serverToRead = " << serverToRead << std::endl;
     for (size_t i = 0; i < serverConfig.size(); ++i)
 	{
 		if (serverConfig[i].find("server ") == 0)
@@ -199,14 +234,6 @@ int Config::ParseFile(int serverToRead, Server &server)
 				if (server.setIndex(index))
 					return (1);
 			}
-			else if (serverConfig[i].find("error_page") == 0)
-			{
-				std::string error_page = getValue(serverConfig[i]);
-				if (error_page.length() == 0)
-					return (1);
-				if (server.setErrorPage(error_page))
-					return (1);
-			}
 			else if (serverConfig[i].find("client_max_body_size") == 0)
 			{
 				std::string client_max_body_size = getValue(serverConfig[i]);
@@ -228,9 +255,12 @@ int Config::ParseFile(int serverToRead, Server &server)
 	
 	if (cleanMethod(serverToRead, server))
 		return (1);
-	for (size_t i = 0; i < server.method.size(); ++i) {
-        std::cout << server.method[i] << " ";
-    }
-    std::cout << std::endl;
+	if (cleanError(serverToRead, server))
+		return (1);
+
+	// for (size_t i = 0; i < server.method.size(); ++i) {
+    //     std::cout << server.method[i] << " ";
+    // }
+    // std::cout << std::endl;
 	return (0);
 }

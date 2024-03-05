@@ -66,15 +66,15 @@ int Server::setIndex(std::string index)
     return (0);
 }
 
-int Server::setErrorPage(std::string error_page)
-{
-    if (error_page.length() == 0)
-    {
-        return (1);
-    }
-	this->error_page = error_page;
-    return (0);
-}
+// int Server::setErrorPage(std::string error_page)
+// {
+//     if (error_page.length() == 0)
+//     {
+//         return (1);
+//     }
+// 	this->error_page = error_page;
+//     return (0);
+// }
 
 int Server::setClientMax(std::string client_max_body_size)
 {
@@ -126,10 +126,10 @@ std::string Server::getIndex(void)
     return (this->index);
 }
 
-std::string Server::getErrorPage(void)
-{
-    return (this->error_page);
-}
+// std::string Server::getErrorPage(void)
+// {
+//     return (this->error_page);
+// }
 
 std::string Server::getClientMax(void)
 {

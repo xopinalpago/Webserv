@@ -34,7 +34,6 @@ int Launcher::initConfig(std::string &filename)
 		std::cout << server.getPort() << std::endl;
 		if (initServer(server))
 			return (1);
-		std::cout << "test" << std::endl;
 	}
 	return (0);
 }
@@ -46,7 +45,6 @@ void Launcher::listenServer(Server &server)
 	new_sd = accept(server.getFd(), (struct sockaddr *)&address, (socklen_t*)&addrlen);
 	if (new_sd < 0)
 	{
-		std::cout << "config.nb_config" << std::endl;
 		strerror(errno);
 		end_server = true;
 		return ;
@@ -130,7 +128,6 @@ int Launcher::initServer(Server &server)
         close(server.getFd());
         return(errorFunction("bind"), 1);
     }
-	std::cout << server.getFd() << std::endl;
 	// Servers.insert(std::make_pair(server.getFd(), server));
 	Servers[server.getFd()] = server;
 	// pourquoi le plus grand fd est celui du socket ?
