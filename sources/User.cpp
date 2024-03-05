@@ -5,12 +5,6 @@ User::User(void)
     return ;
 }
 
-// User::User(int id)
-// {
-// 	this->id = id;
-//     return ;
-// }
-
 User::User(Server &server)
 {
 	this->server = server;

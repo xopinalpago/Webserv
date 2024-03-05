@@ -104,7 +104,7 @@ int Config::cleanMethod(int serverToRead, Server &server)
 			}
 		}
 	}
-	if (server.method.empty())
+	if (server.getMethod().empty())
 		return (1);
 	return (0);
 }
@@ -125,13 +125,13 @@ int Config::cleanCGI(int serverToRead, Server &server)
 				std::string tmp_trim = Utils::trim(cgi_extension[i]);
 				std::string tmp = tmp_trim.substr(0, tmp_trim.size() - 1);
 				if (tmp == "php" || tmp == "py")
-					server.cgi_extension.push_back(tmp);
+					server.setCgiEx(tmp);
 				else
 					return (1);
 			}
 		}
 	}
-	if (server.cgi_extension.empty())
+	if (server.getCgiEx().empty())
 		return (1);
 	return (0);
 }
@@ -160,11 +160,11 @@ int Config::cleanError(int serverToRead, Server &server)
 				std::string error_file = tmp_trim.substr(first_sp + 1, tmp_trim.size() - first_sp - 2);
 				if (Utils::fileExists(error_file))
 					return (1);
-				server.error_page[error_num] = error_file; 
+				server.setErrorPage(error_num, error_file); 
 			}
 		}
 	}
-	if (server.error_page.empty())
+	if (server.getErrorPage().empty())
 		return (1);
 	return (0);
 }
@@ -179,15 +179,11 @@ std::string getValue(std::string line)
 
 int Config::MissElement(Server &server)
 {
-	if (server.getHost().length() == 0)
-		return (1);
 	if (server.getServerName().length() == 0)
 		return (1);
 	if (server.getRoot().length() == 0)
 		return (1);
 	if (server.getIndex().length() == 0)
-		return (1);
-	if (server.getClientMax().length() == 0)
 		return (1);
 	if (server.getDirectory().length() == 0)
 		return (1);
@@ -247,8 +243,13 @@ int Config::ParseFile(int serverToRead, Server &server)
 			}
 			else if (serverConfig[i].find("client_max_body_size") == 0)
 			{
-				std::string client_max_body_size = getValue(serverConfig[i]);
-				if (client_max_body_size.length() == 0)
+				// std::string client_max_body_size = getValue(serverConfig[i]);
+				// if (client_max_body_size.length() == 0)
+				// 	return (1);
+				// if (server.setClientMax(client_max_body_size))
+				// 	return (1);
+				int client_max_body_size = Utils::stringToInt(getValue(serverConfig[i]));
+				if (client_max_body_size <= 0)
 					return (1);
 				if (server.setClientMax(client_max_body_size))
 					return (1);
@@ -270,8 +271,8 @@ int Config::ParseFile(int serverToRead, Server &server)
 	if (cleanError(serverToRead, server))
 		return (1);
 
-	// for (size_t i = 0; i < server.cgi_extension.size(); ++i) {
-    //     std::cout << server.cgi_extension[i] << " ";
+	// for (size_t i = 0; i < server.getMethod().size(); ++i) {
+    //     std::cout << server.getMethodi(i) << " ";
     // }
     // std::cout << std::endl;
 	return (0);

@@ -12,7 +12,7 @@ class Launcher
 {
 	private:
 		struct timeval      timeout;
-		struct sockaddr_in6 address;
+		// struct sockaddr_in address;
 		fd_set	            readfds;
         fd_set	            writefds;
         fd_set	            tmp_readfds;
@@ -37,9 +37,8 @@ class Launcher
 		int initConfig(std::string &filename);
 		int runServer(void);
 
-		std::map<int, User> Users;
-		std::map<int, Server> Servers;
-		int nb_servers;
+		std::map<int, User> 	Users;
+		std::map<int, Server> 	Servers;
 };
 
 

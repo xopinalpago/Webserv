@@ -21,7 +21,6 @@ class User
 		std::string getMethod(void);
 		Server getServer(void);
 		User(void);
-		User(int id);
 		User(Server &server);
 		~User(void);
 };

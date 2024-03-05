@@ -32,7 +32,9 @@ int Server::setHost(std::string host)
     {
         return (1);
     }
-	this->host = host;
+ 	if (host == "localhost")
+		host = "127.0.0.1";   
+	this->host = inet_addr(host.data());
     return (0);
 }
 
@@ -66,9 +68,9 @@ int Server::setIndex(std::string index)
     return (0);
 }
 
-int Server::setClientMax(std::string client_max_body_size)
+int Server::setClientMax(int client_max_body_size)
 {
-    if (client_max_body_size.length() == 0)
+    if (client_max_body_size > 10000)
     {
         return (1);
     }
@@ -92,6 +94,48 @@ void Server::setMethod(std::string tmp)
     return ;
 }
 
+std::vector<std::string> Server::getMethod(void)
+{
+    return (this->method);
+}
+
+std::string Server::getMethodi(int i)
+{
+    return (this->method[i]);
+}
+
+void Server::setCgiEx(std::string tmp)
+{
+    this->cgi_extension.push_back(tmp);
+    return ;
+}
+
+std::vector<std::string> Server::getCgiEx(void)
+{
+    return (this->cgi_extension);
+}
+
+std::string Server::getCgiExi(int i)
+{
+    return (this->cgi_extension[i]);
+}
+
+void Server::setErrorPage(int key, std::string tmp)
+{
+    this->error_page[key] = tmp;
+    return ;
+}
+
+std::map<int, std::string>  Server::getErrorPage(void)
+{
+    return (this->error_page);
+}
+
+std::string Server::getErrorPagei(int i)
+{
+    return (this->error_page[i]);
+}
+
 int Server::getPort(void)
 {
     return (this->port);
@@ -102,7 +146,7 @@ int Server::getFd(void)
     return (this->fd);
 }
 
-std::string Server::getHost(void)
+in_addr_t Server::getHost(void)
 {
     return (this->host);
 }
@@ -122,7 +166,7 @@ std::string Server::getIndex(void)
     return (this->index);
 }
 
-std::string Server::getClientMax(void)
+int Server::getClientMax(void)
 {
     return (this->client_max_body_size);
 }

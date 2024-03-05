@@ -15,14 +15,14 @@ class Config {
     public :
         Config(void);
         ~Config(void);
-		int ParseFile(int serverToRead, Server &server);
-        int GetLineFile(std::string &filename);
-        int MissElement(Server &server);
-        int cleanMethod(int serverToRead, Server &server);
-        int cleanCGI(int serverToRead, Server &server);
-        int cleanError(int serverToRead, Server &server);
-        void setNbConfig(std::string &filename, std::string to_find);
-		int getNbConfig(void);
+		int     ParseFile(int serverToRead, Server &server);
+        int     GetLineFile(std::string &filename);
+        int     MissElement(Server &server);
+        int     cleanMethod(int serverToRead, Server &server);
+        int     cleanCGI(int serverToRead, Server &server);
+        int     cleanError(int serverToRead, Server &server);
+        void    setNbConfig(std::string &filename, std::string to_find);
+		int     getNbConfig(void);
     private :
         int nb_config;
         std::vector<std::string> serverConfig;

@@ -15,19 +15,6 @@ void Launcher::errorFunction(std::string word)
 	std::cerr << word << " failed" << std::endl;
 }
 
-// void Launcher::getUserServer(User &user)
-// {
-// 	for (std::map<int, Server>::iterator it = Servers.begin(); it != Servers.end(); ++it)    
-// 	{
-//         if (user.getServer().getHost() == it->second.getHost() &&
-//             user.getServer().getPort() == it->second.getPort())
-//         {
-//             user.setServer(*it);
-//             return ;
-//         }
-//     }
-// }
-
 int Launcher::initConfig(std::string &filename)
 {
 	Config	config;
@@ -44,7 +31,6 @@ int Launcher::initConfig(std::string &filename)
 			return (1);
 		if (config.MissElement(server))
 			return (1);
-		std::cout << server.getPort() << std::endl;
 		if (initServer(server))
 			return (1);
 	}
@@ -53,12 +39,11 @@ int Launcher::initConfig(std::string &filename)
 
 void Launcher::listenServer(Server &server)
 {
-	int addrlen = sizeof(address);
+	int addrlen = sizeof(server.address);
 	User  new_client(server);
 
 	printf("  Listening socket is readable\n");
-	// std::cout << server.getHost() << std::endl;
-	new_sd = accept(server.getFd(), (struct sockaddr *)&address, (socklen_t*)&addrlen);
+	new_sd = accept(server.getFd(), (struct sockaddr *)&server.address, (socklen_t*)&addrlen);
 	if (new_sd < 0)
 	{
 		strerror(errno);
@@ -107,7 +92,6 @@ void	Launcher::sendServer(User &user)
 {
 	Cgi cgi;
 	std::string method = user.getMethod();
-	std::cout << user.getServer().getPort() << std::endl;
 	std::string content = cgi.displayPage(method, user);
 	int rc3 = send(user.getFd(), content.c_str(), content.size(), 0);
 	if (rc3 < 0)
@@ -124,7 +108,7 @@ int Launcher::initServer(Server &server)
     int on = 1;
 	FD_ZERO(&writefds);
 	int fd_temp = 0;
-    if ((fd_temp = socket(AF_INET6, SOCK_STREAM, 0)) < 0) //pk AF_INET6 pour IPV6 et pas IPV4 ?
+    if ((fd_temp = socket(AF_INET, SOCK_STREAM, 0)) < 0) //pk AF_INET6 pour IPV6 et pas IPV4 ?
         return(errorFunction("socket"), 1);
     server.setFd(fd_temp);
 	if ((rc = setsockopt(server.getFd(), SOL_SOCKET,  SO_REUSEADDR, (char *)&on, sizeof(on)) < 0))
@@ -132,12 +116,11 @@ int Launcher::initServer(Server &server)
 		close(server.getFd());
 		return(errorFunction("setsockopt"), 1);
 	}
-	std::memset(&address, 0, sizeof(address));
-    address.sin6_family = AF_INET6;
-	memcpy(&address.sin6_addr, &in6addr_any, sizeof(in6addr_any));
-    // le serveur doit pouvoir ecouter plusieurs ports mais ici on en defini qu'un ?
-	address.sin6_port = htons(server.getPort());
-    if (bind(server.getFd(), (struct sockaddr *)&address, sizeof(address)) < 0)
+	std::memset(&server.address, 0, sizeof(server.address));
+    server.address.sin_family = AF_INET;
+	server.address.sin_addr.s_addr = server.getHost();
+	server.address.sin_port = htons(server.getPort());
+    if (bind(server.getFd(), (struct sockaddr *)&server.address, sizeof(server.address)) < 0)
 	{
         close(server.getFd());
         return(errorFunction("bind"), 1);
