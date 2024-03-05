@@ -6,7 +6,7 @@
 #    By: rmeriau <rmeriau@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/07/10 16:29:29 by dlu               #+#    #+#              #
-#    Updated: 2024/03/05 10:42:45 by rmeriau          ###   ########.fr        #
+#    Updated: 2024/03/05 12:15:04 by rmeriau          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -22,6 +22,7 @@ SRCS = ${addprefix sources/, \
 			Pages.cpp \
 			Config.cpp \
 			Launcher.cpp \
+			Utils.cpp \
 		}
 OBJS = $(SRCS:sources/%.cpp=objects/%.o)
 DEPS = $(SRCS:sources/%.cpp=objects/%.d)

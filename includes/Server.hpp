@@ -30,12 +30,12 @@ class Server
         std::string         server_name;
         std::string         root;
         std::string         index;
-        // std::string         error_page;
         std::string         client_max_body_size;
         std::string         directory_listing;
         
     public:
         std::vector<std::string> method;
+        std::vector<std::string> cgi_extension;
         std::map<int, std::string> error_page;
         Server(void);
         ~Server(void);
@@ -46,7 +46,6 @@ class Server
         int setServerName(std::string server_name);
         int setRoot(std::string root);
         int setIndex(std::string index);
-        // int setErrorPage(std::string error_page);
         int setClientMax(std::string client_max_body_size);
         int setDirectory(std::string directory_listing);
 
@@ -56,7 +55,6 @@ class Server
         std::string getServerName(void);
         std::string getRoot(void);
         std::string getIndex(void);
-        // std::string getErrorPage(void);
         std::string getClientMax(void);
         std::string getDirectory(void);
 };

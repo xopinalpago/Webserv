@@ -7,6 +7,7 @@
 #include <fstream>
 #include <vector>
 #include "Server.hpp"
+#include "Utils.hpp"
 
 class Config {
 
@@ -14,11 +15,11 @@ class Config {
         Config(void);
         ~Config(void);
 		int ParseFile(int serverToRead, Server &server);
-        int	StringToInt(std::string str);
         int GetLineFile(std::string &filename);
         int GetNbConfig(std::string &filename, std::string to_find);
         int MissElement(Server &server);
         int cleanMethod(int serverToRead, Server &server);
+        int cleanCGI(int serverToRead, Server &server);
         int cleanError(int serverToRead, Server &server);
         std::string trim(std::string& str);
         std::vector<std::string> serverConfig;

@@ -85,21 +85,6 @@ int Config::GetLineFile(std::string &filename)
     return (0);
 }
 
-int	Config::StringToInt(std::string str) {
-
-	if (str.length() > 10)
-		return (0);
-	for (int i = 0; str[i] != '\0'; i++)
-	{
-		if (std::isdigit(str[i] == 0))
-			return (0);
-	}
-	std::stringstream stream(str);
-	int n;
-	stream >> n;
-	return (n);
-}
-
 int Config::cleanMethod(int serverToRead, Server &server)
 {
 	int servernb = 0;
@@ -111,17 +96,45 @@ int Config::cleanMethod(int serverToRead, Server &server)
 			{
 				servernb += 1;
 			}
-			if (servernb == serverToRead)
+			if (servernb == serverToRead && method[i].find("method {"))
 			{
-				std::string tmp = trim(method[i]).substr(0, method[i].size() - 1);
+				std::string tmp_trim = trim(method[i]);
+				std::string tmp = tmp_trim.substr(0, tmp_trim.size() - 1);
 				if (tmp == "GET" || tmp == "HEAD" || tmp == "PATCH" || tmp == "POST" || tmp == "PUT" || tmp == "OPTIONS" || tmp == "DELETE")
-				{
 					server.method.push_back(tmp);
-				}
+				else
+					return (1);
 			}
 		}
 	}
 	if (server.method.empty())
+		return (1);
+	return (0);
+}
+
+int Config::cleanCGI(int serverToRead, Server &server)
+{
+	int servernb = 0;
+    for (size_t i = 0; i < cgi_extension.size(); i++)
+	{
+		if (cgi_extension[i].length() > 0)
+		{
+			if (cgi_extension[i].find("cgi_extension ") == 0)
+			{
+				servernb += 1;
+			}
+			if (servernb == serverToRead && cgi_extension[i].find("cgi_extension {"))
+			{
+				std::string tmp_trim = trim(cgi_extension[i]);
+				std::string tmp = tmp_trim.substr(0, tmp_trim.size() - 1);
+				if (tmp == "php" || tmp == "py")
+					server.cgi_extension.push_back(tmp);
+				else
+					return (1);
+			}
+		}
+	}
+	if (server.cgi_extension.empty())
 		return (1);
 	return (0);
 }
@@ -137,23 +150,24 @@ int Config::cleanError(int serverToRead, Server &server)
 			{
 				servernb += 1;
 			}
-			if (servernb == serverToRead)
+			if (servernb == serverToRead && error_page[i].find("error_page {"))
 			{
+				if (!std::isdigit(error_page[i][0]))
+					return (1);
 				int first_sp = error_page[i].find(' ');
 				if (first_sp < 0)
 					return (1);
-				std::cout << error_page[i].substr(0, first_sp) << std::endl;
-				// int error_num = StringToInt(error_page[i].substr(0, first_sp));
-				std::string tmp = trim(error_page[i]).substr(first_sp, error_page[i].size() - 1);
-				std::cout << tmp << std::endl;
-				// if (tmp == "GET" || tmp == "HEAD" || tmp == "PATCH" || tmp == "POST" || tmp == "PUT" || tmp == "OPTIONS" || tmp == "DELETE")
-				// {
-				// 	server.method.push_back(tmp);
-				// }
+				int error_num = Utils::stringToInt(error_page[i].substr(0, first_sp));
+				//TESTER SI ERROR EST DANS LES ERREURS QU ON GERE
+				std::string tmp_trim = trim(error_page[i]);
+				std::string error_file = tmp_trim.substr(first_sp + 1, tmp_trim.size() - first_sp - 2);
+				if (Utils::fileExists(error_file))
+					return (1);
+				server.error_page[error_num] = error_file; 
 			}
 		}
 	}
-	if (server.method.empty())
+	if (server.error_page.empty())
 		return (1);
 	return (0);
 }
@@ -196,7 +210,7 @@ int Config::ParseFile(int serverToRead, Server &server)
 		{
 			if (serverConfig[i].find("listen") == 0)
 			{
-				int port = StringToInt(getValue(serverConfig[i]));
+				int port = Utils::stringToInt(getValue(serverConfig[i]));
 				if (port <= 0)
 					return (1);
 				if (server.setPort(port))
@@ -252,14 +266,15 @@ int Config::ParseFile(int serverToRead, Server &server)
 			}
 		}
     }
-	
 	if (cleanMethod(serverToRead, server))
+		return (1);
+	if (cleanCGI(serverToRead, server))
 		return (1);
 	if (cleanError(serverToRead, server))
 		return (1);
 
-	// for (size_t i = 0; i < server.method.size(); ++i) {
-    //     std::cout << server.method[i] << " ";
+	// for (size_t i = 0; i < server.cgi_extension.size(); ++i) {
+    //     std::cout << server.cgi_extension[i] << " ";
     // }
     // std::cout << std::endl;
 	return (0);
