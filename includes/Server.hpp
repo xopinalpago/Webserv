@@ -14,12 +14,14 @@
 #include <vector>
 #include <map>
 
-#include "User.hpp"
-#include "Cgi.hpp"
+// #include "User.hpp"
+// #include "Cgi.hpp"
 
 #ifndef BUFFER_SIZE
 #define BUFFER_SIZE 1024
 #endif
+
+// class User ;
 
 class Server
 {
@@ -48,6 +50,7 @@ class Server
         int setIndex(std::string index);
         int setClientMax(std::string client_max_body_size);
         int setDirectory(std::string directory_listing);
+        void setMethod(std::string tmp);
 
         int         getPort(void);
         int         getFd(void);

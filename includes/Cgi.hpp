@@ -44,7 +44,7 @@ class Cgi {
             return this->_cenv;
         }
         static bool cgiExtension(std::string file_path, std::string extension);
-        std::string displayPage(std::string file_path, std::string method, std::map<int, User> Users, int i);
+        std::string displayPage(std::string file_path, std::string method, User &user);
 
     private :
         std::map<std::string, std::string> _env;

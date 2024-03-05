@@ -113,7 +113,7 @@ bool Cgi::cgiExtension(std::string file_path, std::string extension)
 	}
 	return false;
 }
-std::string Cgi::displayPage(std::string file_path, std::string method, std::map<int, User> Users, int i)
+std::string Cgi::displayPage(std::string file_path, std::string method, User &user)
 {
 	status = 200;
 	message = "OK";
@@ -122,7 +122,7 @@ std::string Cgi::displayPage(std::string file_path, std::string method, std::map
 	std::string data;
 
 	// verifier la taille de la requete :
-	if (Users[i].request.size() <= 10000) { // depend du fichier de config
+	if (user.request.size() <= 10000) { // depend du fichier de config
 		// verifier methode valide en fonction du fichier de config :
 			if (method == "GET" || method == "POST") {
 				if (cgiExtension(file_path, ".php") || cgiExtension(file_path, ".py")) {

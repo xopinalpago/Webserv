@@ -5,19 +5,26 @@
 #include <stdio.h>
 
 #include "Cgi.hpp"
+#include "Server.hpp"
+
+// class Server ;
 
 class User
 {
 	private:
-
+		Server server;
+		int fd;
 	public:
-		int id;
 		std::string request;
+		void setFd(int fd);
+		int	getFd(void);
 		void getRequest(void);
 		std::string getPath(void);
 		std::string getMethod(void);
+		Server getServer(void);
 		User(void);
 		User(int id);
+		User(Server &server);
 		~User(void);
 };
 

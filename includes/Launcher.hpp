@@ -23,11 +23,12 @@ class Launcher
         int                 end_server;
 
 		void 	errorFunction(std::string word);
-		int		readServer(int i);
-        void	sendServer(int i);
+		int		readServer(User &user);
+        void	sendServer(User &user);
         void    listenServer(Server &server);
 		int 	initSets(void);
 		int 	initServer(Server &server);
+		void 	getUserServer(User &user);
 
 	public:
 		Launcher(void);

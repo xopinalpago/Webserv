@@ -5,10 +5,16 @@ User::User(void)
     return ;
 }
 
-User::User(int id)
+// User::User(int id)
+// {
+// 	this->id = id;
+//     return ;
+// }
+
+User::User(Server &server)
 {
-	this->id = id;
-    return ;
+	this->server = server;
+	return ;
 }
 
 User::~User(void)
@@ -19,6 +25,22 @@ User::~User(void)
 void User::getRequest(void)
 {
     return ;
+}
+
+Server User::getServer(void)
+{
+	return (this->server);
+}
+
+void User::setFd(int fd)
+{
+	this->fd = fd;
+	return ;
+}
+
+int User::getFd(void)
+{
+	return (this->fd);
 }
 
 std::string User::getPath(void)

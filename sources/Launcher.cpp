@@ -15,16 +15,29 @@ void Launcher::errorFunction(std::string word)
 	std::cerr << word << " failed" << std::endl;
 }
 
+// void Launcher::getUserServer(User &user)
+// {
+// 	for (std::map<int, Server>::iterator it = Servers.begin(); it != Servers.end(); ++it)    
+// 	{
+//         if (user.getServer().getHost() == it->second.getHost() &&
+//             user.getServer().getPort() == it->second.getPort())
+//         {
+//             user.setServer(*it);
+//             return ;
+//         }
+//     }
+// }
+
 int Launcher::initConfig(std::string &filename)
 {
 	Config	config;
 
-	config.nb_config = config.GetNbConfig(filename, "server ");
-	if (config.nb_config == 0)
+	config.setNbConfig(filename, "server ");
+	if (config.getNbConfig() == 0)
 		return (1);
 	if (config.GetLineFile(filename))
 		return (1); 
-	for (int i = 1; i <= config.nb_config; i++)
+	for (int i = 1; i <= config.getNbConfig(); i++)
 	{
 		Server server;
 		if (config.ParseFile(i, server))
@@ -41,7 +54,10 @@ int Launcher::initConfig(std::string &filename)
 void Launcher::listenServer(Server &server)
 {
 	int addrlen = sizeof(address);
+	User  new_client(server);
+
 	printf("  Listening socket is readable\n");
+	// std::cout << server.getHost() << std::endl;
 	new_sd = accept(server.getFd(), (struct sockaddr *)&address, (socklen_t*)&addrlen);
 	if (new_sd < 0)
 	{
@@ -50,14 +66,15 @@ void Launcher::listenServer(Server &server)
 		return ;
 	}
 	printf("  New incoming connection - %d\n", new_sd);
-	Users[new_sd] = User(new_sd);
+	new_client.setFd(new_sd);
+	Users[new_sd] = new_client;
 	FD_SET(new_sd, &readfds);
 	if (new_sd > max_sd)
 		max_sd = new_sd;
 	return ;
 }
 
-int Launcher::readServer(int i)
+int Launcher::readServer(User &user)
 {
 	int bytes = 0;
     int rc = BUFFER_SIZE;
@@ -65,7 +82,7 @@ int Launcher::readServer(int i)
     std::string request = "";
     while (rc == BUFFER_SIZE) {
 		memset(bf, 0, sizeof(bf));
-		rc = recv(i, bf, BUFFER_SIZE, 0);
+		rc = recv(user.getFd(), bf, BUFFER_SIZE, 0);
         if (rc <= 0) {
             if (rc == -1)
                 std::cout << strerror(errno) << std::endl;
@@ -75,30 +92,31 @@ int Launcher::readServer(int i)
 		request.append(bf, rc);
         bytes += rc;
     }
-    std::cout << "Total bytes = " << bytes << std::endl;
-	std::cout << "****************************" << std::endl;
-	std::cout << request; // << std::endl;
-	std::cout << "TAILLE : " << request.length() << std::endl; 
-	std::cout << "****************************" << std::endl;
-	Users[i].request = request;
-	FD_CLR(i, &readfds);
-	FD_SET(i, &writefds);
+    // std::cout << "Total bytes = " << bytes << std::endl;
+	// std::cout << "****************************" << std::endl;
+	// std::cout << request; // << std::endl;
+	// std::cout << "TAILLE : " << request.length() << std::endl; 
+	// std::cout << "****************************" << std::endl;
+	user.request = request;
+	FD_CLR(user.getFd(), &readfds);
+	FD_SET(user.getFd(), &writefds);
 	return (1);
 }
 
-void	Launcher::sendServer(int i)
+void	Launcher::sendServer(User &user)
 {
 	Cgi cgi;
-	std::string method = Users[i].getMethod();
-	std::string content = cgi.displayPage(Users[i].getPath().c_str(), method, Users, i);
-	int rc3 = send(i, content.c_str(), content.size(), 0);
+	std::string method = user.getMethod();
+	std::cout << user.getServer().getPort() << std::endl;
+	std::string content = cgi.displayPage(user.getPath().c_str(), method, user);
+	int rc3 = send(user.getFd(), content.c_str(), content.size(), 0);
 	if (rc3 < 0)
 		strerror(errno);
 	// std::cout << "******* content dans sendServer *******" << std::endl;
 	// std::cout << content << std::endl;
 	// std::cout << "***************************************" << std::endl;
-	FD_CLR(i, &writefds);
-	FD_SET(i, &readfds);	
+	FD_CLR(user.getFd(), &writefds);
+	FD_SET(user.getFd(), &readfds);	
 }
 
 int Launcher::initServer(Server &server)
@@ -137,7 +155,7 @@ int	Launcher::initSets(void)
 {
 	FD_ZERO(&readfds);
 	FD_ZERO(&writefds);
-    for(std::map<int, Server>::iterator it = Servers.begin(); it != Servers.end(); ++it)
+    for (std::map<int, Server>::iterator it = Servers.begin(); it != Servers.end(); ++it)
     {
 		if (listen(it->first, 10) < 0)
 		{
@@ -186,11 +204,11 @@ int Launcher::runServer(void)
 			}
 			else if (FD_ISSET(i, &tmp_readfds) && Users.count(i))
 			{
-				readServer(i);
+				readServer(Users.find(i)->second);
 			}
 			else if (FD_ISSET(i, &tmp_writefds) && Users.count(i))
 			{
-				sendServer(i);
+				sendServer(Users.find(i)->second);
 			}
 		}
     }

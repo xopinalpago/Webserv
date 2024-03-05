@@ -4,17 +4,12 @@ Config::Config(void) {}
 
 Config::~Config(void) {}
 
-std::string Config::trim(std::string& str)
+int Config::getNbConfig(void)
 {
-    size_t first = str.find_first_not_of(' ');
-    if (std::string::npos == first) {
-        return str;
-    }
-    size_t last = str.find_last_not_of(' ');
-    return (str.substr(first, (last - first + 1)));
+	return (this->nb_config);
 }
 
-int Config::GetNbConfig(std::string &filename, std::string to_find)
+void Config::setNbConfig(std::string &filename, std::string to_find)
 {
     std::ifstream file(filename.c_str());
     std::string line;
@@ -31,9 +26,11 @@ int Config::GetNbConfig(std::string &filename, std::string to_find)
         file.close();
     } else {
         std::cerr << "Impossible d'ouvrir le fichier." << std::endl;
-		return (0);
+		this->nb_config = 0;
+		return ;
     }
-    return (count);
+	this->nb_config = count;
+    return ;
 }
 
 int Config::GetLineFile(std::string &filename)
@@ -46,7 +43,7 @@ int Config::GetLineFile(std::string &filename)
         bool insideCgi = false;
 		bool insideError = false; 
         while (std::getline(infile, line)) {
-            line = trim(line);
+            line = Utils::trim(line);
             if (!line.empty())
 			{
 				if (line.find("method") == 0)
@@ -98,10 +95,10 @@ int Config::cleanMethod(int serverToRead, Server &server)
 			}
 			if (servernb == serverToRead && method[i].find("method {"))
 			{
-				std::string tmp_trim = trim(method[i]);
+				std::string tmp_trim = Utils::trim(method[i]);
 				std::string tmp = tmp_trim.substr(0, tmp_trim.size() - 1);
 				if (tmp == "GET" || tmp == "HEAD" || tmp == "PATCH" || tmp == "POST" || tmp == "PUT" || tmp == "OPTIONS" || tmp == "DELETE")
-					server.method.push_back(tmp);
+					server.setMethod(tmp);
 				else
 					return (1);
 			}
@@ -125,7 +122,7 @@ int Config::cleanCGI(int serverToRead, Server &server)
 			}
 			if (servernb == serverToRead && cgi_extension[i].find("cgi_extension {"))
 			{
-				std::string tmp_trim = trim(cgi_extension[i]);
+				std::string tmp_trim = Utils::trim(cgi_extension[i]);
 				std::string tmp = tmp_trim.substr(0, tmp_trim.size() - 1);
 				if (tmp == "php" || tmp == "py")
 					server.cgi_extension.push_back(tmp);
@@ -159,7 +156,7 @@ int Config::cleanError(int serverToRead, Server &server)
 					return (1);
 				int error_num = Utils::stringToInt(error_page[i].substr(0, first_sp));
 				//TESTER SI ERROR EST DANS LES ERREURS QU ON GERE
-				std::string tmp_trim = trim(error_page[i]);
+				std::string tmp_trim = Utils::trim(error_page[i]);
 				std::string error_file = tmp_trim.substr(first_sp + 1, tmp_trim.size() - first_sp - 2);
 				if (Utils::fileExists(error_file))
 					return (1);
@@ -272,7 +269,6 @@ int Config::ParseFile(int serverToRead, Server &server)
 		return (1);
 	if (cleanError(serverToRead, server))
 		return (1);
-	std::cout << "test" << std::endl;
 
 	// for (size_t i = 0; i < server.cgi_extension.size(); ++i) {
     //     std::cout << server.cgi_extension[i] << " ";

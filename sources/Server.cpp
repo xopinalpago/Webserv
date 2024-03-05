@@ -86,6 +86,12 @@ int Server::setDirectory(std::string directory_listing)
     return (0);
 }
 
+void Server::setMethod(std::string tmp)
+{
+    this->method.push_back(tmp);
+    return ;
+}
+
 int Server::getPort(void)
 {
     return (this->port);

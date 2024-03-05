@@ -12,6 +12,7 @@ class Utils {
         ~Utils(void);
 		static int fileExists(std::string filename);
 		static int stringToInt(std::string str);
+		static std::string trim(std::string& str);
 };
 
 #endif
