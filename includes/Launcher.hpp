@@ -1,12 +1,20 @@
 #ifndef LAUNCHER_HPP
 #define LAUNCHER_HPP
 
+#include <map>
+#include <vector>
+
+#include "Cgi.hpp"
 #include "Config.hpp"
 #include "Server.hpp"
 #include "User.hpp"
+#include "Utils.hpp"
 
-#include <map>
-#include <vector>
+class Cgi;
+class Config;
+class Server;
+class User;
+class Utils;
 
 class Launcher
 {

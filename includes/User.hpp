@@ -5,6 +5,16 @@
 #include <stdio.h>
 
 #include "Cgi.hpp"
+#include "Config.hpp"
+#include "Launcher.hpp"
+#include "Server.hpp"
+#include "Utils.hpp"
+
+class Cgi;
+class Config;
+class Launcher;
+class Server;
+class Utils;
 
 class User
 {

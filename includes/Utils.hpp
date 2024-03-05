@@ -5,6 +5,18 @@
 #include <sstream>
 #include <fstream>
 
+#include "Cgi.hpp"
+#include "Config.hpp"
+#include "Launcher.hpp"
+#include "Server.hpp"
+#include "User.hpp"
+
+class Cgi;
+class Config;
+class Launcher;
+class Server;
+class User;
+
 class Utils {
 
     public :

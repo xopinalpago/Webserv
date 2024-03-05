@@ -16,9 +16,17 @@
 #include <sstream>
 #include <fstream>
 
+#include "Config.hpp"
+#include "Launcher.hpp"
+#include "Server.hpp"
 #include "User.hpp"
+#include "Utils.hpp"
 
+class Config;
+class Launcher;
+class Server;
 class User;
+class Utils;
 
 class Cgi {
 
@@ -43,8 +51,8 @@ class Cgi {
         char **getCenv() const {
             return this->_cenv;
         }
-        static bool cgiExtension(std::string file_path, std::string extension);
-        std::string displayPage(std::string file_path, std::string method, std::map<int, User> Users, int i);
+        static bool cgiExtension(std::string file_path, Server server, std::string extension);
+        std::string displayPage(std::string method, std::map<int, User> Users, int i, Server server);
 
     private :
         std::map<std::string, std::string> _env;

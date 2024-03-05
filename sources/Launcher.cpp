@@ -90,7 +90,8 @@ void	Launcher::sendServer(int i)
 {
 	Cgi cgi;
 	std::string method = Users[i].getMethod();
-	std::string content = cgi.displayPage(Users[i].getPath().c_str(), method, Users, i);
+	std::cout << "TEST = " << Servers[i].getPort() << std::endl;
+	std::string content = cgi.displayPage(method, Users, i, Servers[i]);
 	int rc3 = send(i, content.c_str(), content.size(), 0);
 	if (rc3 < 0)
 		strerror(errno);

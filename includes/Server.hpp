@@ -14,8 +14,18 @@
 #include <vector>
 #include <map>
 
-#include "User.hpp"
 #include "Cgi.hpp"
+#include "Config.hpp"
+#include "Launcher.hpp"
+#include "Server.hpp"
+#include "User.hpp"
+#include "Utils.hpp"
+
+class Cgi;
+class Config;
+class Launcher;
+class User;
+class Utils;
 
 #ifndef BUFFER_SIZE
 #define BUFFER_SIZE 1024

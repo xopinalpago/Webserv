@@ -6,8 +6,18 @@
 #include <sstream>
 #include <fstream>
 #include <vector>
+
+#include "Cgi.hpp"
+#include "Launcher.hpp"
 #include "Server.hpp"
+#include "User.hpp"
 #include "Utils.hpp"
+
+class Cgi;
+class Launcher;
+class Server;
+class User;
+class Utils;
 
 class Config {
 
