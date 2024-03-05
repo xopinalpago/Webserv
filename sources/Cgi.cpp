@@ -76,6 +76,7 @@ int Cgi::execCGI(std::string file_path) {
     int fd = open(".cgi.txt", O_WRONLY | O_CREAT | O_TRUNC);
     if (fd == -1) {
         std::cout << "FAIL TO OPEN\n";
+        // status = 500 // internal error
     }
     pid = fork();
     if (pid == -1) {
@@ -171,7 +172,7 @@ std::string Cgi::displayPage(std::string file_path, std::string method, std::map
 		message = "Request Entity Too Large";
 	}
 	std::cout << "ERROR STATUS = " << status << std::endl;
-	std::ifstream file_error("./pages/error_page_404.html");
+	std::ifstream file_error("./pages/error_pages/error_page_505.html");
 	body << file_error.rdbuf();
 	data = body.str();
 	clength = data.length();
