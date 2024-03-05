@@ -43,8 +43,9 @@ class Cgi {
         char **getCenv() const {
             return this->_cenv;
         }
-        static bool cgiExtension(std::string file_path, std::string extension);
+        static bool cgiExtension(std::string file_path, User user);
         std::string displayPage(std::string method, User &user);
+        bool authorizedMethod(User user);
 
     private :
         std::map<std::string, std::string> _env;

@@ -56,7 +56,7 @@ void Launcher::listenServer(Server &server)
 	int addrlen = sizeof(address);
 	User  new_client(server);
 
-	printf("  Listening socket is readable\n");
+	// printf("  Listening socket is readable\n");
 	// std::cout << server.getHost() << std::endl;
 	new_sd = accept(server.getFd(), (struct sockaddr *)&address, (socklen_t*)&addrlen);
 	if (new_sd < 0)
@@ -65,7 +65,7 @@ void Launcher::listenServer(Server &server)
 		end_server = true;
 		return ;
 	}
-	printf("  New incoming connection - %d\n", new_sd);
+	// printf("  New incoming connection - %d\n", new_sd);
 	new_client.setFd(new_sd);
 	Users[new_sd] = new_client;
 	FD_SET(new_sd, &readfds);
@@ -107,7 +107,7 @@ void	Launcher::sendServer(User &user)
 {
 	Cgi cgi;
 	std::string method = user.getMethod();
-	std::cout << user.getServer().getPort() << std::endl;
+	// std::cout << user.getServer().getPort() << std::endl;
 	std::string content = cgi.displayPage(method, user);
 	int rc3 = send(user.getFd(), content.c_str(), content.size(), 0);
 	if (rc3 < 0)
@@ -183,7 +183,7 @@ int Launcher::runServer(void)
 		// pourquoi des fd temporaires ?
 		std::memcpy(&tmp_readfds, &readfds, sizeof(readfds));
 		std::memcpy(&tmp_writefds, &writefds, sizeof(writefds));
-		std::cout << "Waiting for select..." << std::endl;
+		// std::cout << "Waiting for select..." << std::endl;
 		// signifcation rc ?
 		rc = select(max_sd + 1, &tmp_readfds, &tmp_writefds, NULL, &timeout);
 		if (rc < 0)

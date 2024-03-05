@@ -106,57 +106,52 @@ int Cgi::execCGI(std::string file_path) {
     return 1;
 }
 
-bool Cgi::cgiExtension(std::string file_path, std::string extension)
-{   
-    std::string ext = file_path.substr(file_path.rfind(".") + 1, file_path.length() - file_path.rfind(".") + 1);
-    // std::cout << "|" << ext << "|" << std::endl;    
-    // std::vector<std::string>::iterator it = server.cgi_extension.begin();
-    // while (it != server.cgi_extension.end()) {
-    //     if (ext == *it) {
-    //         return true;
-    //     }
-    //     ++it;
-    // }
-    if (file_path.length() >= extension.length()) {
-		return (file_path.compare(file_path.length() - extension.length() , extension.length(), extension) == 0);
-	}
-	return false;
+bool Cgi::authorizedMethod(User user) {
+    
+    Server server = user.getServer();
+    std::vector<std::string>::iterator it = server.method.begin();
+    std::vector<std::string>::iterator ite = server.method.end();
+    while (it != ite) {
+        if (user.getMethod() == *it)
+            return true;
+        ++it;
+    }
+    return false;
 }
 
-bool authorizedMethod(std::string method) {
-    (void)method;
-    // std::vector<std::string>::iterator it = server.method.begin();
-    // while (it != server.method.end()) {
-    //     if (method == *it) {
-    //         std::cout << "Methode " << *it << " autorisee" << std::endl;
-    //         return true;
-    //     }
-    //     ++it;
-    // }
-    // return false;
-    return true;
+bool Cgi::cgiExtension(std::string file_path, User user)
+{   
+    std::string ext = file_path.substr(file_path.rfind(".") + 1, file_path.length() - file_path.rfind(".") + 1);
+    Server server = user.getServer();
+
+    std::vector<std::string>::iterator it = server.cgi_extension.begin();
+    std::vector<std::string>::iterator ite = server.cgi_extension.end();
+    while (it != ite) {
+        if (ext == *it)
+            return true;
+        ++it;
+    }
+    return false;
 }
 
 std::string Cgi::displayPage(std::string method, User &user)
 {
-    // std::cout << "TEST = " << server.getPort() << std::endl;
 	status = 200;
 	message = "OK";
     std::string file_path = user.getPath().c_str();
 	std::stringstream body;
 	std::stringstream content;
 	std::string data;
-    std::cout << user.getServer().getHost() << std::endl;
 	// verifier la taille de la requete :
 	if (user.request.size() <= 10000) { // config
-        if (authorizedMethod(method))
+        if (authorizedMethod(user))
 			if (method == "GET" || method == "POST") {
-				if (cgiExtension(file_path, ".php") || cgiExtension(file_path, ".py")) {
+				if (cgiExtension(file_path, user) || cgiExtension(file_path, user)) {
 					this->execCGI(file_path);
 					std::ifstream file(".cgi.txt");
 					body << file.rdbuf();
-                    if (remove(".cgi.txt") != 0)
-                        status = 500;
+                    // if (remove(".cgi.txt") != 0)
+                    //     status = 500;
 				} else {
 					std::ifstream file(file_path.c_str());
 					if (file.fail()) {
