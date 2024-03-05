@@ -107,23 +107,49 @@ int Cgi::execCGI(std::string file_path) {
 }
 
 bool Cgi::cgiExtension(std::string file_path, std::string extension)
-{
-	if (file_path.length() >= extension.length()) {
+{   
+    std::string ext = file_path.substr(file_path.rfind(".") + 1, file_path.length() - file_path.rfind(".") + 1);
+    // std::cout << "|" << ext << "|" << std::endl;    
+    // std::vector<std::string>::iterator it = server.cgi_extension.begin();
+    // while (it != server.cgi_extension.end()) {
+    //     if (ext == *it) {
+    //         return true;
+    //     }
+    //     ++it;
+    // }
+    if (file_path.length() >= extension.length()) {
 		return (file_path.compare(file_path.length() - extension.length() , extension.length(), extension) == 0);
 	}
 	return false;
 }
-std::string Cgi::displayPage(std::string file_path, std::string method, User &user)
+
+bool authorizedMethod(std::string method) {
+    (void)method;
+    // std::vector<std::string>::iterator it = server.method.begin();
+    // while (it != server.method.end()) {
+    //     if (method == *it) {
+    //         std::cout << "Methode " << *it << " autorisee" << std::endl;
+    //         return true;
+    //     }
+    //     ++it;
+    // }
+    // return false;
+    return true;
+}
+
+std::string Cgi::displayPage(std::string method, User &user)
 {
+    // std::cout << "TEST = " << server.getPort() << std::endl;
 	status = 200;
 	message = "OK";
+    std::string file_path = user.getPath().c_str();
 	std::stringstream body;
 	std::stringstream content;
 	std::string data;
-
+    std::cout << user.getServer().getHost() << std::endl;
 	// verifier la taille de la requete :
-	if (user.request.size() <= 10000) { // depend du fichier de config
-		// verifier methode valide en fonction du fichier de config :
+	if (user.request.size() <= 10000) { // config
+        if (authorizedMethod(method))
 			if (method == "GET" || method == "POST") {
 				if (cgiExtension(file_path, ".php") || cgiExtension(file_path, ".py")) {
 					this->execCGI(file_path);
@@ -132,7 +158,6 @@ std::string Cgi::displayPage(std::string file_path, std::string method, User &us
                     if (remove(".cgi.txt") != 0)
                         status = 500;
 				} else {
-					// std::cout << "File or Directory" << std::endl;
 					std::ifstream file(file_path.c_str());
 					if (file.fail()) {
 						status = 404;
@@ -148,11 +173,10 @@ std::string Cgi::displayPage(std::string file_path, std::string method, User &us
 				status = 501;
 				message = "Not Implemented";
 			}
-		// Si ce n'est pas une methode valide :
-			// status = 405
-
-			if (!body)
-				std::cout << "BODY VIDE\n";
+        else {
+            status = 405;
+            message = "Method Not Allowed";
+        }
 			if (status == 200 && body) {
 				data = body.str();
 				clength = data.length();

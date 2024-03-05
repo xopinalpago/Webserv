@@ -7,8 +7,6 @@
 #include "Cgi.hpp"
 #include "Server.hpp"
 
-// class Server ;
-
 class User
 {
 	private:

@@ -14,9 +14,6 @@
 #include <vector>
 #include <map>
 
-// #include "User.hpp"
-// #include "Cgi.hpp"
-
 #ifndef BUFFER_SIZE
 #define BUFFER_SIZE 1024
 #endif
