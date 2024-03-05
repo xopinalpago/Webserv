@@ -15,7 +15,7 @@
 #include <map>
 
 #include "User.hpp"
-#include "Pages.hpp"
+#include "Cgi.hpp"
 
 #ifndef BUFFER_SIZE
 #define BUFFER_SIZE 1024

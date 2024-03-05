@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: rmeriau <rmeriau@student.42.fr>            +#+  +:+       +#+         #
+#    By: aducobu <aducobu@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/07/10 16:29:29 by dlu               #+#    #+#              #
-#    Updated: 2024/03/05 12:15:04 by rmeriau          ###   ########.fr        #
+#    Updated: 2024/03/05 13:46:54 by aducobu          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,7 +19,7 @@ SRCS = ${addprefix sources/, \
 			main.cpp \
 			Server.cpp \
 			User.cpp \
-			Pages.cpp \
+			Cgi.cpp \
 			Config.cpp \
 			Launcher.cpp \
 			Utils.cpp \

@@ -272,6 +272,7 @@ int Config::ParseFile(int serverToRead, Server &server)
 		return (1);
 	if (cleanError(serverToRead, server))
 		return (1);
+	std::cout << "test" << std::endl;
 
 	// for (size_t i = 0; i < server.cgi_extension.size(); ++i) {
     //     std::cout << server.cgi_extension[i] << " ";

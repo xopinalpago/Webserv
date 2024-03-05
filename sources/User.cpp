@@ -23,17 +23,15 @@ void User::getRequest(void)
 
 std::string User::getPath(void)
 {
-    // printf("****************************\n");
-	// printf("%s\n", request.c_str());
-	// printf("****************************\n");
 	int fpos = request.find(" ", 0);
 	int lpos = request.find(" ", fpos + 1);
 	std::string path_file = request.substr(fpos + 1, lpos - fpos - 1);
 	if (!path_file.compare("/"))
-		path_file = "/pages/index.html";
+		path_file = "pages/index.html";
+	else if (Cgi::cgiExtension(path_file, ".py") || Cgi::cgiExtension(path_file, ".php")) // definir en fct du fichier de config
+		return path_file.substr(1, path_file.length() - 1);
 	else
-		path_file = "/pages" + path_file;
-	path_file = path_file.insert(0, ".");
+		path_file = "pages" + path_file;
     return (path_file);
 }
 

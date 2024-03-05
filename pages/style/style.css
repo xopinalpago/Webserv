@@ -5,11 +5,14 @@ body, html {
 }
 
 .title {
+    display: flex;
+    justify-content: center;
     margin-top: 0;
     font-size:5em;
     color: #4b4b4b;
     font-weight: bold;
     text-transform: uppercase;
+    text-align: center;
 }
 
 button {

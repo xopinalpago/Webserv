@@ -4,6 +4,8 @@
 #include <iostream>
 #include <stdio.h>
 
+#include "Cgi.hpp"
+
 class User
 {
 	private:

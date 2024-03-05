@@ -20,9 +20,7 @@ class Launcher
         int                 rc;
         int                 max_sd;
         int                 new_sd;
-        int                 len;
         int                 end_server;
-		char                buffer[BUFFER_SIZE];
 
 		void 	errorFunction(std::string word);
 		int		readServer(int i);

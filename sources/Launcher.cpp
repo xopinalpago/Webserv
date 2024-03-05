@@ -59,32 +59,28 @@ void Launcher::listenServer(Server &server)
 
 int Launcher::readServer(int i)
 {
-	printf("  Descriptor %d is readable\n", i);
-	std::string all = "";
-	int rc2 = BUFFER_SIZE;
-	while (rc2 == BUFFER_SIZE)
-	{
-		char bf[BUFFER_SIZE + 1];
-		rc2 = recv(i, buffer, BUFFER_SIZE, 0);
-		if (rc2 <= 0)
-		{
-			if (rc2 == -1)
-				strerror(errno);
-			return (rc2);
-		}
-		bf[rc2] = 0;
-		std::string str(bf, bf + rc2);
-		all.append(str);
-		len = rc2;		
-		printf("  %d bytes received\n", len);
-		rc2 = 1;
-	}
-	printf("****************************\n");
-	std::cout << buffer << std::endl;
-	// printf("%s\n", buffer);
-	std::cout << "TAILLE : " << strlen(buffer) << std::endl; 
-	printf("****************************\n");
-	Users[i].request = buffer;
+	int bytes = 0;
+    int rc = BUFFER_SIZE;
+	char bf[BUFFER_SIZE + 1];
+    std::string request = "";
+    while (rc == BUFFER_SIZE) {
+		memset(bf, 0, sizeof(bf));
+		rc = recv(i, bf, BUFFER_SIZE, 0);
+        if (rc <= 0) {
+            if (rc == -1)
+                std::cout << strerror(errno) << std::endl;
+            return rc;
+        }
+		bf[rc] = 0;
+		request.append(bf, rc);
+        bytes += rc;
+    }
+    std::cout << "Total bytes = " << bytes << std::endl;
+	std::cout << "****************************" << std::endl;
+	std::cout << request; // << std::endl;
+	std::cout << "TAILLE : " << request.length() << std::endl; 
+	std::cout << "****************************" << std::endl;
+	Users[i].request = request;
 	FD_CLR(i, &readfds);
 	FD_SET(i, &writefds);
 	return (1);
@@ -92,9 +88,9 @@ int Launcher::readServer(int i)
 
 void	Launcher::sendServer(int i)
 {
-	Pages page;
+	Cgi cgi;
 	std::string method = Users[i].getMethod();
-	std::string content = page.displayPage(Users[i].getPath().c_str(), method);
+	std::string content = cgi.displayPage(Users[i].getPath().c_str(), method, Users, i);
 	int rc3 = send(i, content.c_str(), content.size(), 0);
 	if (rc3 < 0)
 		strerror(errno);
