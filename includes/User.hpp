@@ -4,7 +4,7 @@
 #include <iostream>
 #include <stdio.h>
 
-#include "Pages.hpp"
+#include "Cgi.hpp"
 
 class User
 {

@@ -12,16 +12,25 @@
 #include <errno.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <cstdio>
+#include <sstream>
+#include <fstream>
 
-#include "Pages.hpp"
+#include "User.hpp"
 
-class Pages;
+class User;
 
 class Cgi {
 
     public :
         Cgi(void);
         ~Cgi(void);
+
+        // mettre en prive et dans une class Response
+        int status;
+		int clength;
+		std::string message;
+		std::string ctype;
 
         int execCGI(std::string file_path);
         void create_env();
@@ -34,9 +43,10 @@ class Cgi {
         char **getCenv() const {
             return this->_cenv;
         }
+        static bool cgiExtension(std::string file_path, std::string extension);
+        std::string displayPage(std::string file_path, std::string method, std::map<int, User> Users, int i);
 
     private :
-        // Pages page;
         std::map<std::string, std::string> _env;
         char **_cenv;
 

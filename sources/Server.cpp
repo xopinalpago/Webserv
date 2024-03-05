@@ -113,9 +113,9 @@ int Server::readServer(int i) {
 
 void	Server::sendServer(int i)
 {
-	Pages page;
+	Cgi cgi;
 	std::string method = Users[i].getMethod();
-	std::string content = page.displayPage(Users[i].getPath().c_str(), method, Users, i);
+	std::string content = cgi.displayPage(Users[i].getPath().c_str(), method, Users, i);
 	int rc3 = send(i, content.c_str(), content.size(), 0);
 	if (rc3 < 0)
 		strerror(errno);

@@ -1,10 +1,5 @@
 import os
 
-# header // a generer par le script cgi 
-# print("HTTP/1.1 200 OK")
-# print("Content-Type: text/html")
-# print("Content-Length: 306\n")
-
 query = os.environ.get('QUERY_STRING')
 # corps de la reponse
 print("<!DOCTYPE html>")
