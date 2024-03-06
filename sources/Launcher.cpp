@@ -93,10 +93,10 @@ int Launcher::readServer(User &user)
         bytes += rc;
     }
     // std::cout << "Total bytes = " << bytes << std::endl;
-	// std::cout << "****************************" << std::endl;
-	// std::cout << request; // << std::endl;
+	std::cout << "****************************" << std::endl;
+	std::cout << request; // << std::endl;
 	// std::cout << "TAILLE : " << request.length() << std::endl; 
-	// std::cout << "****************************" << std::endl;
+	std::cout << "\n****************************" << std::endl;
 	user.request = request;
 	FD_CLR(user.getFd(), &readfds);
 	FD_SET(user.getFd(), &writefds);

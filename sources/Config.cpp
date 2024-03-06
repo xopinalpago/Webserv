@@ -276,20 +276,3 @@ int Config::ParseFile(int serverToRead, Server &server)
     // std::cout << std::endl;
 	return (0);
 }
-
-void Config::setMessages() {
-
-	messages[100] = "Continue";
-	messages[200] = "OK";
-	messages[204] = "No Content";
-	messages[400] = "Bad Request";
-	messages[401] = "Unauthorized";
-	messages[403] = "Forbidden";
-	messages[404] = "Not Found";
-	messages[405] = "Method Not Allowed";
-	messages[408] = "Request Time Out";
-	messages[413] = "Request Entity Too Large";
-	messages[500] = "Internal Server Error";
-	messages[501] = "Not Implemented";
-	messages[505] = "HTTP Version not supported";
-}

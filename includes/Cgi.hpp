@@ -26,14 +26,14 @@ class Cgi {
         Cgi(void);
         ~Cgi(void);
 
-        // mettre en prive et dans une class Response
+        // mettre en prive et dans une class Response ?
         int status;
 		int clength;
 		std::string message;
 		std::string ctype;
 
-        int execCGI(std::string file_path);
-        void create_env();
+        int execCGI(std::string file_path, User user);
+        int create_env(User user, std::string *file_path);
         int mapToChar();
         void displayEnv();
         void freeEnv();
@@ -46,10 +46,17 @@ class Cgi {
         static bool cgiExtension(std::string file_path, User user);
         std::string displayPage(std::string method, User &user);
         bool authorizedMethod(User user);
+        void setMessages();
+        void setBackupPages();
+        std::string decodeQuery(std::string query);
+        std::string extractQuery(User user);
+
 
     private :
         std::map<std::string, std::string> _env;
         char **_cenv;
+        std::map<int, std::string> messages;
+        std::map<int, std::string> errorBackup;
 
 };
 

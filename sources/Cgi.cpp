@@ -1,21 +1,95 @@
 #include "Cgi.hpp"
 
-Cgi::Cgi(void) {}
+Cgi::Cgi(void) {
+    setMessages();
+    setBackupPages();
+}
 
 Cgi::~Cgi(void) {}
 
+void Cgi::setMessages() {
 
-void Cgi::create_env() {
-    _env["SERVER_NAME"] = "Localhost"; // conf ou user
+	messages[100] = "Continue";
+	messages[200] = "OK";
+	messages[204] = "No Content";
+	messages[400] = "Bad Request";
+	messages[401] = "Unauthorized";
+	messages[403] = "Forbidden";
+	messages[404] = "Not Found";
+	messages[405] = "Method Not Allowed";
+	messages[408] = "Request Time Out";
+	messages[413] = "Request Entity Too Large";
+	messages[500] = "Internal Server Error";
+	messages[501] = "Not Implemented";
+	messages[505] = "HTTP Version not supported";
+}
+
+void Cgi::setBackupPages() {
+
+	errorBackup[204] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>204 - No Content</title></head><body><h1>204 - No Content</h1><p id=\"comment\">Oops! Your request has been processed successfully but there is no information to return.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
+	errorBackup[400] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>400 - Bad Request</title></head><body><h1>400 - Bad Request</h1><p id=\"comment\">Oops! The request syntax is wrong.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
+	errorBackup[401] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>401 - Unauthorized</title></head><body><h1>401 - Unauthorized</h1><p id=\"comment\">Oops! An authentication is required.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
+	errorBackup[403] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>403 - Forbidden</title></head><body><h1>403 - Forbidden</h1><p id=\"comment\">Oops! Something went wrong.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
+	errorBackup[404] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>404 - Page Not Found</title></head><body><h1>404 - Page Not Found</h1><p id=\"comment\">Oops! The page you're looking for does not exist.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
+	errorBackup[405] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>405 - Method Not Allowed</title></head><body><h1>405 - Method Not Allowed</h1><p id=\"comment\">Oops! The method used is not allowed.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
+	errorBackup[408] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>408 - Request Time Out</title></head><body><h1>408 - Request Time Out</h1><p id=\"comment\">Oops! The request timed out.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
+	errorBackup[413] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>413 - Request Entity To Large</title></head><body><h1>413 - Request Entity To Large</h1><p id=\"comment\">Oops! The request is too big.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
+	errorBackup[500] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>500 - Internal Server Error</title></head><body><h1>500 - Internal Server Error</h1><p id=\"comment\">Oops! Something went wrong.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
+	errorBackup[501] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>501 - Not Implemented</title></head><body><h1>501 - Not Implemented</h1><p id=\"comment\">Oops! Functionality not implemented by the server.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
+	errorBackup[505] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>505 - HTTP Version not supported</title></head><body><h1>505 - HTTP Version not supported</h1><p id=\"comment\">Oops! The HTTP version used is not managed by the server.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
+}
+
+std::string Cgi::decodeQuery(std::string query) {
+
+    std::stringstream res;
+    for (size_t i = 0 ; i < query.length() ; i++) {
+        if (query[i] == '+')
+            res << ' ';
+        else if (query[i] == '%') {
+            int value;
+            std::string hex = query.substr(i + 1, 2);
+            std::stringstream ss;
+            ss << std::hex << hex;
+            ss >> value;
+            res << static_cast<char>(value);
+            i += 2;
+        } else {
+            res << query[i];
+        }
+    }
+    return res.str();
+}
+
+std::string Cgi::extractQuery(User user) {
+
+    int len = user.request.length() - (user.request.rfind("\r\n\r\n") + 4);
+    std::string res = user.request.substr(user.request.rfind("\r\n\r\n") + 4, len);
+    return res;
+}
+
+int Cgi::create_env(User user, std::string *file_path) {
+
+    _env["SERVER_NAME"] = "Localhost"; // conf
     _env["SERVER_PROTOCOL"] = "HTTP/1.1";
     _env["GATEWAY_INTERFACE"] = "CGI/1.1";
-    _env["REQUEST_METHOD"] = "GET"; // user
-    _env["SCRIPT_FILENAME"] = "test.php"; // user
+    _env["REQUEST_METHOD"] = user.getMethod();
     _env["CONTENT_TYPE"] = "text/html"; // user
     _env["CONTENT_LENGTH"] = "882"; // user
-    _env["QUERY_STRING"] = "name=Ducobu&firstname=Aurore"; // user
+
+    if (user.getMethod() == "GET") {
+        std::size_t pos = user.request.find('?');
+        if (pos != std::string::npos) {
+            _env["QUERY_STRING"] = user.request.substr(pos + 1, user.request.find(' ', pos) - pos - 1);
+            *file_path = file_path->substr(0, file_path->find('?'));
+        }
+    } else if (user.getMethod() == "POST") {
+        _env["QUERY_STRING"] = extractQuery(user);
+    } else
+        _env["QUERY_STRING"] = "";
+    _env["SCRIPT_FILENAME"] = *file_path;
+    // _env["QUERY_STRING"] = decodeQuery(_env["QUERY_STRING"]);
     _env["REQUEST_URI"] = "uri";
-    this->mapToChar();
+    return (this->mapToChar());
 }
 
 int Cgi::mapToChar() {
@@ -55,8 +129,10 @@ void Cgi::freeEnv() {
 }
 
 
-int Cgi::execCGI(std::string file_path) {
+int Cgi::execCGI(std::string file_path,User user) {
     
+    if (this->create_env(user, &file_path))
+        return 500;
     /******************************************/
     /******************tmp*********************/
     /******************************************/
@@ -71,20 +147,19 @@ int Cgi::execCGI(std::string file_path) {
     /******************************************/
     /******************************************/
     
-    this->create_env();
     pid_t pid;
     int fd = open(".cgi.txt", O_WRONLY | O_CREAT | O_TRUNC);
     if (fd == -1) {
         std::cout << "FAIL TO OPEN\n";
-        // status = 500 // internal error
+        return 500;
     }
     pid = fork();
     if (pid == -1) {
         std::cout << "ERROR fork" << std::endl;
-        return 0;
+        return 500;
     }
     if (pid == 0) {
-        dup2(fd, STDOUT_FILENO);
+        // dup2(fd, STDOUT_FILENO);
         close(fd);
         if (execve("/usr/bin/python3", args, _cenv) == -1) {
             std::cout << strerror(errno) << std::endl;
@@ -93,7 +168,7 @@ int Cgi::execCGI(std::string file_path) {
             free(args[1]);
             free(args);
             freeEnv();
-            return 0;
+            return 500;
         }
     } else {
         free(args[0]);
@@ -103,7 +178,7 @@ int Cgi::execCGI(std::string file_path) {
         close(fd);
     }
     waitpid(pid, NULL, 0);
-    return 1;
+    return 200;
 }
 
 bool Cgi::authorizedMethod(User user) {
@@ -138,7 +213,7 @@ std::string Cgi::displayPage(std::string method, User &user)
 {
 	status = 200;
 	message = "OK";
-    std::string file_path = user.getPath().c_str();
+    std::string file_path = user.getPath(method).c_str();
 	std::stringstream body;
 	std::stringstream content;
 	std::string data;
@@ -146,12 +221,14 @@ std::string Cgi::displayPage(std::string method, User &user)
 	if (user.request.size() <= 10000) { // config
         if (authorizedMethod(user))
 			if (method == "GET" || method == "POST") {
-				if (cgiExtension(file_path, user) || cgiExtension(file_path, user)) {
-					this->execCGI(file_path);
-					std::ifstream file(".cgi.txt");
-					body << file.rdbuf();
-                    // if (remove(".cgi.txt") != 0)
-                    //     status = 500;
+				if (cgiExtension(file_path, user)) {
+					status = this->execCGI(file_path, user);
+                    if (status == 200) {
+					    std::ifstream file(".cgi.txt");
+					    body << file.rdbuf();
+                        // if (remove(".cgi.txt") != 0)
+                        //     status = 500;
+                    }
 				} else {
 					std::ifstream file(file_path.c_str());
 					if (file.fail()) {
@@ -163,8 +240,8 @@ std::string Cgi::displayPage(std::string method, User &user)
 				}
 			} else if (method == "DELETE") {
 				std::cout << "Methode DELETE" << std::endl;
+                status = 404;
 			} else {
-				std::cout << "Methode not implemented" << std::endl;
 				status = 501;
 				message = "Not Implemented";
 			}
@@ -172,30 +249,42 @@ std::string Cgi::displayPage(std::string method, User &user)
             status = 405;
             message = "Method Not Allowed";
         }
-			if (status == 200 && body) {
-				data = body.str();
-				clength = data.length();
-				std::string file_extension = file_path.substr(file_path.find_last_of(".") + 1);
-
-				ctype = "text/html";
-				file_extension == "css" ? ctype = "text/css" : ctype = "text/html";
-				content << "HTTP/1.1 " << status << " " << message << std::endl;
-				content << "Content-Type: " << ctype << std::endl;
-				content << "Content-Length: " << clength << std::endl << std::endl;
-				content << data;
-
-				return (content.str());
-			}
+		if (status == 200 && body) {
+			data = body.str();
+			clength = data.length();
+			std::string file_extension = file_path.substr(file_path.find_last_of(".") + 1);
+			ctype = "text/html";
+			file_extension == "css" ? ctype = "text/css" : ctype = "text/html";
+			content << "HTTP/1.1 " << status << " " << message << std::endl;
+			content << "Content-Type: " << ctype << std::endl;
+			content << "Content-Length: " << clength << std::endl << std::endl;
+			content << data;
+			return (content.str());
+		}
 	} else {
 		status = 413;
 		message = "Request Entity Too Large";
 	}
-	std::cout << "ERROR STATUS = " << status << std::endl;
-	std::ifstream file_error("./pages/error_pages/error_page_505.html");
-	body << file_error.rdbuf();
-	data = body.str();
+    std::ifstream errorFile;
+    Server server = user.getServer();
+    std::map<int, std::string>::iterator it = server.error_page.find(status);
+    std::map<int, std::string>::iterator ite = server.error_page.end();
+    if (it != ite) {
+        errorFile.open((server.error_page[status]).c_str());
+    } else {
+        std::stringstream ss;
+        ss << "./pages/error_pages/error_page_" << status << ".html";
+        std::string fileName = ss.str();
+	    errorFile.open(fileName.c_str());
+    }
+    if (!errorFile.is_open()) {
+        data = errorBackup[status];
+    } else {
+	    body << errorFile.rdbuf();
+	    data = body.str();
+    }
 	clength = data.length();
-	content << "HTTP/1.1 " << status << " " << message << std::endl;
+	content << "HTTP/1.1 " << status << " " << messages[status] << std::endl;
 	content << "Content-Type: text/html" << std::endl;
 	content << "Content-Length: " << clength << std::endl << std::endl;
 	content << data;

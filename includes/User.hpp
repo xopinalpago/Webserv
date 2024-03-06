@@ -19,10 +19,10 @@ class User
 		void setFd(int fd);
 		int	getFd(void);
 		void getRequest(void);
-		std::string getPath(void);
+		std::string getPath(std::string method);
 		std::string getMethod(void);
 		Server getServer(void) const;
-		bool scriptExt(std::string file_path, std::string ext);
+		bool scriptExt(std::string *file_path, std::string ext, std::string method);
 		User(void);
 		User(int id);
 		User(Server &server);
