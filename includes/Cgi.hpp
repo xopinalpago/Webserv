@@ -35,7 +35,7 @@ class Cgi {
         std::string extractQuery(User user);
         bool scriptExt(std::string ext, std::string method);
 
-        bool IsCgiExtension(User user);
+        bool IsCgiExtension(std::string file, User user);
         bool authorizedMethod(User user);
 
         std::string displayPage(std::string method, User &user);
@@ -77,6 +77,8 @@ class Cgi {
         std::map<int, std::string> errorBackup;
 
         int                 _status;
+        int                 _cgiFd;
+        std::string         _cgiFile;
         std::string         _filePath;
         std::string         _data;
         std::stringstream   _body;

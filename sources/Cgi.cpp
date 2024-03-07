@@ -1,13 +1,27 @@
 #include "Cgi.hpp"
 
+// #include <iostream>
+// #include <fstream>
+#include <sys/stat.h>
+
 Cgi::Cgi(void) {
     setMessages();
     setBackupPages();
     _status = 200;
+    _cgiFile = ".cgi.txt";
     _ctype = "text/html";
+    int fd = open(_cgiFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
+    if (fd != -1) {
+        if (chmod(_cgiFile.c_str(), S_IRWXU | S_IRWXG | S_IRWXO) != 0) {
+            close(fd);
+            fd = -1;
+        }
+    }
 }
 
-Cgi::~Cgi(void) {}
+Cgi::~Cgi(void) {
+    close(_cgiFd);
+}
 
 void Cgi::setMessages() {
 
@@ -174,19 +188,21 @@ int Cgi::execCGI(User user) {
     }
     
     pid_t pid;
-    int fd = open(".cgi.txt", O_WRONLY | O_CREAT | O_TRUNC);
-    if (fd == -1) {
-        std::cout << "FAIL TO OPEN\n";
+    // int fd = open(".cgi.txt", O_WRONLY | O_CREAT | O_TRUNC);
+    // if (fd == -1) {
+    //     std::cout << "FAIL TO OPEN\n";
+    //     return 500;
+    // }
+    if (_cgiFd == -1)
         return 500;
-    }
     pid = fork();
     if (pid == -1) {
         std::cout << "ERROR fork" << std::endl;
         return 500;
     }
     if (pid == 0) {
-        dup2(fd, STDOUT_FILENO);
-        close(fd);
+        dup2(_cgiFd, STDOUT_FILENO);
+        close(_cgiFd);
         if (execve(exec, args, _cenv) == -1) {
             free(args[0]);
             free(args[1]);
@@ -200,7 +216,7 @@ int Cgi::execCGI(User user) {
         free(args[1]);
         free(args);
         freeEnv();
-        close(fd);
+        // close(_cgiFd);
     }
     waitpid(pid, NULL, 0);
     return 200;
@@ -228,27 +244,23 @@ bool Cgi::authorizedMethod(User user) {
     return false; // Element non trouvé
 }
 
-bool Cgi::IsCgiExtension(User user)
+bool Cgi::IsCgiExtension(std::string file, User user)
 {   
-    std::string ext = _filePath.substr(_filePath.rfind(".") + 1, _filePath.length() - _filePath.rfind(".") + 1);
-    // Server server = user.getServer();
-
-    // std::vector<std::string>::iterator it = user.getRequest().getServer().getCgiEx().begin(); 
-    // std::vector<std::string>::iterator ite = user.getRequest().getServer().getCgiEx().end();
-    // while (it != ite) {
-    //     if (ext == *it)
-    //         return true;
-    //     ++it;
-    // }
-    // return false;
+    // std::string uri = user.getRequest().getUri();
+    if (file == "")
+        return false;
+    
+    std::cout << "FILE = " << file << std::endl;
+    size_t pos = file.rfind(".");
+    std::string ext = file.substr(pos + 1, _filePath.length() - pos + 1);
+    std::cout << "EXT = " << ext << std::endl;
 
     for (size_t i = 0; i < user.getRequest().getServer().getCgiEx().size(); ++i) {
-        // Vérifier si l'élément correspond
         if (user.getRequest().getServer().getCgiEx()[i] == ext) {
-            return true; // Element trouvé
+            return true;
         }
     }
-    return false; // Element non trouvé
+    return false;
 }
 
 std::string Cgi::setPathFile(std::string str, User &user)
@@ -258,12 +270,30 @@ std::string Cgi::setPathFile(std::string str, User &user)
 		// std::cout << "user.getRequest().getServer().getIndex()= " << user.getRequest().getServer().getIndex() << std::endl;
 		// std::cout << server.getServerName() << std::endl; 
 		str = user.getRequest().getServer().getIndex();
-	}
-	else if (IsCgiExtension(user) || IsCgiExtension(user)) // definir en fct du fichier de config
-		return str.substr(1, str.length() - 1);
-	else
-		str = "pages" + str;
-    return (str);
+	} else {
+        std::string uri = user.getRequest().getUri();
+        if (uri.find('?') != std::string::npos) { // char trouve
+            str = uri.substr(0, uri.find('?'));
+        } else {
+            str = uri;
+        }
+        std::cout << "inter = " << str << std::endl;
+        if (IsCgiExtension(str, user) == true) {
+            std::cout << "CGI ext" << std::endl;
+            str = str.substr(1, str.length() - 1);
+        } else {
+            str = "pages" + str;
+        }
+    }
+    std::cout << "STR = |" << str << "|" << std::endl << std::endl;
+    return str;
+	// else if (IsCgiExtension(user) == true) { // definir en fct du fichier de config
+    //     std::cout << "element trouve2\n" << std::endl;
+	// 	return str.substr(1, str.length() - 1);
+    // }
+	// else
+	// 	str = "pages" + str;
+    // return (str);
 }
 
 std::string Cgi::displayPage(std::string method, User &user)
@@ -273,7 +303,7 @@ std::string Cgi::displayPage(std::string method, User &user)
 	if (user.getRequest().getContentLength() <= user.getRequest().getServer().getClientMax()) { // config
         if (authorizedMethod(user))
 			if (method == "GET" || method == "POST") {
-				if (IsCgiExtension(user)) {
+				if (IsCgiExtension(_filePath, user)) {
 					_status = this->execCGI(user);
                     if (_status == 200) {
 					    std::ifstream file(".cgi.txt");
