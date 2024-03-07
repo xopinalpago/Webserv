@@ -60,7 +60,7 @@ std::string User::getPath(std::string method)
 	std::string path_file = request.substr(fpos + 1, lpos - fpos - 1);
 	if (!path_file.compare("/"))
 		path_file = "pages/index.html";
-	else if (scriptExt(&path_file, ".py", method) || scriptExt(&path_file, ".php", method)) // definir en fct du fichier de config
+	else if (scriptExt(&path_file, ".py", method) || scriptExt(&path_file, ".php", method) || method == "DELETE") // definir en fct du fichier de config
 		return path_file.substr(1, path_file.length() - 1);
 	else
 		path_file = "pages" + path_file;

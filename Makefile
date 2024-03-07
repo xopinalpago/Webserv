@@ -6,7 +6,7 @@
 #    By: aducobu <aducobu@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/07/10 16:29:29 by dlu               #+#    #+#              #
-#    Updated: 2024/03/05 13:46:54 by aducobu          ###   ########.fr        #
+#    Updated: 2024/03/07 14:06:43 by aducobu          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,6 +23,7 @@ SRCS = ${addprefix sources/, \
 			Config.cpp \
 			Launcher.cpp \
 			Utils.cpp \
+			Response.cpp \
 		}
 OBJS = $(SRCS:sources/%.cpp=objects/%.o)
 DEPS = $(SRCS:sources/%.cpp=objects/%.d)

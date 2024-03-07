@@ -1,15 +1,28 @@
-#include "Cgi.hpp"
+#include "Response.hpp"
 
-Cgi::Cgi(void) {
+Response::Response() {
+
     setMessages();
     setBackupPages();
     _status = 200;
     _ctype = "text/html";
 }
 
-Cgi::~Cgi(void) {}
+Response::~Response() {}
 
-void Cgi::setMessages() {
+Response::Response(const Response& cpy) {
+    *this = cpy;
+}
+
+Response& Response::operator=(const Response& rhs) {
+    (void)rhs;
+    // if (this != &rhs) {
+
+    // }
+    return *this;
+}
+
+void Response::setMessages() {
 
 	messages[100] = "Continue";
 	messages[200] = "OK";
@@ -26,7 +39,7 @@ void Cgi::setMessages() {
 	messages[505] = "HTTP Version not supported";
 }
 
-void Cgi::setBackupPages() {
+void Response::setBackupPages() {
 
 	errorBackup[204] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>204 - No Content</title></head><body><h1>204 - No Content</h1><p id=\"comment\">Oops! Your request has been processed successfully but there is no information to return.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
 	errorBackup[400] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>400 - Bad Request</title></head><body><h1>400 - Bad Request</h1><p id=\"comment\">Oops! The request syntax is wrong.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
@@ -43,244 +56,7 @@ void Cgi::setBackupPages() {
     errorBackup[4040] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>Ressource not deleted</title></head><body><h1>Ressource not deleted</h1><p id=\"comment\">The ressource you are trying to delete does not exist.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
 }
 
-std::string Cgi::decodeQuery(std::string query) {
-
-    std::stringstream res;
-    for (size_t i = 0 ; i < query.length() ; i++) {
-        if (query[i] == '+')
-            res << ' ';
-        else if (query[i] == '%') {
-            int value;
-            std::string hex = query.substr(i + 1, 2);
-            std::stringstream ss;
-            ss << std::hex << hex;
-            ss >> value;
-            res << static_cast<char>(value);
-            i += 2;
-        } else {
-            res << query[i];
-        }
-    }
-    return res.str();
-}
-
-std::string Cgi::extractQuery(User user) {
-
-    int len = user.request.length() - (user.request.rfind("\r\n\r\n") + 4);
-    std::string res = user.request.substr(user.request.rfind("\r\n\r\n") + 4, len);
-    return res;
-}
-
-int Cgi::create_env(User user) {
-
-    _env["SERVER_NAME"] = "Localhost"; // conf
-    _env["SERVER_PROTOCOL"] = "HTTP/1.1";
-    _env["GATEWAY_INTERFACE"] = "CGI/1.1";
-    _env["REQUEST_METHOD"] = user.getMethod();
-    _env["CONTENT_TYPE"] = "text/html"; // user
-    _env["CONTENT_LENGTH"] = "882"; // user
-
-    if (user.getMethod() == "GET") {
-        std::size_t pos = user.request.find('?');
-        if (pos != std::string::npos) {
-            _env["QUERY_STRING"] = user.request.substr(pos + 1, user.request.find(' ', pos) - pos - 1);
-            _filePath = _filePath.substr(0, _filePath.find('?'));
-        }
-    } else if (user.getMethod() == "POST") {
-        _env["QUERY_STRING"] = extractQuery(user);
-    } else
-        _env["QUERY_STRING"] = "";
-    _env["SCRIPT_FILENAME"] = _filePath;
-    // _env["QUERY_STRING"] = decodeQuery(_env["QUERY_STRING"]);
-    _env["REQUEST_URI"] = "uri";
-    return (this->mapToChar());
-}
-
-int Cgi::mapToChar() {
-
-    memset(&_cenv, 0, sizeof(_cenv));
-    std::map<std::string, std::string>::iterator it;
-    _cenv = (char**)malloc(sizeof(char*) * (_env.size() + 1));
-    if (!_cenv)
-        return 1;
-    int i = 0;
-    for (it = _env.begin() ; it != _env.end() ; ++it) {
-        int len = (it->first).length() + 1 + (it->second).length() + 1;
-        _cenv[i] = (char*)malloc(sizeof(char) * len);
-        if (!_cenv[i])
-            return 1;
-        strcpy(_cenv[i], (it->first).c_str());
-        strcat(_cenv[i], "=");
-        strcat(_cenv[i], (it->second).c_str());
-        i++;
-    }
-    _cenv[i] = NULL;
-    return 0;
-}
-
-void Cgi::displayEnv() {
-
-    for (size_t i = 0; i < _env.size(); i++) {
-        std::cout << _cenv[i] << std::endl;
-    }
-}
-
-void Cgi::freeEnv() {
-    for (size_t i = 0; i < _env.size(); i++) {
-        free(_cenv[i]);
-    }
-    free(_cenv);
-}
-
-bool Cgi::scriptExt(std::string ext, std::string method) {
-
-	if (method == "GET")
-		_filePath = _filePath.substr(0, _filePath.find('?'));
-	if (_filePath.length() >= ext.length()) {
-		return (_filePath.compare(_filePath.length() - ext.length() , ext.length(), ext) == 0);
-	}
-	return false;
-}
-
-
-int Cgi::execCGI(User user) {
-    
-    // creer l'environnement d'execution
-    if (this->create_env(user))
-        return 500;
-    
-    char **args;
-    args = (char **)malloc(sizeof(char *) * 3);
-    args[1] = (char *)malloc(sizeof(char) * 8);
-    strcpy(args[1], _filePath.c_str());
-    args[2] = NULL;
-
-    // determiner l'executable
-    char *exec;
-    
-    if (scriptExt("py", user.getMethod()) == true) {
-        args[0] = (char *)malloc(sizeof(char) * (strlen("python3") + 1));
-        strcpy(args[0], "python3");
-        exec = (char *)malloc(sizeof(char) * (strlen("/usr/bin/python3") + 1));
-        strcpy(exec, "/usr/bin/python3");
-    }
-    else if (scriptExt("php", user.getMethod()) == true) { // config
-        args[0] = (char *)malloc(sizeof(char) * (strlen("php") + 1));
-        strcpy(args[0], "php");
-        exec = (char *)malloc(sizeof(char) * (strlen("/usr/bin/php") + 1));
-        strcpy(exec, "/usr/bin/php");
-    } else {
-        return 501;
-    }
-    
-    pid_t pid;
-    int fd = open(".cgi.txt", O_WRONLY | O_CREAT | O_TRUNC);
-    if (fd == -1) {
-        std::cout << "FAIL TO OPEN\n";
-        return 500;
-    }
-    pid = fork();
-    if (pid == -1) {
-        std::cout << "ERROR fork" << std::endl;
-        return 500;
-    }
-    if (pid == 0) {
-        dup2(fd, STDOUT_FILENO);
-        close(fd);
-        if (execve(exec, args, _cenv) == -1) {
-            free(args[0]);
-            free(args[1]);
-            free(args);
-            free(exec);
-            freeEnv();
-            return 500;
-        }
-    } else {
-        free(args[0]);
-        free(args[1]);
-        free(args);
-        freeEnv();
-        close(fd);
-    }
-    waitpid(pid, NULL, 0);
-    return 200;
-}
-
-bool Cgi::authorizedMethod(User user) {
-    
-    Server server = user.getServer();
-    std::vector<std::string>::iterator it = server.method.begin();
-    std::vector<std::string>::iterator ite = server.method.end();
-    while (it != ite) {
-        if (user.getMethod() == *it)
-            return true;
-        ++it;
-    }
-    return false;
-}
-
-bool Cgi::IsCgiExtension(User user)
-{   
-    std::string ext = _filePath.substr(_filePath.rfind(".") + 1, _filePath.length() - _filePath.rfind(".") + 1);
-    Server server = user.getServer();
-
-    std::vector<std::string>::iterator it = server.cgi_extension.begin();
-    std::vector<std::string>::iterator ite = server.cgi_extension.end();
-    while (it != ite) {
-        if (ext == *it)
-            return true;
-        ++it;
-    }
-    return false;
-}
-
-std::string Cgi::displayPage(std::string method, User &user)
-{
-    _filePath = user.getPath(method).c_str();
-	// verifier la taille de la requete :
-	if (user.request.size() <= 10000) { // config
-        if (authorizedMethod(user))
-			if (method == "GET" || method == "POST") {
-				if (IsCgiExtension(user)) {
-					_status = this->execCGI(user);
-                    if (_status == 200) {
-					    std::ifstream file(".cgi.txt");
-					    _body << file.rdbuf();
-                    }
-				} else {
-					std::ifstream file(_filePath.c_str());
-					if (file.fail()) {
-						_status = 404;
-					} else
-						_body << file.rdbuf();
-				}
-			} else if (method == "DELETE") {
-                if (remove(_filePath.c_str()) != 0) {
-                    _body << errorBackup[4040];
-                } else {
-                    _body << errorBackup[2000];
-                }
-			} else
-				_status = 501;
-        else
-            _status = 405;
-		if (_status == 200 && _body) {
-			_data = _body.str();
-			std::string file_extension = _filePath.substr(_filePath.find_last_of(".") + 1);
-			file_extension == "css" ? _ctype = "text/css" : _ctype = "text/html";
-            _content << makeHeader();
-			_content << _data;
-			return (_content.str());
-		}
-	} else
-		_status = 413;
-    errorData(user);
-    _content << makeHeader();
-	_content << _data;
-	return (_content.str());
-}
-
-std::string Cgi::makeHeader() {
+std::string Response::makeHeader() {
 
     std::stringstream header;
     _clength = _data.length();
@@ -290,7 +66,7 @@ std::string Cgi::makeHeader() {
     return (header.str());
 }
 
-void Cgi::errorData(User user) {
+void Response::errorData(User user) {
 
     std::ifstream errorFile;
     Server server = user.getServer();

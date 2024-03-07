@@ -26,30 +26,48 @@ class Cgi {
         Cgi(void);
         ~Cgi(void);
 
-        // mettre en prive et dans une class Response ?
-        int status;
-		int clength;
-		std::string message;
-		std::string ctype;
-
-        int execCGI(std::string file_path, User user);
-        int create_env(User user, std::string *file_path);
+        int execCGI(User user);
+        int create_env(User user);
         int mapToChar();
         void displayEnv();
         void freeEnv();
+        std::string decodeQuery(std::string query);
+        std::string extractQuery(User user);
+        bool scriptExt(std::string ext, std::string method);
+
+        bool IsCgiExtension(User user);
+        bool authorizedMethod(User user);
+
+        std::string displayPage(std::string method, User &user);
+        void setMessages();
+        void setBackupPages();
+        void errorData(User user);
+        std::string makeHeader();
+
+        /* getters */
+        int getStatus() const { return _status; }
+        std::string getFilePath() const { return _filePath; }
+        std::string getData() const { return _data; }
+        int getClength() const { return _clength; }
+        std::string getCtype() const { return _ctype; }
+        // std::stringstream getBody() { return body; }
+        // std::stringstream getContent() { return content; }
+
         std::map<std::string, std::string> getEnv() const {
             return this->_env;
         }
         char **getCenv() const {
             return this->_cenv;
         }
-        static bool cgiExtension(std::string file_path, User user);
-        std::string displayPage(std::string method, User &user);
-        bool authorizedMethod(User user);
-        void setMessages();
-        void setBackupPages();
-        std::string decodeQuery(std::string query);
-        std::string extractQuery(User user);
+
+        /* setters */
+        void setStatus( int status ) { _status = status; }
+        void setFilePath( std::string filePath ) { _filePath = filePath; }
+        void setData( std::string data ) { _data = data; };
+        void setClength( int clength ) { _clength = clength; }
+        void setCtype( std::string ctype ) { _ctype = ctype; }
+        // void setBody();
+        // void setContent();
 
 
     private :
@@ -58,6 +76,13 @@ class Cgi {
         std::map<int, std::string> messages;
         std::map<int, std::string> errorBackup;
 
+        int                 _status;
+        std::string         _filePath;
+        std::string         _data;
+        std::stringstream   _body;
+        std::stringstream   _content;
+		int                 _clength;
+		std::string         _ctype;
 };
 
 #endif
