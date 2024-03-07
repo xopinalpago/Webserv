@@ -179,8 +179,6 @@ std::string getValue(std::string line)
 
 int Config::MissElement(Server &server)
 {
-	if (server.getServerName().length() == 0)
-		return (1);
 	if (server.getRoot().length() == 0)
 		return (1);
 	if (server.getIndex().length() == 0)
@@ -243,11 +241,6 @@ int Config::ParseFile(int serverToRead, Server &server)
 			}
 			else if (serverConfig[i].find("client_max_body_size") == 0)
 			{
-				// std::string client_max_body_size = getValue(serverConfig[i]);
-				// if (client_max_body_size.length() == 0)
-				// 	return (1);
-				// if (server.setClientMax(client_max_body_size))
-				// 	return (1);
 				int client_max_body_size = Utils::stringToInt(getValue(serverConfig[i]));
 				if (client_max_body_size <= 0)
 					return (1);

@@ -137,18 +137,39 @@ bool authorizedMethod(std::string method) {
     return true;
 }
 
+std::string Cgi::setPathFile(std::string path_file, User &user)
+{
+	if (!path_file.compare("/"))
+	{
+		// std::cout << "user.getRequest().getServer().getIndex()= " << user.getRequest().getServer().getIndex() << std::endl;
+		// std::cout << server.getServerName() << std::endl; 
+		path_file = user.getRequest().getServer().getIndex();
+	}
+	else if (Cgi::cgiExtension(path_file, ".py") || Cgi::cgiExtension(path_file, ".php")) // definir en fct du fichier de config
+		return path_file.substr(1, path_file.length() - 1);
+	else
+		path_file = "pages" + path_file;
+    return (path_file);
+}
+
 std::string Cgi::displayPage(std::string method, User &user)
 {
     // std::cout << "TEST = " << server.getPort() << std::endl;
 	status = 200;
 	message = "OK";
-    std::string file_path = user.getPath().c_str();
+
+    // std::cout << std::endl;
+    // std::cout << "uri= " << user.getRequest().getUri() << std::endl;
+    
+    std::string file_path = setPathFile(user.getRequest().getUri(), user).c_str();
 	std::stringstream body;
 	std::stringstream content;
 	std::string data;
-    std::cout << user.getServer().getHost() << std::endl;
-	// verifier la taille de la requete :
-	if (user.request.size() <= 10000) { // config
+
+    // std::cout << "file_path= " << file_path << std::endl;
+    // std::cout << std::endl;
+	// // verifier la taille de la requete :
+	if (user.getRequest().getContentLength() <= 10000) { // config
         if (authorizedMethod(method))
 			if (method == "GET" || method == "POST") {
 				if (cgiExtension(file_path, ".php") || cgiExtension(file_path, ".py")) {

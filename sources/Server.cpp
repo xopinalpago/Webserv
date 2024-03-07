@@ -2,6 +2,13 @@
 
 Server::Server(void)
 {
+	this->fd = 0;
+	this->port = 0;
+	this->client_max_body_size = 0;
+    this->host = 0;
+	this->server_name = "";
+	this->root = "";
+	this->index = "";
     return ;
 }
 
@@ -12,7 +19,7 @@ Server::~Server(void)
 
 int Server::setPort(int port)
 {
-    if (port > 65535)
+    if (port > 65535 || port <= 0)
     {
         return (1);
     }

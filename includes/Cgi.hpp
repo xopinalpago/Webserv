@@ -49,6 +49,7 @@ class Cgi {
     private :
         std::map<std::string, std::string> _env;
         char **_cenv;
+        std::string setPathFile(std::string path_file, User &user);
 
 };
 

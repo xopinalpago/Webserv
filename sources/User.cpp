@@ -16,11 +16,6 @@ User::~User(void)
     return ;
 }
 
-void User::getRequest(void)
-{
-    return ;
-}
-
 Server User::getServer(void)
 {
 	return (this->server);
@@ -32,27 +27,44 @@ void User::setFd(int fd)
 	return ;
 }
 
+int User::setServer(std::map<int, Server> Servers)
+{
+	std::string hostname;
+	if (request.getHost().find(':') != std::string::npos)
+		hostname = request.getHost().substr(0, request.getHost().length() - (request.getHost().length() - request.getHost().find(':')));
+	else
+		hostname = request.getHost();
+
+    for (std::map<int, Server>::iterator it = Servers.begin(); it != Servers.end(); ++it)
+	{
+		if (it->second.getServerName() == hostname)
+		{
+			server = it->second;
+			request.setServer(it->second);
+			return (0);
+		}
+	}
+	std::map<int, Server>::iterator itemp = Servers.begin();
+	if (itemp != Servers.end())
+	{
+		server = itemp->second;
+		request.setServer(itemp->second);
+	}
+	return (1);
+}
+
 int User::getFd(void)
 {
 	return (this->fd);
 }
 
-std::string User::getPath(void)
+Request 	User::getRequest(void)
 {
-	int fpos = request.find(" ", 0);
-	int lpos = request.find(" ", fpos + 1);
-	std::string path_file = request.substr(fpos + 1, lpos - fpos - 1);
-	if (!path_file.compare("/"))
-		path_file = "pages/index.html";
-	else if (Cgi::cgiExtension(path_file, ".py") || Cgi::cgiExtension(path_file, ".php")) // definir en fct du fichier de config
-		return path_file.substr(1, path_file.length() - 1);
-	else
-		path_file = "pages" + path_file;
-    return (path_file);
+	return (this->request);
 }
 
-std::string User::getMethod(void) {
-	int lpos = request.find(" ", 0);
-	std::string method = request.substr(0, lpos);
-	return method;
+void User::setRequest(Request request)
+{
+	this->request = request;
+	return ;
 }

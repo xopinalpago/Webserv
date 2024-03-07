@@ -6,23 +6,26 @@
 
 #include "Cgi.hpp"
 #include "Server.hpp"
+#include "Request.hpp"
 
 class User
 {
 	private:
 		Server server;
+		Request request;
 		int fd;
 	public:
-		std::string request;
-		void setFd(int fd);
-		int	getFd(void);
-		void getRequest(void);
-		std::string getPath(void);
-		std::string getMethod(void);
-		Server getServer(void);
 		User(void);
 		User(Server &server);
 		~User(void);
+
+		int			getFd(void);
+		Request 	getRequest(void);
+		Server 		getServer(void);
+
+		void 	setFd(int fd);
+		int 	setServer(std::map<int, Server> Servers);
+		void 	setRequest(Request request);
 };
 
 #endif

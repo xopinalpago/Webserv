@@ -7,12 +7,12 @@
 #include "Config.hpp"
 #include "Server.hpp"
 #include "User.hpp"
+#include "Request.hpp"
 
 class Launcher
 {
 	private:
 		struct timeval      timeout;
-		// struct sockaddr_in address;
 		fd_set	            readfds;
         fd_set	            writefds;
         fd_set	            tmp_readfds;
@@ -29,7 +29,9 @@ class Launcher
 		int 	initSets(void);
 		int 	initServer(Server &server);
 		void 	getUserServer(User &user);
-
+		int		checkServers(void);
+		void 	checkServerName(void);
+		void    closeConnection(int i);
 	public:
 		Launcher(void);
 		~Launcher(void);

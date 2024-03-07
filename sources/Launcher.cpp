@@ -34,13 +34,16 @@ int Launcher::initConfig(std::string &filename)
 		if (initServer(server))
 			return (1);
 	}
+	if (config.getNbConfig() > 1)
+		if (checkServers())
+			return (1);
 	return (0);
 }
 
 void Launcher::listenServer(Server &server)
 {
 	int addrlen = sizeof(server.address);
-	User  new_client(server);
+	User  new_client;
 
 	printf("  Listening socket is readable\n");
 	new_sd = accept(server.getFd(), (struct sockaddr *)&server.address, (socklen_t*)&addrlen);
@@ -59,30 +62,55 @@ void Launcher::listenServer(Server &server)
 	return ;
 }
 
+void    Launcher::closeConnection(int fd)
+{
+    if (FD_ISSET(fd, &writefds))
+        FD_CLR(fd, &writefds);
+    if (FD_ISSET(fd, &readfds))
+        FD_CLR(fd, &readfds);
+    if (fd == max_sd)
+        max_sd--;
+    close(fd);
+    Users.erase(fd);
+}
+
 int Launcher::readServer(User &user)
 {
 	int bytes = 0;
     int rc = BUFFER_SIZE;
 	char bf[BUFFER_SIZE + 1];
-    std::string request = "";
+    // std::string request = "";
+
+	Request request;
+
     while (rc == BUFFER_SIZE) {
 		memset(bf, 0, sizeof(bf));
 		rc = recv(user.getFd(), bf, BUFFER_SIZE, 0);
-        if (rc <= 0) {
-            if (rc == -1)
-                std::cout << strerror(errno) << std::endl;
-            return rc;
-        }
+		if (rc == 0)
+		{
+			closeConnection(user.getFd());
+			return (rc);
+		}
+		else if (rc < 0)
+		{
+			closeConnection(user.getFd());
+			return (rc);
+		}
+        // if (rc <= 0)
+		// {
+        //     if (rc == -1)
+        //         std::cout << strerror(errno) << std::endl;
+        //     return rc;
+        // }
 		bf[rc] = 0;
-		request.append(bf, rc);
+		// request.append(bf, rc);
+		request.allRequest.append(bf, rc);
         bytes += rc;
     }
-    // std::cout << "Total bytes = " << bytes << std::endl;
-	// std::cout << "****************************" << std::endl;
-	// std::cout << request; // << std::endl;
-	// std::cout << "TAILLE : " << request.length() << std::endl; 
-	// std::cout << "****************************" << std::endl;
-	user.request = request;
+
+	request.parseRequest();
+	user.setRequest(request);
+	user.setServer(Servers);
 	FD_CLR(user.getFd(), &readfds);
 	FD_SET(user.getFd(), &writefds);
 	return (1);
@@ -91,7 +119,7 @@ int Launcher::readServer(User &user)
 void	Launcher::sendServer(User &user)
 {
 	Cgi cgi;
-	std::string method = user.getMethod();
+	std::string method = user.getRequest().getMethod();
 	std::string content = cgi.displayPage(method, user);
 	int rc3 = send(user.getFd(), content.c_str(), content.size(), 0);
 	if (rc3 < 0)
@@ -101,6 +129,20 @@ void	Launcher::sendServer(User &user)
 	// std::cout << "***************************************" << std::endl;
 	FD_CLR(user.getFd(), &writefds);
 	FD_SET(user.getFd(), &readfds);	
+}
+
+void Launcher::checkServerName(void)
+{
+	for (std::map<int, Server>::iterator it = Servers.begin(); it != Servers.end(); ++it)
+    {
+		for (std::map<int, Server>::iterator it2 = Servers.begin(); it2 != it; ++it2)
+        {
+            if (it2->second.getHost() == it->second.getHost() && it2->second.getPort() == it->second.getPort())
+            {
+				it->second.setFd(it2->second.getFd());
+            }
+        }
+    }
 }
 
 int Launcher::initServer(Server &server)
@@ -125,12 +167,9 @@ int Launcher::initServer(Server &server)
         close(server.getFd());
         return(errorFunction("bind"), 1);
     }
-	// Servers.insert(std::make_pair(server.getFd(), server));
 	Servers[server.getFd()] = server;
 	// pourquoi le plus grand fd est celui du socket ?
 	max_sd = server.getFd();
-	timeout.tv_sec  = 15 * 60;
-	timeout.tv_usec = 0;
     return (0);
 }
 
@@ -140,17 +179,17 @@ int	Launcher::initSets(void)
 	FD_ZERO(&writefds);
     for (std::map<int, Server>::iterator it = Servers.begin(); it != Servers.end(); ++it)
     {
-		if (listen(it->first, 10) < 0)
+		if (listen(it->second.getFd(), 10) < 0)
 		{
-			close(it->first);
+			close(it->second.getFd());
 			return(errorFunction("listen"), 1);
 		}
-		if ((rc = fcntl(it->first, F_SETFL, O_NONBLOCK, FD_CLOEXEC)) < 0)
+		if ((rc = fcntl(it->second.getFd(), F_SETFL, O_NONBLOCK, FD_CLOEXEC)) < 0)
 		{
-		    close(it->first);
+		    close(it->second.getFd());
 		    return(errorFunction("fcntl"), 1);
 		}
-		FD_SET(it->first, &readfds);
+		FD_SET(it->second.getFd(), &readfds);
 	}
 	return (0);
 }
@@ -159,14 +198,17 @@ int Launcher::runServer(void)
 {
 	end_server = false;
 
+	checkServerName();
 	if (initSets())
 		return (1);
     while (end_server == false)
 	{
+		timeout.tv_sec  = 1;
+		timeout.tv_usec = 0;
 		// pourquoi des fd temporaires ?
 		std::memcpy(&tmp_readfds, &readfds, sizeof(readfds));
 		std::memcpy(&tmp_writefds, &writefds, sizeof(writefds));
-		std::cout << "Waiting for select..." << std::endl;
+		// std::cout << "Waiting for select..." << std::endl;
 		// signifcation rc ?
 		rc = select(max_sd + 1, &tmp_readfds, &tmp_writefds, NULL, &timeout);
 		if (rc < 0)
@@ -174,11 +216,11 @@ int Launcher::runServer(void)
             std::cerr << "select() failed" << std::endl;
 			return (1);
 		}
-		if (rc == 0)
-		{
-            std::cerr << "select() timed out" << std::endl;
-			return (1);
-		}
+		// if (rc == 0)
+		// {
+        //     std::cerr << "select() timed out" << std::endl;
+		// 	return (1);
+		// }
 		for (int i = 0; i <= max_sd; i++)
 		{
 			if (FD_ISSET(i, &tmp_readfds) && Servers.count(i))
@@ -201,4 +243,31 @@ int Launcher::runServer(void)
         close(i);
     }
 	return (0);
+}
+
+int Launcher::checkServers(void)
+{
+    std::vector<int> keys;
+
+    for (std::map<int, Server>::iterator it = Servers.begin(); it != Servers.end(); ++it)
+    {
+        keys.push_back(it->first);
+    }
+
+    for (size_t i = 0; i < keys.size() - 1; ++i)
+    {
+        for (size_t j = i + 1; j < keys.size(); ++j)
+        {
+            int key1 = keys[i];
+            int key2 = keys[j];
+
+            if (Servers[key1].getPort() == Servers[key2].getPort() &&
+                Servers[key1].getHost() == Servers[key2].getHost() &&
+                Servers[key1].getServerName() == Servers[key2].getServerName())
+            {
+                return (1);
+            }
+        }
+    }
+    return (0);
 }
