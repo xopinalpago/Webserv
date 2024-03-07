@@ -1,5 +1,5 @@
 <?php
-    // echo 'ceci est un test';
+    echo 'ceci est un test';
     $url = 'http://localhost:8080/resource/123';
 
     // Initialiser une session cURL
