@@ -58,6 +58,16 @@ int User::getFd(void)
 	return (this->fd);
 }
 
+bool User::scriptExt(std::string *file_path, std::string ext, std::string method) {
+
+	if (method == "GET")
+		*file_path = file_path->substr(0, file_path->find('?'));
+	if (file_path->length() >= ext.length()) {
+		return (file_path->compare(file_path->length() - ext.length() , ext.length(), ext) == 0);
+	}
+	return false;
+}
+
 Request 	User::getRequest(void)
 {
 	return (this->request);

@@ -18,7 +18,7 @@ class Request
 		std::string     referer;
 		std::string     accept;
 		// std::string		pathFile;
-		unsigned int	contentLength;
+		int				contentLength;
 		int				keepAlive;
 		std::vector<std::string> vAllRequest;
 		Server			server;
@@ -35,7 +35,7 @@ class Request
 		std::string		getHost(void);
 		// std::string		getContentType(void);
 		// std::string		getPathFile(void);
-		unsigned int	getContentLength(void);
+		int	getContentLength(void);
 		int				getKeepAlive(void);
 		Server			getServer(void);
 

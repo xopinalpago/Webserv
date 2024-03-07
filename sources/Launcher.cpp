@@ -53,7 +53,7 @@ void Launcher::listenServer(Server &server)
 		end_server = true;
 		return ;
 	}
-	printf("  New incoming connection - %d\n", new_sd);
+	// printf("  New incoming connection - %d\n", new_sd);
 	new_client.setFd(new_sd);
 	Users[new_sd] = new_client;
 	FD_SET(new_sd, &readfds);
@@ -208,6 +208,7 @@ int Launcher::runServer(void)
 		// pourquoi des fd temporaires ?
 		std::memcpy(&tmp_readfds, &readfds, sizeof(readfds));
 		std::memcpy(&tmp_writefds, &writefds, sizeof(writefds));
+		// std::cout << "Waiting for select..." << std::endl;
 		// std::cout << "Waiting for select..." << std::endl;
 		// signifcation rc ?
 		rc = select(max_sd + 1, &tmp_readfds, &tmp_writefds, NULL, &timeout);

@@ -53,7 +53,7 @@ std::string		Request::getHost(void)
 // 	return (this->pathFile);
 // }
 
-unsigned int	Request::getContentLength(void)
+int	Request::getContentLength(void)
 {
 	return (this->contentLength);
 }

@@ -133,7 +133,7 @@ void Server::setErrorPage(int key, std::string tmp)
     return ;
 }
 
-std::map<int, std::string>  Server::getErrorPage(void)
+std::map<int, std::string>&  Server::getErrorPage(void)
 {
     return (this->error_page);
 }

@@ -66,7 +66,7 @@ class Server
         std::string 				getMethodi(int i);
         std::vector<std::string>    getCgiEx(void);
         std::string                 getCgiExi(int i);
-        std::map<int, std::string>  getErrorPage(void);
+        std::map<int, std::string>&  getErrorPage(void);
         std::string                 getErrorPagei(int i);
 };
 
