@@ -7,13 +7,13 @@
 #include <map>
 #include <sstream> // stringstream
 
-#include "User.hpp"
+#include "Cgi.hpp"
 
 class Response {
 
     public :
         Response();
-        Response(const User& user);
+        Response(Request request);
         ~Response();
         Response(const Response& cpy);
         Response& operator=(const Response& rhs);
@@ -39,7 +39,7 @@ class Response {
 
         void        processRequest();
         void        errorData();
-        std::string setPathFile();
+        void        setPathFile();
         bool        IsCgiExtension(std::string file);
         std::string makeHeader();
         bool        authorizedMethod();

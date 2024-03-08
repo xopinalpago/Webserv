@@ -118,7 +118,7 @@ int Launcher::readServer(User &user)
 
 void	Launcher::sendServer(User &user)
 {
-	Response *res = new Response(user);
+	Response *res = new Response(user.getRequest());
 
 	// Cgi cgi;
 	// std::string method = user.getRequest().getMethod();

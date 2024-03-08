@@ -8,12 +8,14 @@ Response::Response() {
     _ctype = "text/html";
 }
 
-Response::Response(const User& user) {
+Response::Response(Request request) {
 
-    _request = user.getRequest();
-    _server = user.getRequest().getServer();
+    // _request = user.getRequest();
+    _request = request;
+    _server = request.getServer();
     setMessages();
     setBackupPages();
+    setTypes();
     _status = 200;
     _ctype = "text/html";
     setPathFile();
@@ -99,7 +101,7 @@ bool Response::IsCgiExtension(std::string file)
     return false;
 }
 
-std::string Response::setPathFile()
+void Response::setPathFile()
 {
     std::string str = _request.getUri();
 	if (!str.compare("/"))
@@ -158,7 +160,7 @@ std::string Response::makeHeader() {
     std::stringstream header;
     std::string ext = _filePath.substr(_filePath.rfind(".") + 1);
 
-    _clength = _data.length();
+    _clength = _body.str().length();
     _ctype = types[ext];
     header << "HTTP/1.1 " << _status << " " << messages[_status] << std::endl;
     header << "Content-Type: " << _ctype << std::endl;
@@ -172,11 +174,13 @@ void Response::processRequest() {
         if (authorizedMethod()) {
             if (_request.getMethod() == "GET" || _request.getMethod() == "POST") {
                 if (IsCgiExtension(_filePath)) {
-                    // _status = execCGI(user);
+                    Cgi *cgi = new Cgi(_filePath);
+                    _status = cgi->execCGI(_request);
                     if (_status == 200) {
                         std::ifstream file(".cgi.txt");
 					    _body << file.rdbuf();
                     }
+                    delete cgi;
                 } else {
                     std::ifstream file(_filePath.c_str());
 					if (file.fail()) {
@@ -199,12 +203,12 @@ void Response::processRequest() {
             _ctype = types[ext];
             _content << makeHeader();
 			_content << _body.str();
-			_filePath = _content.str();
+			_finalRes = _content.str();
         }
     } else
         _status = 413;
     errorData();
     _content << makeHeader();
 	_content << _body.str();
-	_filePath = _content.str();
+	_finalRes = _content.str();
 }

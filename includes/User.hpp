@@ -32,7 +32,6 @@ class User
 		int 	setServer(std::map<int, Server> Servers);
 		void 	setRequest(Request request);
 
-		bool scriptExt(std::string *file_path, std::string ext, std::string method);
 };
 
 #endif
