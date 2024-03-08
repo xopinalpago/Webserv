@@ -37,7 +37,7 @@ class Request
 		// std::string		getPathFile(void);
 		int	getContentLength(void);
 		int				getKeepAlive(void);
-		Server			getServer(void);
+		Server			getServer(void) const;
 
 		int		setAllRequest(std::string request);
 		int		setMethod(std::string method);

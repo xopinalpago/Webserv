@@ -16,7 +16,7 @@ User::~User(void)
     return ;
 }
 
-Server User::getServer(void)
+Server User::getServer(void) const
 {
 	return (this->server);
 }
@@ -62,17 +62,7 @@ int User::getFd(void)
 	return (this->fd);
 }
 
-bool User::scriptExt(std::string *file_path, std::string ext, std::string method) {
-
-	if (method == "GET")
-		*file_path = file_path->substr(0, file_path->find('?'));
-	if (file_path->length() >= ext.length()) {
-		return (file_path->compare(file_path->length() - ext.length() , ext.length(), ext) == 0);
-	}
-	return false;
-}
-
-Request 	User::getRequest(void)
+Request 	User::getRequest(void) const
 {
 	return (this->request);
 }
@@ -81,4 +71,9 @@ void User::setRequest(Request request)
 {
 	this->request = request;
 	return ;
+}
+
+Response	User::getResponse(void)
+{
+	return this->response;
 }

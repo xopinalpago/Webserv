@@ -8,12 +8,14 @@
 #include "Server.hpp"
 #include "Request.hpp"
 #include "Utils.hpp"
+#include "Response.hpp"
 
 class User
 {
 	private:
 		Server server;
 		Request request;
+		Response response;
 		int fd;
 		// int status;
 	
@@ -23,14 +25,14 @@ class User
 		~User(void);
 
 		int			getFd(void);
-		Request 	getRequest(void);
-		Server 		getServer(void);
+		Request 	getRequest(void) const;
+		Server 		getServer(void) const;
+		Response	getResponse(void);
 
 		void 	setFd(int fd);
 		int 	setServer(std::map<int, Server> Servers);
 		void 	setRequest(Request request);
 
-		bool scriptExt(std::string *file_path, std::string ext, std::string method);
 };
 
 #endif

@@ -190,7 +190,7 @@ void Request::splitString(void)
     }
 }
 
-Server	Request::getServer(void)
+Server	Request::getServer(void) const
 {
 	return (this->server);
 }
