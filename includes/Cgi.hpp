@@ -34,12 +34,9 @@ class Cgi {
         std::string decodeQuery(std::string query);
         std::string extractQuery(Request request);
 
-        std::map<std::string, std::string> getEnv() const {
-            return this->_env;
-        }
-        char **getCenv() const {
-            return this->_cenv;
-        }
+        std::map<std::string, std::string> getEnv() const { return this->_env; }
+        char **getCenv() const { return this->_cenv; }
+        int getCgiFd() const { return this->_cgiFd; }
 
     private :
         std::map<std::string, std::string> _env;

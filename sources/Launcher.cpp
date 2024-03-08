@@ -45,7 +45,6 @@ void Launcher::listenServer(Server &server)
 	int addrlen = sizeof(server.address);
 	User  new_client;
 
-	// printf("  Listening socket is readable\n");
 	new_sd = accept(server.getFd(), (struct sockaddr *)&server.address, (socklen_t*)&addrlen);
 	if (new_sd < 0)
 	{
@@ -53,7 +52,6 @@ void Launcher::listenServer(Server &server)
 		end_server = true;
 		return ;
 	}
-	// printf("  New incoming connection - %d\n", new_sd);
 	new_client.setFd(new_sd);
 	Users[new_sd] = new_client;
 	FD_SET(new_sd, &readfds);
@@ -120,18 +118,9 @@ void	Launcher::sendServer(User &user)
 {
 	Response *res = new Response(user.getRequest());
 
-	// Cgi cgi;
-	// std::string method = user.getRequest().getMethod();
-	// std::string content = cgi.displayPage(method, user);
 	int rc3 = send(user.getFd(), res->getFinalRes().c_str(), res->getFinalRes().size(), 0);
-	// int rc3 = send(user.getFd(), content.c_str(), content.size(), 0);
 	if (rc3 < 0)
 		strerror(errno); // gestion d'erreur ?
-
-	// std::cout << "******* content dans sendServer *******" << std::endl;
-	// std::cout << content << std::endl;
-	// std::cout << "***************************************" << std::endl;
-
 	FD_CLR(user.getFd(), &writefds);
 	FD_SET(user.getFd(), &readfds);
 
@@ -157,7 +146,7 @@ int Launcher::initServer(Server &server)
     int on = 1;
 	FD_ZERO(&writefds);
 	int fd_temp = 0;
-    if ((fd_temp = socket(AF_INET, SOCK_STREAM, 0)) < 0) //pk AF_INET6 pour IPV6 et pas IPV4 ?
+    if ((fd_temp = socket(AF_INET, SOCK_STREAM, 0)) < 0)
         return(errorFunction("socket"), 1);
     server.setFd(fd_temp);
 	if ((rc = setsockopt(server.getFd(), SOL_SOCKET,  SO_REUSEADDR, (char *)&on, sizeof(on)) < 0))
@@ -175,7 +164,6 @@ int Launcher::initServer(Server &server)
         return(errorFunction("bind"), 1);
     }
 	Servers[server.getFd()] = server;
-	// pourquoi le plus grand fd est celui du socket ?
 	max_sd = server.getFd();
     return (0);
 }
@@ -212,23 +200,14 @@ int Launcher::runServer(void)
 	{
 		timeout.tv_sec  = 1;
 		timeout.tv_usec = 0;
-		// pourquoi des fd temporaires ?
 		std::memcpy(&tmp_readfds, &readfds, sizeof(readfds));
 		std::memcpy(&tmp_writefds, &writefds, sizeof(writefds));
-		// std::cout << "Waiting for select..." << std::endl;
-		// std::cout << "Waiting for select..." << std::endl;
-		// signifcation rc ?
 		rc = select(max_sd + 1, &tmp_readfds, &tmp_writefds, NULL, &timeout);
 		if (rc < 0)
 		{
             std::cerr << "select() failed" << std::endl;
 			return (1);
 		}
-		// if (rc == 0)
-		// {
-        //     std::cerr << "select() timed out" << std::endl;
-		// 	return (1);
-		// }
 		for (int i = 0; i <= max_sd; i++)
 		{
 			if (FD_ISSET(i, &tmp_readfds) && Servers.count(i))

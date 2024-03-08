@@ -24,6 +24,7 @@ int main(int argc, char **argv)
 				return (1);
 		}
 		catch (Launcher::SigError &e) {
+			// run.closeConnection()
 			return (0);
 		}
 	}

@@ -19,6 +19,7 @@ Cgi::~Cgi(void) {
 
     if (fcntl(_cgiFd, F_GETFL) == -1)
         close(_cgiFd);
+    // remove(_cgiFile.c_str());
 }
 
 std::string Cgi::decodeQuery(std::string query) {
@@ -112,20 +113,19 @@ void Cgi::freeEnv() {
 
 int Cgi::execCGI(Request request) {
     
-    // creer l'environnement d'execution
-    if (create_env(request))
+    char **args = NULL;
+    char *exec = NULL;
+
+    // create the execution environment
+    if (create_env(request) || _cgiFd == -1)
         return 500;
     
-    char **args;
     args = (char **)malloc(sizeof(char *) * 3);
-    args[1] = (char *)malloc(sizeof(char) * 8);
+    args[1] = (char *)malloc(sizeof(char) * (_filePath.size() + 1));
     strcpy(args[1], _filePath.c_str());
     args[2] = NULL;
 
-    // determiner l'executable
-    char *exec;
-    
-
+    // determine executable and arguments
     std::string ext = _filePath.substr(_filePath.rfind(".") + 1);
     if (ext == "py") {
         args[0] = (char *)malloc(sizeof(char) * (strlen("python3") + 1));
@@ -133,7 +133,7 @@ int Cgi::execCGI(Request request) {
         exec = (char *)malloc(sizeof(char) * (strlen("/usr/bin/python3") + 1));
         strcpy(exec, "/usr/bin/python3");
     }
-    else if (ext == "php") { // config
+    else if (ext == "php") {
         args[0] = (char *)malloc(sizeof(char) * (strlen("php") + 1));
         strcpy(args[0], "php");
         exec = (char *)malloc(sizeof(char) * (strlen("/usr/bin/php") + 1));
@@ -143,8 +143,6 @@ int Cgi::execCGI(Request request) {
     }
     
     pid_t pid;
-    if (_cgiFd == -1)
-        return 500;
     pid = fork();
     if (pid == -1) {
         return 500;
@@ -158,13 +156,16 @@ int Cgi::execCGI(Request request) {
             free(args);
             free(exec);
             freeEnv();
+            close(_cgiFd);
             return 500;
         }
     } else {
         free(args[0]);
         free(args[1]);
         free(args);
+        free(exec);
         freeEnv();
+        close(_cgiFd);
     }
     waitpid(pid, NULL, 0);
     return 200;
