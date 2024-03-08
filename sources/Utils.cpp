@@ -41,3 +41,14 @@ std::string Utils::trim(std::string& str)
     size_t last = str.find_last_not_of(' ');
     return (str.substr(first, (last - first + 1)));
 }
+
+int Utils::inVector(std::vector<std::string> vec, std::string elem)
+{
+    for (size_t i = 0; i < vec.size(); i++)
+    {
+        if (vec[i] == elem) {
+            return (0);
+        }
+    }
+    return (1);
+}

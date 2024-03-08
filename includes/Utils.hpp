@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <vector>
 
 class Utils {
 
@@ -13,6 +14,7 @@ class Utils {
 		static int 			fileExists(std::string filename);
 		static int 			stringToInt(std::string str);
 		static std::string 	trim(std::string& str);
+		static int			inVector(std::vector<std::string> vec, std::string elem);
 };
 
 #endif

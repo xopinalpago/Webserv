@@ -36,6 +36,9 @@ void Config::setNbConfig(std::string &filename, std::string to_find)
 int Config::GetLineFile(std::string &filename)
 {
     std::ifstream infile(filename.c_str());
+	int nbMethod = 0;
+	int nbCgiEx = 0;
+	int nbErrorPage = 0;
 
     if (infile) {
         std::string line;
@@ -47,15 +50,30 @@ int Config::GetLineFile(std::string &filename)
             if (!line.empty())
 			{
 				if (line.find("method") == 0)
+				{
+					nbMethod++;
+					if (nbMethod > 1)
+						return (1);
                     insideMethod = true;
+				}
 				else if (line == "}" && insideMethod)
                     insideMethod = false;
 				else if (line.find("cgi_extension") == 0)
+				{
+					nbCgiEx++;
+					if (nbCgiEx > 1)
+						return (1);
 					insideCgi = true;
+				}
 				else if (line == "}" && insideCgi)
                     insideCgi = false;
 				else if (line.find("error_page") == 0)
+				{
+					nbErrorPage++;
+					if (nbErrorPage > 1)
+						return (1);
 					insideError = true;
+				}
 				else if (line == "}" && insideError)
                     insideError = false;              
 				if (!insideMethod && !insideCgi && !insideError) 
@@ -70,13 +88,13 @@ int Config::GetLineFile(std::string &filename)
         }
         infile.close();
     } else {
-        std::cerr << "Erreur lors de l'ouverture du fichier." << std::endl;
+        std::cout << "Erreur lors de l'ouverture du fichier." << std::endl;
         return (1);
     }
 
     // Affichage du contenu du vecteur
-    // for (size_t i = 0; i < error_page.size(); ++i) {
-    //     std::cout << error_page[i] << std::endl;
+    // for (size_t i = 0; i < cgi_extension.size(); ++i) {
+    //     std::cout << cgi_extension[i] << std::endl;
     // }
 
     return (0);
@@ -342,8 +360,8 @@ int Config::ParseFile(int serverToRead, Server &server)
 	if (cleanError(serverToRead, server))
 		return (1);
 
-	// for (size_t i = 0; i < server.getMethod().size(); ++i) {
-    //     std::cout << server.getMethodi(i) << " ";
+	// for (size_t i = 0; i < server.getCgiEx().size(); ++i) {
+    //     std::cout << server.getCgiExi(i) << " ";
     // }
     // std::cout << std::endl;
 	return (0);

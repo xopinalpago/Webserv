@@ -97,7 +97,10 @@ int Server::setDirectory(std::string directory_listing)
 
 void Server::setMethod(std::string tmp)
 {
-    this->method.push_back(tmp);
+    if (Utils::inVector(this->method, tmp)) 
+    {
+        this->method.push_back(tmp);
+    }
     return ;
 }
 
@@ -113,7 +116,10 @@ std::string Server::getMethodi(int i)
 
 void Server::setCgiEx(std::string tmp)
 {
-    this->cgi_extension.push_back(tmp);
+    if (Utils::inVector(this->cgi_extension, tmp)) 
+    {
+        this->cgi_extension.push_back(tmp);
+    }
     return ;
 }
 

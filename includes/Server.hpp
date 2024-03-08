@@ -19,7 +19,7 @@
 #define BUFFER_SIZE 1024
 #endif
 
-// class User ;
+#include "Utils.hpp"
 
 class Server
 {

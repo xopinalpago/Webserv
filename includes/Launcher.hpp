@@ -41,6 +41,7 @@ class Launcher
 
 		std::map<int, User> 	Users;
 		std::map<int, Server> 	Servers;
+	class SigError : public std::exception {};
 };
 
 
