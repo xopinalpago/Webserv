@@ -16,7 +16,7 @@ User::~User(void)
     return ;
 }
 
-Server User::getServer(void)
+Server User::getServer(void) const
 {
 	return (this->server);
 }
@@ -68,7 +68,7 @@ bool User::scriptExt(std::string *file_path, std::string ext, std::string method
 	return false;
 }
 
-Request 	User::getRequest(void)
+Request 	User::getRequest(void) const
 {
 	return (this->request);
 }
@@ -77,4 +77,9 @@ void User::setRequest(Request request)
 {
 	this->request = request;
 	return ;
+}
+
+Response	User::getResponse(void)
+{
+	return this->response;
 }

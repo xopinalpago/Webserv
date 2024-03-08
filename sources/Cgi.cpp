@@ -1,20 +1,16 @@
 #include "Cgi.hpp"
 
-// #include <iostream>
-// #include <fstream>
-#include <sys/stat.h>
-
 Cgi::Cgi(void) {
     setMessages();
     setBackupPages();
     _status = 200;
     _cgiFile = ".cgi.txt";
     _ctype = "text/html";
-    int fd = open(_cgiFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
-    if (fd != -1) {
+    _cgiFd = open(_cgiFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
+    if (_cgiFd != -1) {
         if (chmod(_cgiFile.c_str(), S_IRWXU | S_IRWXG | S_IRWXO) != 0) {
-            close(fd);
-            fd = -1;
+            close(_cgiFd);
+            _cgiFd = -1;
         }
     }
 }
@@ -188,11 +184,6 @@ int Cgi::execCGI(User user) {
     }
     
     pid_t pid;
-    // int fd = open(".cgi.txt", O_WRONLY | O_CREAT | O_TRUNC);
-    // if (fd == -1) {
-    //     std::cout << "FAIL TO OPEN\n";
-    //     return 500;
-    // }
     if (_cgiFd == -1)
         return 500;
     pid = fork();
@@ -216,161 +207,139 @@ int Cgi::execCGI(User user) {
         free(args[1]);
         free(args);
         freeEnv();
-        // close(_cgiFd);
     }
     waitpid(pid, NULL, 0);
     return 200;
 }
 
-bool Cgi::authorizedMethod(User user) {
+// bool Cgi::authorizedMethod(User user) {
+
+//     for (size_t i = 0; i < user.getRequest().getServer().getMethod().size(); ++i) {
+//         if (user.getRequest().getServer().getMethod()[i] == user.getRequest().getMethod()) {
+//             return true;
+//         }
+//     }
+//     return false;
+// }
+
+// bool Cgi::IsCgiExtension(std::string file, User user)
+// {   
+//     if (file == "")
+//         return false;
     
-    // Server server = user.getRequest().getServer();
-    // std::vector<std::string>::iterator it = server.getMethod().begin();
-    // std::vector<std::string>::iterator ite = server.getMethod().end();
-    // while (it != ite) {
-    //     if (user.getRequest().getMethod() == *it)
-    //         return true;
-    //     ++it;
-    // }
+//     size_t pos = file.rfind(".");
+//     std::string ext = file.substr(pos + 1, _filePath.length() - pos + 1);
+//     for (size_t i = 0; i < user.getRequest().getServer().getCgiEx().size(); ++i) {
+//         if (user.getRequest().getServer().getCgiEx()[i] == ext) {
+//             return true;
+//         }
+//     }
+//     return false;
+// }
 
-    // return false;
+// std::string Cgi::setPathFile(std::string str, User &user)
+// {
+// 	if (!str.compare("/"))
+// 	{
+// 		// std::cout << "user.getRequest().getServer().getIndex()= " << user.getRequest().getServer().getIndex() << std::endl;
+// 		// std::cout << server.getServerName() << std::endl; 
+// 		str = user.getRequest().getServer().getIndex();
+// 	} else {
+//         std::string uri = user.getRequest().getUri();
+//         if (uri.find('?') != std::string::npos) {
+//             str = uri.substr(0, uri.find('?'));
+//         } else {
+//             str = uri;
+//         }
+//         if (IsCgiExtension(str, user) == true) {
+//             str = str.substr(1, str.length() - 1);
+//         } else {
+//             str = "pages" + str;
+//         }
+//     }
+//     return str;
+// }
 
-    for (size_t i = 0; i < user.getRequest().getServer().getMethod().size(); ++i) {
-        // Vérifier si l'élément correspond
-        if (user.getRequest().getServer().getMethod()[i] == user.getRequest().getMethod()) {
-            return true; // Element trouvé
-        }
-    }
-    return false; // Element non trouvé
-}
+// std::string Cgi::displayPage(std::string method, User &user)
+// {
+//     _filePath = setPathFile(user.getRequest().getUri(), user).c_str();
+// 	if (user.getRequest().getContentLength() <= user.getRequest().getServer().getClientMax()) { // config
+//         if (authorizedMethod(user))
+// 			if (method == "GET" || method == "POST") {
+// 				if (IsCgiExtension(_filePath, user)) {
+// 					_status = this->execCGI(user);
+//                     if (_status == 200) {
+// 					    std::ifstream file(".cgi.txt");
+// 					    _body << file.rdbuf();
+//                     }
+// 				} else {
+// 					std::ifstream file(_filePath.c_str());
+// 					if (file.fail()) {
+// 						_status = 404;
+// 					} else
+// 						_body << file.rdbuf();
+// 				}
+// 			} else if (method == "DELETE") {
+//                 if (remove(_filePath.c_str()) != 0) {
+//                     _body << errorBackup[4040];
+//                 } else {
+//                     _body << errorBackup[2000];
+//                 }
+// 			} else
+// 				_status = 501;
+//         else
+//             _status = 405;
+// 		if (_status == 200 && _body) {
+// 			_data = _body.str();
+// 			// std::string file_extension = _filePath.substr(_filePath.find_last_of(".") + 1);
+//             size_t pos = _filePath.rfind(".");
+//             std::string ext = _filePath.substr(pos + 1, _filePath.length() - pos + 1);
+//             _ctype = types[ext];
+// 			// file_extension == "css" ? _ctype = "text/css" : _ctype = "text/html";
 
-bool Cgi::IsCgiExtension(std::string file, User user)
-{   
-    // std::string uri = user.getRequest().getUri();
-    if (file == "")
-        return false;
-    
-    std::cout << "FILE = " << file << std::endl;
-    size_t pos = file.rfind(".");
-    std::string ext = file.substr(pos + 1, _filePath.length() - pos + 1);
-    std::cout << "EXT = " << ext << std::endl;
+//             _content << makeHeader();
+// 			_content << _body.str();
+// 			return (_content.str());
+// 		}
+// 	} else
+// 		_status = 413;
+//     errorData(user);
+//     _content << makeHeader();
+// 	_content << _body.str();
+// 	return (_content.str());
+// }
 
-    for (size_t i = 0; i < user.getRequest().getServer().getCgiEx().size(); ++i) {
-        if (user.getRequest().getServer().getCgiEx()[i] == ext) {
-            return true;
-        }
-    }
-    return false;
-}
+// std::string Cgi::makeHeader() {
 
-std::string Cgi::setPathFile(std::string str, User &user)
-{
-	if (!str.compare("/"))
-	{
-		// std::cout << "user.getRequest().getServer().getIndex()= " << user.getRequest().getServer().getIndex() << std::endl;
-		// std::cout << server.getServerName() << std::endl; 
-		str = user.getRequest().getServer().getIndex();
-	} else {
-        std::string uri = user.getRequest().getUri();
-        if (uri.find('?') != std::string::npos) { // char trouve
-            str = uri.substr(0, uri.find('?'));
-        } else {
-            str = uri;
-        }
-        std::cout << "inter = " << str << std::endl;
-        if (IsCgiExtension(str, user) == true) {
-            std::cout << "CGI ext" << std::endl;
-            str = str.substr(1, str.length() - 1);
-        } else {
-            str = "pages" + str;
-        }
-    }
-    std::cout << "STR = |" << str << "|" << std::endl << std::endl;
-    return str;
-	// else if (IsCgiExtension(user) == true) { // definir en fct du fichier de config
-    //     std::cout << "element trouve2\n" << std::endl;
-	// 	return str.substr(1, str.length() - 1);
-    // }
-	// else
-	// 	str = "pages" + str;
-    // return (str);
-}
+//     std::stringstream header;
+//     _clength = _data.length();
 
-std::string Cgi::displayPage(std::string method, User &user)
-{
-    _filePath = setPathFile(user.getRequest().getUri(), user).c_str();
-	// verifier la taille de la requete :
-	if (user.getRequest().getContentLength() <= user.getRequest().getServer().getClientMax()) { // config
-        if (authorizedMethod(user))
-			if (method == "GET" || method == "POST") {
-				if (IsCgiExtension(_filePath, user)) {
-					_status = this->execCGI(user);
-                    if (_status == 200) {
-					    std::ifstream file(".cgi.txt");
-					    _body << file.rdbuf();
-                    }
-				} else {
-					std::ifstream file(_filePath.c_str());
-					if (file.fail()) {
-						_status = 404;
-					} else
-						_body << file.rdbuf();
-				}
-			} else if (method == "DELETE") {
-                if (remove(_filePath.c_str()) != 0) {
-                    _body << errorBackup[4040];
-                } else {
-                    _body << errorBackup[2000];
-                }
-			} else
-				_status = 501;
-        else
-            _status = 405;
-		if (_status == 200 && _body) {
-			_data = _body.str();
-			std::string file_extension = _filePath.substr(_filePath.find_last_of(".") + 1);
-			file_extension == "css" ? _ctype = "text/css" : _ctype = "text/html";
-            _content << makeHeader();
-			_content << _data;
-			return (_content.str());
-		}
-	} else
-		_status = 413;
-    errorData(user);
-    _content << makeHeader();
-	_content << _data;
-	return (_content.str());
-}
+//     size_t pos = _filePath.rfind(".");
+//     std::string ext = _filePath.substr(pos + 1);
+//     _ctype = types[ext];
+//     header << "HTTP/1.1 " << _status << " " << messages[_status] << std::endl;
+//     header << "Content-Type: " << _ctype << std::endl;
+//     header << "Content-Length: " << _clength << std::endl << std::endl;
+//     return (header.str());
+// }
 
-std::string Cgi::makeHeader() {
+// void Cgi::errorData(User user) {
 
-    std::stringstream header;
-    _clength = _data.length();
-    header << "HTTP/1.1 " << _status << " " << messages[_status] << std::endl;
-    header << "Content-Type: " << _ctype << std::endl;
-    header << "Content-Length: " << _clength << std::endl << std::endl;
-    return (header.str());
-}
-
-void Cgi::errorData(User user) {
-
-    std::ifstream errorFile;
-    Server server = user.getRequest().getServer();
-    std::map<int, std::string>::iterator it = user.getRequest().getServer().getErrorPage().find(_status);
-    // std::map<int, std::string>::iterator ite = server.getErrorPage().end();
-    // if (it != ite) {
-    if (it != user.getRequest().getServer().getErrorPage().end()) {
-        errorFile.open(((server.getErrorPage())[_status]).c_str());
-    } else {
-        std::stringstream ss;
-        ss << "./pages/error_pages/error_page_" << _status << ".html";
-        std::string fileName = ss.str();
-	    errorFile.open(fileName.c_str());
-    }
-    if (!errorFile.is_open()) {
-        _data = errorBackup[_status];
-    } else {
-	    _body << errorFile.rdbuf();
-	    _data = _body.str();
-    }
-}
+//     std::ifstream errorFile;
+//     Server server = user.getRequest().getServer();
+//     std::map<int, std::string>::iterator it = user.getRequest().getServer().getErrorPage().find(_status);
+//     if (it != user.getRequest().getServer().getErrorPage().end()) {
+//         errorFile.open(((server.getErrorPage())[_status]).c_str());
+//     } else {
+//         std::stringstream ss;
+//         ss << "./pages/error_pages/error_page_" << _status << ".html";
+//         std::string fileName = ss.str();
+// 	    errorFile.open(fileName.c_str());
+//     }
+//     if (!errorFile.is_open()) {
+//         _body << errorBackup[_status];
+//     } else {
+// 	    _body << errorFile.rdbuf();
+// 	    // _data = _body.str();
+//     }
+// }

@@ -15,6 +15,7 @@
 #include <cstdio>
 #include <sstream>
 #include <fstream>
+#include <sys/stat.h> // chmod
 
 #include "User.hpp"
 

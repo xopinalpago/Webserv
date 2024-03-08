@@ -45,7 +45,7 @@ void Launcher::listenServer(Server &server)
 	int addrlen = sizeof(server.address);
 	User  new_client;
 
-	printf("  Listening socket is readable\n");
+	// printf("  Listening socket is readable\n");
 	new_sd = accept(server.getFd(), (struct sockaddr *)&server.address, (socklen_t*)&addrlen);
 	if (new_sd < 0)
 	{
@@ -118,17 +118,24 @@ int Launcher::readServer(User &user)
 
 void	Launcher::sendServer(User &user)
 {
-	Cgi cgi;
-	std::string method = user.getRequest().getMethod();
-	std::string content = cgi.displayPage(method, user);
-	int rc3 = send(user.getFd(), content.c_str(), content.size(), 0);
+	Response *res = new Response(user);
+
+	// Cgi cgi;
+	// std::string method = user.getRequest().getMethod();
+	// std::string content = cgi.displayPage(method, user);
+	int rc3 = send(user.getFd(), res->getFinalRes().c_str(), res->getFinalRes().size(), 0);
+	// int rc3 = send(user.getFd(), content.c_str(), content.size(), 0);
 	if (rc3 < 0)
-		strerror(errno);
+		strerror(errno); // gestion d'erreur ?
+
 	// std::cout << "******* content dans sendServer *******" << std::endl;
 	// std::cout << content << std::endl;
 	// std::cout << "***************************************" << std::endl;
+
 	FD_CLR(user.getFd(), &writefds);
-	FD_SET(user.getFd(), &readfds);	
+	FD_SET(user.getFd(), &readfds);
+
+	delete res;
 }
 
 void Launcher::checkServerName(void)

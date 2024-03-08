@@ -8,6 +8,18 @@ Response::Response() {
     _ctype = "text/html";
 }
 
+Response::Response(const User& user) {
+
+    _request = user.getRequest();
+    _server = user.getRequest().getServer();
+    setMessages();
+    setBackupPages();
+    _status = 200;
+    _ctype = "text/html";
+    setPathFile();
+    processRequest();
+}
+
 Response::~Response() {}
 
 Response::Response(const Response& cpy) {
@@ -56,24 +68,67 @@ void Response::setBackupPages() {
     errorBackup[4040] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>Ressource not deleted</title></head><body><h1>Ressource not deleted</h1><p id=\"comment\">The ressource you are trying to delete does not exist.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
 }
 
-std::string Response::makeHeader() {
-
-    std::stringstream header;
-    _clength = _data.length();
-    header << "HTTP/1.1 " << _status << " " << messages[_status] << std::endl;
-    header << "Content-Type: " << _ctype << std::endl;
-    header << "Content-Length: " << _clength << std::endl << std::endl;
-    return (header.str());
+void Response::setTypes() {
+    types["html"] = "text/html";
+    types["txt"] = "text/plain";
+    types["json"] = "application/json";
+    types["xml"] = "application/xml";
+    types["jpeg"] = "image/jpeg";
+    types["png"] = "image/png";
+    types["gif"] = "image/gif";
+    types["pdf"] = "application/pdf";
+    types["js"] = "application/javascript";
+    types["css"] = "text/css";
+    types["mp3"] = "audio/mpeg";
+    types["mp4"] = "video/mp4";
+    types["zip"] = "application/zip";
 }
 
-void Response::errorData(User user) {
+bool Response::IsCgiExtension(std::string file)
+{   
+    if (file == "")
+        return false;
+    
+    size_t pos = file.rfind(".");
+    std::string ext = file.substr(pos + 1, _filePath.length() - pos + 1);
+    for (size_t i = 0; i < _server.getCgiEx().size(); ++i) {
+        if (_server.getCgiEx()[i] == ext) {
+            return true;
+        }
+    }
+    return false;
+}
+
+std::string Response::setPathFile()
+{
+    std::string str = _request.getUri();
+	if (!str.compare("/"))
+	{
+		str = _server.getIndex();
+	} else {
+        std::string uri = _request.getUri();
+        if (uri.find('?') != std::string::npos) {
+            str = uri.substr(0, uri.find('?'));
+        } else {
+            str = uri;
+        }
+        if (IsCgiExtension(str) == true) {
+            str = str.substr(1, str.length() - 1);
+        } else {
+            str = "pages" + str;
+        }
+    }
+    _filePath = str;
+}
+
+
+void Response::errorData() {
 
     std::ifstream errorFile;
-    Server server = user.getServer();
-    std::map<int, std::string>::iterator it = server.error_page.find(_status);
-    std::map<int, std::string>::iterator ite = server.error_page.end();
+    std::map<int, std::string>::iterator it = _server.getErrorPage().find(_status);
+    std::map<int, std::string>::iterator ite = _server.getErrorPage().end();
     if (it != ite) {
-        errorFile.open((server.error_page[_status]).c_str());
+        errorFile.open((_server.getErrorPage()[_status]).c_str());
     } else {
         std::stringstream ss;
         ss << "./pages/error_pages/error_page_" << _status << ".html";
@@ -86,4 +141,70 @@ void Response::errorData(User user) {
 	    _body << errorFile.rdbuf();
 	    _data = _body.str();
     }
+}
+
+bool Response::authorizedMethod() {
+
+    for (size_t i = 0; i < _server.getMethod().size(); ++i) {
+        if (_server.getMethod()[i] == _request.getMethod()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+std::string Response::makeHeader() {
+
+    std::stringstream header;
+    std::string ext = _filePath.substr(_filePath.rfind(".") + 1);
+
+    _clength = _data.length();
+    _ctype = types[ext];
+    header << "HTTP/1.1 " << _status << " " << messages[_status] << std::endl;
+    header << "Content-Type: " << _ctype << std::endl;
+    header << "Content-Length: " << _clength << std::endl << std::endl;
+    return (header.str());
+}
+
+void Response::processRequest() {
+
+    if (_request.getContentLength() <= _server.getClientMax()) {
+        if (authorizedMethod()) {
+            if (_request.getMethod() == "GET" || _request.getMethod() == "POST") {
+                if (IsCgiExtension(_filePath)) {
+                    // _status = execCGI(user);
+                    if (_status == 200) {
+                        std::ifstream file(".cgi.txt");
+					    _body << file.rdbuf();
+                    }
+                } else {
+                    std::ifstream file(_filePath.c_str());
+					if (file.fail()) {
+						_status = 404;
+					} else
+						_body << file.rdbuf();
+                }
+            } else if (_request.getMethod() == "DELETE") {
+                if (remove(_filePath.c_str()) != 0) {
+                    _body << errorBackup[4040];
+                } else {
+                    _body << errorBackup[2000];
+                }
+            } else
+                _status = 501;
+        } else
+            _status = 405;
+        if (_status == 200 && _body) {
+            std::string ext = _filePath.substr(_filePath.rfind(".") + 1);
+            _ctype = types[ext];
+            _content << makeHeader();
+			_content << _body.str();
+			_filePath = _content.str();
+        }
+    } else
+        _status = 413;
+    errorData();
+    _content << makeHeader();
+	_content << _body.str();
+	_filePath = _content.str();
 }
