@@ -7,6 +7,7 @@
 #include "Cgi.hpp"
 #include "Server.hpp"
 #include "Request.hpp"
+#include "Utils.hpp"
 
 class User
 {

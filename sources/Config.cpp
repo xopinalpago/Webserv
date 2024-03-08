@@ -188,9 +188,108 @@ int Config::MissElement(Server &server)
 	return (0);
 }
 
+int makePort(Server &server, std::string str, int &nbPort)
+{
+	int port = Utils::stringToInt(getValue(str));
+	if (port <= 0)
+		return (1);
+	if (server.setPort(port))
+		return (1);
+	nbPort++;
+	if (nbPort > 1)
+		return (1);
+	return (0);
+}
+
+int makeHost(Server &server, std::string str, int &nbHost)
+{
+	std::string host = getValue(str);
+	if (host.length() == 0)
+		return (1);
+	if (server.setHost(host))
+		return (1);
+	nbHost++;
+	if (nbHost > 1)
+		return (1);
+	return (0);
+}
+
+int makeServerName(Server &server, std::string str, int &nbServerName)
+{
+	std::string server_name = getValue(str);
+	if (server_name.length() == 0)
+		return (1);
+	if (server.setServerName(server_name))
+		return (1);
+	nbServerName++;
+	if (nbServerName > 1)
+		return (1);
+	return (0);
+}
+
+int makeRoot(Server &server, std::string str, int &nbRoot)
+{
+	std::string root = getValue(str);
+	if (root.length() == 0)
+		return (1);
+	if (server.setRoot(root))
+		return (1);
+	nbRoot++;
+	if (nbRoot > 1)
+		return (1);
+	return (0);
+}
+
+int makeIndex(Server &server, std::string str, int &nbIndex)
+{
+	std::string index = getValue(str);
+	if (index.length() == 0)
+		return (1);
+	if (server.setIndex(index))
+		return (1);
+	nbIndex++;
+	if (nbIndex > 1)
+		return (1);
+	return (0);
+}
+
+int makeClientMax(Server &server, std::string str, int &nbClientMax)
+{
+	int client_max_body_size = Utils::stringToInt(getValue(str));
+	if (client_max_body_size <= 0)
+		return (1);
+	if (server.setClientMax(client_max_body_size))
+		return (1);
+	nbClientMax++;
+	if (nbClientMax > 1)
+		return (1);
+	return (0);
+}
+
+int makeDirectory(Server &server, std::string str, int &nbDirectory)
+{
+	std::string directory_listing = getValue(str);
+	if (directory_listing.length() == 0)
+		return (1);
+	if (server.setDirectory(directory_listing))
+		return (1);
+	nbDirectory++;
+	if (nbDirectory > 1)
+		return (1);
+	return (0);
+}
+
 int Config::ParseFile(int serverToRead, Server &server)
 {
 	int servernb = 0;
+	int nbPort = 0;
+	int nbHost = 0;
+	int nbServerName = 0;
+	int nbRoot = 0;
+	int nbIndex = 0;
+	int nbClientMax = 0;
+	int nbDirectory = 0;
+
     for (size_t i = 0; i < serverConfig.size(); ++i)
 	{
 		if (serverConfig[i].find("server ") == 0)
@@ -201,58 +300,37 @@ int Config::ParseFile(int serverToRead, Server &server)
 		{
 			if (serverConfig[i].find("listen") == 0)
 			{
-				int port = Utils::stringToInt(getValue(serverConfig[i]));
-				if (port <= 0)
-					return (1);
-				if (server.setPort(port))
+				if (makePort(server, serverConfig[i], nbPort))
 					return (1);
 			}
 			else if (serverConfig[i].find("host") == 0)
 			{
-				std::string host = getValue(serverConfig[i]);
-				if (host.length() == 0)
-					return (1);
-				if (server.setHost(host))
+				if (makeHost(server, serverConfig[i], nbHost))
 					return (1);
 			}
 			else if (serverConfig[i].find("server_name") == 0)
 			{
-				std::string server_name = getValue(serverConfig[i]);
-				if (server_name.length() == 0)
-					return (1);
-				if (server.setServerName(server_name))
+				if (makeServerName(server, serverConfig[i], nbServerName))
 					return (1);
 			}
 			else if (serverConfig[i].find("root") == 0)
 			{
-				std::string root = getValue(serverConfig[i]);
-				if (root.length() == 0)
-					return (1);
-				if (server.setRoot(root))
+				if (makeRoot(server, serverConfig[i], nbRoot))
 					return (1);
 			}
 			else if (serverConfig[i].find("index") == 0)
 			{
-				std::string index = getValue(serverConfig[i]);
-				if (index.length() == 0)
-					return (1);
-				if (server.setIndex(index))
+				if (makeIndex(server, serverConfig[i], nbIndex))
 					return (1);
 			}
 			else if (serverConfig[i].find("client_max_body_size") == 0)
 			{
-				int client_max_body_size = Utils::stringToInt(getValue(serverConfig[i]));
-				if (client_max_body_size <= 0)
-					return (1);
-				if (server.setClientMax(client_max_body_size))
+				if (makeClientMax(server, serverConfig[i], nbClientMax))
 					return (1);
 			}
 			else if (serverConfig[i].find("directory_listing") == 0)
 			{
-				std::string directory_listing = getValue(serverConfig[i]);
-				if (directory_listing.length() == 0)
-					return (1);
-				if (server.setDirectory(directory_listing))
+				if (makeDirectory(server, serverConfig[i], nbDirectory))
 					return (1);
 			}
 		}
