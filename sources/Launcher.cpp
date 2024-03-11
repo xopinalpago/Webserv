@@ -74,7 +74,7 @@ void    Launcher::closeConnection(int fd)
 
 int Launcher::readServer(User &user)
 {
-	int bytes = 0;
+	// int bytes = 0;
     int rc = BUFFER_SIZE;
 	char bf[BUFFER_SIZE + 1];
     // std::string request = "";
@@ -103,7 +103,7 @@ int Launcher::readServer(User &user)
 		bf[rc] = 0;
 		// request.append(bf, rc);
 		request.allRequest.append(bf, rc);
-        bytes += rc;
+        // bytes += rc;
     }
 
 	request.parseRequest();
@@ -111,6 +111,11 @@ int Launcher::readServer(User &user)
 	user.setServer(Servers);
 	FD_CLR(user.getFd(), &readfds);
 	FD_SET(user.getFd(), &writefds);
+
+	std::cout << "**************REQUEST***************" << std::endl;
+	std::cout << request.getAllRequest() << std::endl;
+	std::cout << "************************************" << std::endl;
+
 	return (1);
 }
 

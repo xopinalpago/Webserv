@@ -186,6 +186,7 @@ void Response::processRequest() {
                     }
                     delete cgi;
                 } else {
+                    // determiner si c'est un fichier ou un dossier 
                     std::ifstream file(_filePath.c_str());
 					if (file.fail()) {
 						_status = 404;
