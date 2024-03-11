@@ -118,11 +118,14 @@ void Response::setPathFile()
         }
         if (IsCgiExtension(str) == true) {
             str = str.substr(1, str.length() - 1);
-        } else {
+        }
+        else {
             str = "pages" + str;
         }
     }
     _filePath = str;
+    // std::cout << "_filePath : " << _filePath << std::endl;
+
 }
 
 
@@ -135,14 +138,15 @@ void Response::errorData() {
         errorFile.open((_server.getErrorPage()[_status]).c_str());
     } else {
         std::stringstream ss;
-        ss << "./pages/error_pages/error_page_" << _status << ".html";
+        ss << "./pages/error_pages/error_page_" << 500 << ".html";
         std::string fileName = ss.str();
 	    errorFile.open(fileName.c_str());
     }
     if (!errorFile.is_open()) {
         _body << errorBackup[_status];
-    } else {
-	    _body << errorFile.rdbuf();
+    } else if (errorFile.is_open() == true) {
+        errorFile.seekg(0, std::ios::beg);
+        _body << errorFile.rdbuf();
     }
 }
 
@@ -182,13 +186,17 @@ void Response::processRequest() {
                     _status = cgi->execCGI(_request);
                     if (_status == 200) {
                         std::ifstream file(".cgi.txt");
-					    _body << file.rdbuf();
+                        if (file.peek() == std::ifstream::traits_type::eof())
+                            _status = 204;
+                        else
+                            _body << file.rdbuf();
                     }
                     delete cgi;
                 } else {
                     // determiner si c'est un fichier ou un dossier 
                     std::ifstream file(_filePath.c_str());
 					if (file.fail()) {
+                        std::cout << "test\n";
 						_status = 404;
 					} else
 						_body << file.rdbuf();
@@ -217,4 +225,5 @@ void Response::processRequest() {
     _content << makeHeader();
 	_content << _body.str();
 	_finalRes = _content.str();
+
 }

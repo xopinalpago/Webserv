@@ -57,7 +57,7 @@ std::string Cgi::extractQuery(Request request) {
 
 int Cgi::create_env(Request request) {
 
-    _env["SERVER_NAME"] = "Localhost"; // conf
+    _env["SERVER_NAME"] = request.getServer().getServerName(); // conf
     _env["SERVER_PROTOCOL"] = "HTTP/1.1";
     _env["GATEWAY_INTERFACE"] = "CGI/1.1";
     _env["REQUEST_METHOD"] = request.getMethod();
@@ -121,6 +121,8 @@ int Cgi::execCGI(Request request) {
     char **args = NULL;
     char *exec = NULL;
 
+    // return 500;
+
     // create the execution environment
     if (create_env(request) || _cgiFd == -1)
         return 500;
@@ -173,18 +175,15 @@ int Cgi::execCGI(Request request) {
         freeEnv();
         close(_cgiFd);
 
-        std::cout << "LA" << std::endl;
         int st;
         pid_t child_pid = waitpid(pid, &st, 0);
         if (child_pid > 0) {
             if (WIFEXITED(st)) {
-                std::cout << "Le processus enfant s'est terminé avec le code de sortie : " << WEXITSTATUS(st) << std::endl;
             } else if (WIFSIGNALED(st)) {
                 return 408;
-                std::cout << "Le processus enfant s'est terminé à cause du signal : " << WTERMSIG(st) << std::endl;
             }
         } else {
-            std::cerr << "Erreur lors de la récupération du statut du processus enfant" << std::endl;
+            return 500;
         }
     }
     return 200;
