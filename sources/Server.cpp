@@ -27,10 +27,10 @@ int Server::setPort(int port)
     return (0);
 }
 
-void Server::setFd(int fd)
+int Server::setFd(int fd)
 {
 	this->fd = fd;
-    return ;
+    return (fd);
 }
 
 int Server::setHost(std::string host)
@@ -104,12 +104,12 @@ void Server::setMethod(std::string tmp)
     return ;
 }
 
-std::vector<std::string> Server::getMethod(void)
+std::vector<std::string> Server::getMethod(void) const
 {
     return (this->method);
 }
 
-std::string Server::getMethodi(int i)
+std::string Server::getMethodi(int i) const
 {
     return (this->method[i]);
 }
@@ -123,12 +123,12 @@ void Server::setCgiEx(std::string tmp)
     return ;
 }
 
-std::vector<std::string> Server::getCgiEx(void)
+std::vector<std::string> Server::getCgiEx(void) const
 {
     return (this->cgi_extension);
 }
 
-std::string Server::getCgiExi(int i)
+std::string Server::getCgiExi(int i) const
 {
     return (this->cgi_extension[i]);
 }
@@ -149,42 +149,42 @@ std::string Server::getErrorPagei(int i)
     return (this->error_page[i]);
 }
 
-int Server::getPort(void)
+int Server::getPort(void) const
 {
     return (this->port);
 }
 
-int Server::getFd(void)
+int Server::getFd(void) const
 {
     return (this->fd);
 }
 
-in_addr_t Server::getHost(void)
+in_addr_t Server::getHost(void) const
 {
     return (this->host);
 }
 
-std::string Server::getServerName(void)
+std::string Server::getServerName(void) const
 {
     return (this->server_name);
 }
 
-std::string Server::getRoot(void)
+std::string Server::getRoot(void) const
 {
     return (this->root);
 }
 
-std::string Server::getIndex(void)
+std::string Server::getIndex(void) const
 {
     return (this->index);
 }
 
-int Server::getClientMax(void)
+int Server::getClientMax(void) const
 {
     return (this->client_max_body_size);
 }
 
-std::string Server::getDirectory(void)
+std::string Server::getDirectory(void) const
 {
     return (this->directory_listing);
 }

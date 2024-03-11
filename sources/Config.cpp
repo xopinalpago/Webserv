@@ -15,17 +15,21 @@ void Config::setNbConfig(std::string &filename, std::string to_find)
     std::string line;
     int count = 0;
 
-    if (file.is_open()) {
-        while (getline(file, line)) {
+    if (file.is_open())
+	{
+        while (getline(file, line))
+		{
             size_t pos = 0;
-            while ((pos = line.find(to_find, pos)) != std::string::npos) {
-                ++count;
+            while ((pos = line.find(to_find, pos)) != std::string::npos)
+			{
+                count++;
                 pos += to_find.length();
             }
         }
         file.close();
-    } else {
-        std::cerr << "Impossible d'ouvrir le fichier." << std::endl;
+    }
+	else
+	{
 		this->nb_config = 0;
 		return ;
     }
@@ -33,22 +37,30 @@ void Config::setNbConfig(std::string &filename, std::string to_find)
     return ;
 }
 
-int Config::GetLineFile(std::string &filename)
+int Config::getLineFile(std::string &filename)
 {
     std::ifstream infile(filename.c_str());
 	int nbMethod = 0;
 	int nbCgiEx = 0;
 	int nbErrorPage = 0;
 
-    if (infile) {
+    if (infile)
+	{
         std::string line;
         bool insideMethod = false;
         bool insideCgi = false;
 		bool insideError = false; 
-        while (std::getline(infile, line)) {
+        while (std::getline(infile, line))
+		{
             line = Utils::trim(line);
             if (!line.empty())
 			{
+				if (line.find("server {") == 0)
+				{
+					nbMethod = 0;
+					nbCgiEx = 0;
+					nbErrorPage = 0;
+				}
 				if (line.find("method") == 0)
 				{
 					nbMethod++;
@@ -87,8 +99,9 @@ int Config::GetLineFile(std::string &filename)
             }
         }
         infile.close();
-    } else {
-        std::cout << "Erreur lors de l'ouverture du fichier." << std::endl;
+    } 
+	else
+	{
         return (1);
     }
 
@@ -187,7 +200,7 @@ int Config::cleanError(int serverToRead, Server &server)
 	return (0);
 }
 
-std::string getValue(std::string line)
+std::string Config::getValue(std::string line)
 {
 	int first_sp = line.find(' ');
 	if (first_sp < 0)
@@ -195,8 +208,14 @@ std::string getValue(std::string line)
 	return(line.substr(first_sp + 1, line.size() - 2 - first_sp));
 }
 
-int Config::MissElement(Server &server)
+int Config::missElement(Server &server)
 {
+	if (server.getPort() <= 0)
+		return (1);
+	if (server.getClientMax() <= 0)
+		return (1);
+	if (server.getHost() <= 0)
+		return (1);
 	if (server.getRoot().length() == 0)
 		return (1);
 	if (server.getIndex().length() == 0)
@@ -206,7 +225,7 @@ int Config::MissElement(Server &server)
 	return (0);
 }
 
-int makePort(Server &server, std::string str, int &nbPort)
+int Config::makePort(Server &server, std::string str, int &nbPort)
 {
 	int port = Utils::stringToInt(getValue(str));
 	if (port <= 0)
@@ -219,7 +238,7 @@ int makePort(Server &server, std::string str, int &nbPort)
 	return (0);
 }
 
-int makeHost(Server &server, std::string str, int &nbHost)
+int Config::makeHost(Server &server, std::string str, int &nbHost)
 {
 	std::string host = getValue(str);
 	if (host.length() == 0)
@@ -232,7 +251,7 @@ int makeHost(Server &server, std::string str, int &nbHost)
 	return (0);
 }
 
-int makeServerName(Server &server, std::string str, int &nbServerName)
+int Config::makeServerName(Server &server, std::string str, int &nbServerName)
 {
 	std::string server_name = getValue(str);
 	if (server_name.length() == 0)
@@ -245,7 +264,7 @@ int makeServerName(Server &server, std::string str, int &nbServerName)
 	return (0);
 }
 
-int makeRoot(Server &server, std::string str, int &nbRoot)
+int Config::makeRoot(Server &server, std::string str, int &nbRoot)
 {
 	std::string root = getValue(str);
 	if (root.length() == 0)
@@ -258,7 +277,7 @@ int makeRoot(Server &server, std::string str, int &nbRoot)
 	return (0);
 }
 
-int makeIndex(Server &server, std::string str, int &nbIndex)
+int Config::makeIndex(Server &server, std::string str, int &nbIndex)
 {
 	std::string index = getValue(str);
 	if (index.length() == 0)
@@ -271,7 +290,7 @@ int makeIndex(Server &server, std::string str, int &nbIndex)
 	return (0);
 }
 
-int makeClientMax(Server &server, std::string str, int &nbClientMax)
+int Config::makeClientMax(Server &server, std::string str, int &nbClientMax)
 {
 	int client_max_body_size = Utils::stringToInt(getValue(str));
 	if (client_max_body_size <= 0)
@@ -284,7 +303,7 @@ int makeClientMax(Server &server, std::string str, int &nbClientMax)
 	return (0);
 }
 
-int makeDirectory(Server &server, std::string str, int &nbDirectory)
+int Config::makeDirectory(Server &server, std::string str, int &nbDirectory)
 {
 	std::string directory_listing = getValue(str);
 	if (directory_listing.length() == 0)
@@ -297,7 +316,7 @@ int makeDirectory(Server &server, std::string str, int &nbDirectory)
 	return (0);
 }
 
-int Config::ParseFile(int serverToRead, Server &server)
+int Config::parseFile(int serverToRead, Server &server)
 {
 	int servernb = 0;
 	int nbPort = 0;
@@ -308,7 +327,7 @@ int Config::ParseFile(int serverToRead, Server &server)
 	int nbClientMax = 0;
 	int nbDirectory = 0;
 
-    for (size_t i = 0; i < serverConfig.size(); ++i)
+    for (size_t i = 0; i < serverConfig.size(); i++)
 	{
 		if (serverConfig[i].find("server ") == 0)
 		{
@@ -360,6 +379,7 @@ int Config::ParseFile(int serverToRead, Server &server)
 	if (cleanError(serverToRead, server))
 		return (1);
 
+	// std::cout << server.getPort() << std::endl;
 	// for (size_t i = 0; i < server.getCgiEx().size(); ++i) {
     //     std::cout << server.getCgiExi(i) << " ";
     // }

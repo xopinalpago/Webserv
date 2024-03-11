@@ -44,8 +44,8 @@ std::string Cgi::decodeQuery(std::string query) {
 
 std::string Cgi::extractQuery(Request request) {
 
-    int len = request.allRequest.length() - (request.allRequest.rfind("\r\n\r\n") + 4);
-    std::string res = request.allRequest.substr(request.allRequest.rfind("\r\n\r\n") + 4, len);
+    int len = request.getAllRequest().length() - (request.getAllRequest().rfind("\r\n\r\n") + 4);
+    std::string res = request.getAllRequest().substr(request.getAllRequest().rfind("\r\n\r\n") + 4, len);
     return res;
 }
 

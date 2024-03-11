@@ -32,18 +32,18 @@ class Launcher
 		int		checkServers(void);
 		void 	checkServerName(void);
 		void    closeConnection(int i);
+		void	checkTimeout(void);
 	public:
 		Launcher(void);
 		~Launcher(void);
 
-		int initConfig(std::string &filename);
-		int runServer(void);
+		int 	initConfig(std::string &filename);
+		int 	runServer(void);
+		void	closeAllConnection(void);
 
 		std::map<int, User> 	Users;
 		std::map<int, Server> 	Servers;
 	class SigError : public std::exception {};
 };
-
-
 
 #endif

@@ -2,6 +2,7 @@
 
 User::User(void)
 {
+	lastTime = time(NULL);
     return ;
 }
 
@@ -57,7 +58,7 @@ int User::setServer(std::map<int, Server> Servers)
 	return (1);
 }
 
-int User::getFd(void)
+int User::getFd(void) const
 {
 	return (this->fd);
 }
@@ -73,7 +74,17 @@ void User::setRequest(Request request)
 	return ;
 }
 
-Response	User::getResponse(void)
+Response	User::getResponse(void) const
 {
 	return this->response;
+}
+
+time_t     User::getLastTime() const
+{
+    return (lastTime);
+}
+
+void	User::updateTime()
+{
+    lastTime = time(NULL);
 }

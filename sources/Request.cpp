@@ -58,53 +58,53 @@ int	Request::getContentLength(void)
 	return (this->contentLength);
 }
 
-int				Request::getKeepAlive(void)
+int	Request::getKeepAlive(void)
 {
 	return (this->keepAlive);
 }
 
 
-int		Request::setAllRequest(std::string request)
+int	Request::setAllRequest(std::string request)
 {
     if (request.length() == 0)
     {
         return (1);
     }
-	this->allRequest = request;
+	this->allRequest.append(request);
     return (0);
 }
 
-int		Request::setMethod(std::string method)
-{
-    if (method.length() == 0)
-    {
-        return (1);
-    }
-	this->method = method;
-    return (0);
-}
+// int	Request::setMethod(std::string method)
+// {
+//     if (method.length() == 0)
+//     {
+//         return (1);
+//     }
+// 	this->method = method;
+//     return (0);
+// }
 
-int		Request::setUri(std::string uri)
-{
-    if (uri.length() == 0)
-    {
-        return (1);
-    }
-	this->uri = uri;
-    return (0);
-}
+// int	Request::setUri(std::string uri)
+// {
+//     if (uri.length() == 0)
+//     {
+//         return (1);
+//     }
+// 	this->uri = uri;
+//     return (0);
+// }
 
-int		Request::setVersion(std::string version)
-{
-    if (version.length() == 0)
-    {
-        return (1);
-    }
-	this->version = version;
-    return (0);
-}
+// int	Request::setVersion(std::string version)
+// {
+//     if (version.length() == 0)
+//     {
+//         return (1);
+//     }
+// 	this->version = version;
+//     return (0);
+// }
 
-int		Request::setHost(std::string host)
+int	Request::setHost(std::string host)
 {
     if (host.length() == 0)
     {
@@ -134,7 +134,7 @@ int		Request::setHost(std::string host)
 //     return (0);
 // }
 
-int		Request::setContentLength(unsigned int cLength)
+int	Request::setContentLength(unsigned int cLength)
 {
     if (cLength < 0)
     {
@@ -144,7 +144,7 @@ int		Request::setContentLength(unsigned int cLength)
     return (0);
 }
 
-int		Request::setKeepAlive(int alive)
+int	Request::setKeepAlive(int alive)
 {
     if (alive != 0 && alive != 1)
     {
@@ -153,31 +153,6 @@ int		Request::setKeepAlive(int alive)
 	this->keepAlive = alive;
     return (0);
 }
-
-
-// int Request::setPathFile(std::string str)
-// {
-// 	int fpos = str.find(" ", 0);
-// 	int lpos = str.find(" ", fpos + 1);
-// 	std::string path_file = str.substr(fpos + 1, lpos - fpos - 1);
-// 	if (!path_file.compare("/"))
-// 	{
-// 		// std::cout << server.getIndex() << std::endl;
-// 		// std::cout << server.getServerName() << std::endl; 
-// 		path_file = server.getIndex();
-// 	}
-// 	else if (Cgi::cgiExtension(path_file, ".py") || Cgi::cgiExtension(path_file, ".php")) // definir en fct du fichier de config
-// 		return path_file.substr(1, path_file.length() - 1);
-// 	else
-// 		path_file = "pages" + path_file;
-//     return (path_file);
-// }
-
-// std::string Request::getMethod(void) {
-// 	int lpos = request.find(" ", 0);
-// 	std::string method = request.substr(0, lpos);
-// 	return method;
-// }
 
 void Request::splitString(void)
 {
@@ -201,7 +176,7 @@ void	Request::setServer(Server server)
 	return ;
 }
 
-int		Request::parseRequest(void)
+int	Request::parseRequest(void)
 {
     splitString();
 	int	fpos = vAllRequest[0].find(' ', 0);
@@ -210,6 +185,8 @@ int		Request::parseRequest(void)
 	uri = vAllRequest[0].substr(fpos + 1, lpos - fpos - 1);
 	version = vAllRequest[0].substr(lpos + 1, lpos - vAllRequest[0].size());
 
+	if (method.length() == 0 || uri.length() == 0 || version.length() == 0)
+		return (1);
 	// std::cout << std::endl;
 	// std::cout << "method= " << method << std::endl;
 	// std::cout << "uri= " << uri << std::endl;

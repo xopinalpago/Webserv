@@ -41,32 +41,32 @@ class Server
         ~Server(void);
 
         struct sockaddr_in address;
-        
-        int 	setPort(int port);
-        void 	setFd(int port);
-        int 	setHost(std::string host);
-        int 	setServerName(std::string server_name);
-        int 	setRoot(std::string root);
-        int 	setIndex(std::string index);
-        int 	setClientMax(int client_max_body_size);
-        int 	setDirectory(std::string directory_listing);
-        void 	setMethod(std::string tmp);
-        void 	setErrorPage(int key, std::string tmp);
-        void 	setCgiEx(std::string tmp);
 
-        int         				getPort(void);
-        int         				getFd(void);
-        int        					getClientMax(void);
-        in_addr_t    				getHost(void);
-        std::string 				getServerName(void);
-        std::string 				getRoot(void);
-        std::string 				getIndex(void);
-        std::string 				getDirectory(void);
-        std::vector<std::string> 	getMethod(void);
-        std::string 				getMethodi(int i);
-        std::vector<std::string>    getCgiEx(void);
-        std::string                 getCgiExi(int i);
-        std::map<int, std::string>&  getErrorPage(void);
+        int 	                    setPort(int port);
+        int 	                    setFd(int fd);
+        int 	                    setHost(std::string host);
+        int 	                    setServerName(std::string server_name);
+        int 	                    setRoot(std::string root);
+        int 	                    setIndex(std::string index);
+        int 	                    setClientMax(int client_max_body_size);
+        int 	                    setDirectory(std::string directory_listing);
+        void 	                    setMethod(std::string tmp);
+        void 	                    setErrorPage(int key, std::string tmp);
+        void 	                    setCgiEx(std::string tmp);
+ 
+        int         				getPort(void) const;
+        int         				getFd(void) const;
+        int        					getClientMax(void) const;
+        in_addr_t    				getHost(void) const;
+        std::string 				getServerName(void) const;
+        std::string 				getRoot(void) const;
+        std::string 				getIndex(void) const;
+        std::string 				getDirectory(void) const;
+        std::vector<std::string> 	getMethod(void) const;
+        std::string 				getMethodi(int i) const;
+        std::vector<std::string>    getCgiEx(void) const;
+        std::string                 getCgiExi(int i) const;
+        std::map<int, std::string>& getErrorPage(void);
         std::string                 getErrorPagei(int i);
 };
 

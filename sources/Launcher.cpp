@@ -12,7 +12,7 @@ Launcher::~Launcher(void)
 
 void Launcher::errorFunction(std::string word)
 {
-	std::cerr << word << " failed" << std::endl;
+	std::cout << word << " failed" << std::endl;
 }
 
 int Launcher::initConfig(std::string &filename)
@@ -22,14 +22,14 @@ int Launcher::initConfig(std::string &filename)
 	config.setNbConfig(filename, "server ");
 	if (config.getNbConfig() == 0)
 		return (1);
-	if (config.GetLineFile(filename))
+	if (config.getLineFile(filename))
 		return (1); 
 	for (int i = 1; i <= config.getNbConfig(); i++)
 	{
 		Server server;
-		if (config.ParseFile(i, server))
+		if (config.parseFile(i, server))
 			return (1);
-		if (config.MissElement(server))
+		if (config.missElement(server))
 			return (1);
 		if (initServer(server))
 			return (1);
@@ -53,13 +53,22 @@ void Launcher::listenServer(Server &server)
 		end_server = true;
 		return ;
 	}
-	// printf("  New incoming connection - %d\n", new_sd);
+	
+	std::cout << "New incoming connection: " << new_sd << std::endl;
 	new_client.setFd(new_sd);
 	Users[new_sd] = new_client;
 	FD_SET(new_sd, &readfds);
 	if (new_sd > max_sd)
 		max_sd = new_sd;
 	return ;
+}
+
+void    Launcher::closeAllConnection(void)
+{
+    for (int i=0; i <= max_sd; ++i)
+    {
+		closeConnection(i);
+    }
 }
 
 void    Launcher::closeConnection(int fd)
@@ -69,9 +78,15 @@ void    Launcher::closeConnection(int fd)
     if (FD_ISSET(fd, &readfds))
         FD_CLR(fd, &readfds);
     if (fd == max_sd)
+	{
         max_sd--;
+	}
+	std::cout << "Connection: " << fd << " closed..." << std::endl;
     close(fd);
-    Users.erase(fd);
+	if (Users.find(fd) != Users.end())
+		Users.erase(fd);
+	if (Servers.find(fd) != Servers.end())
+		Servers.erase(fd);
 }
 
 int Launcher::readServer(User &user)
@@ -79,7 +94,6 @@ int Launcher::readServer(User &user)
 	int bytes = 0;
     int rc = BUFFER_SIZE;
 	char bf[BUFFER_SIZE + 1];
-    // std::string request = "";
 
 	Request request;
 
@@ -96,6 +110,8 @@ int Launcher::readServer(User &user)
 			closeConnection(user.getFd());
 			return (rc);
 		}
+		else
+			user.updateTime();
         // if (rc <= 0)
 		// {
         //     if (rc == -1)
@@ -104,11 +120,16 @@ int Launcher::readServer(User &user)
         // }
 		bf[rc] = 0;
 		// request.append(bf, rc);
-		request.allRequest.append(bf, rc);
+		request.setAllRequest(bf);
+		// request.allRequest.append(bf, rc);
         bytes += rc;
     }
 
-	request.parseRequest();
+	if (request.parseRequest())
+	{
+		closeConnection(user.getFd());
+		return (0);
+	}
 	user.setRequest(request);
 	user.setServer(Servers);
 	FD_CLR(user.getFd(), &readfds);
@@ -127,7 +148,8 @@ void	Launcher::sendServer(User &user)
 	// int rc3 = send(user.getFd(), content.c_str(), content.size(), 0);
 	if (rc3 < 0)
 		strerror(errno); // gestion d'erreur ?
-
+	else
+		user.updateTime();
 	// std::cout << "******* content dans sendServer *******" << std::endl;
 	// std::cout << content << std::endl;
 	// std::cout << "***************************************" << std::endl;
@@ -156,10 +178,11 @@ int Launcher::initServer(Server &server)
 {
     int on = 1;
 	FD_ZERO(&writefds);
-	int fd_temp = 0;
-    if ((fd_temp = socket(AF_INET, SOCK_STREAM, 0)) < 0) //pk AF_INET6 pour IPV6 et pas IPV4 ?
+	if (server.setFd(socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	{
+		close(server.getFd());
         return(errorFunction("socket"), 1);
-    server.setFd(fd_temp);
+	}
 	if ((rc = setsockopt(server.getFd(), SOL_SOCKET,  SO_REUSEADDR, (char *)&on, sizeof(on)) < 0))
 	{
 		close(server.getFd());
@@ -188,17 +211,29 @@ int	Launcher::initSets(void)
     {
 		if (listen(it->second.getFd(), 10) < 0)
 		{
-			close(it->second.getFd());
+			closeAllConnection();
 			return(errorFunction("listen"), 1);
 		}
 		if ((rc = fcntl(it->second.getFd(), F_SETFL, O_NONBLOCK, FD_CLOEXEC)) < 0)
 		{
-		    close(it->second.getFd());
+			closeAllConnection();
 		    return(errorFunction("fcntl"), 1);
 		}
 		FD_SET(it->second.getFd(), &readfds);
 	}
 	return (0);
+}
+
+void	Launcher::checkTimeout(void)
+{
+    for(std::map<int, User>::iterator it = Users.begin() ; it != Users.end(); ++it)
+    {
+        if (time(NULL) - it->second.getLastTime() > 60)
+        {
+            closeConnection(it->first);
+            return ;
+        }
+    }
 }
 
 int Launcher::runServer(void)
@@ -216,13 +251,12 @@ int Launcher::runServer(void)
 		std::memcpy(&tmp_readfds, &readfds, sizeof(readfds));
 		std::memcpy(&tmp_writefds, &writefds, sizeof(writefds));
 		// std::cout << "Waiting for select..." << std::endl;
-		// std::cout << "Waiting for select..." << std::endl;
 		// signifcation rc ?
 		rc = select(max_sd + 1, &tmp_readfds, &tmp_writefds, NULL, &timeout);
 		if (rc < 0)
 		{
-            std::cerr << "select() failed" << std::endl;
-			return (1);
+			closeAllConnection();
+			return(errorFunction("select"), 1);
 		}
 		// if (rc == 0)
 		// {
@@ -244,6 +278,7 @@ int Launcher::runServer(void)
 				sendServer(Users.find(i)->second);
 			}
 		}
+		checkTimeout();
     }
     for (int i=0; i <= max_sd; ++i)
     {

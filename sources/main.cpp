@@ -5,7 +5,6 @@
 void	handle_sigint(int sig)
 {
 	throw Launcher::SigError();
-	std::cout << "test" << std::endl;
 	(void)sig;
 }
 
@@ -24,6 +23,7 @@ int main(int argc, char **argv)
 				return (1);
 		}
 		catch (Launcher::SigError &e) {
+			run.closeAllConnection();
 			return (0);
 		}
 	}

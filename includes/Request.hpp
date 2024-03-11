@@ -10,6 +10,7 @@
 class Request
 {
 	private:
+		std::string		allRequest;
 		std::string		method;
 		std::string		uri;
 		std::string		version;
@@ -27,7 +28,6 @@ class Request
 		Request();
 		~Request();
 
-		std::string		allRequest;
 		std::string		getAllRequest(void);
 		std::string		getMethod(void);
 		std::string		getUri(void);
@@ -40,9 +40,9 @@ class Request
 		Server			getServer(void) const;
 
 		int		setAllRequest(std::string request);
-		int		setMethod(std::string method);
-		int		setUri(std::string uri);
-		int		setVersion(std::string version);
+		// int		setMethod(std::string method);
+		// int		setUri(std::string uri);
+		// int		setVersion(std::string version);
 		int		setHost(std::string host);
 		// int		setContentType(std::string cType);
 		// int		setPathFile(std::string str);
