@@ -9,6 +9,11 @@
 #include "User.hpp"
 #include "Request.hpp"
 
+// struct RequestInfo {
+//     std::string requestString;
+//     time_t timestamp;
+// };
+
 class Launcher
 {
 	private:
@@ -21,6 +26,7 @@ class Launcher
         int                 max_sd;
         int                 new_sd;
         int                 end_server;
+		// std::map<int, std::vector<RequestInfo> > requestMap;
 
 		void 	errorFunction(std::string word);
 		int		readServer(User &user);
@@ -32,6 +38,7 @@ class Launcher
 		int		checkServers(void);
 		void 	checkServerName(void);
 		void    closeConnection(int i);
+
 	public:
 		Launcher(void);
 		~Launcher(void);

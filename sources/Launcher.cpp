@@ -74,11 +74,8 @@ void    Launcher::closeConnection(int fd)
 
 int Launcher::readServer(User &user)
 {
-	// int bytes = 0;
     int rc = BUFFER_SIZE;
 	char bf[BUFFER_SIZE + 1];
-    // std::string request = "";
-
 	Request request;
 
     while (rc == BUFFER_SIZE) {
@@ -94,19 +91,31 @@ int Launcher::readServer(User &user)
 			closeConnection(user.getFd());
 			return (rc);
 		}
-        // if (rc <= 0)
-		// {
-        //     if (rc == -1)
-        //         std::cout << strerror(errno) << std::endl;
-        //     return rc;
-        // }
 		bf[rc] = 0;
-		// request.append(bf, rc);
 		request.allRequest.append(bf, rc);
-        // bytes += rc;
     }
 
 	request.parseRequest();
+
+	// int clientID = user.getFd();
+    // std::string requestString = request.allRequest;
+
+    // std::map<int, std::vector<RequestInfo> >::iterator it = requestMap.find(clientID);
+    // if (it != requestMap.end()) {
+    //     const std::vector<RequestInfo>& clientRequests = it->second;
+    //     for (std::vector<RequestInfo>::const_iterator reqIt = clientRequests.begin(); reqIt != clientRequests.end(); ++reqIt) {
+    //         if (reqIt->requestString == requestString) {
+    //             std::cout << "Requête ignorée (déjà envoyée récemment)" << std::endl;
+    //             return 0;
+    //         }
+    //     }
+    // }
+
+	// RequestInfo reqInfo;
+    // reqInfo.requestString = requestString;
+    // reqInfo.timestamp = time(NULL);
+    // requestMap[clientID].push_back(reqInfo);
+
 	user.setRequest(request);
 	user.setServer(Servers);
 	FD_CLR(user.getFd(), &readfds);
