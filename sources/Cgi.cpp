@@ -1,5 +1,10 @@
 #include "Cgi.hpp"
 
+#include <iostream>
+#include <unistd.h>
+#include <signal.h>
+#include <sys/wait.h>
+
 Cgi::Cgi(void) {}
 
 Cgi::Cgi(std::string filePath) {
@@ -19,6 +24,7 @@ Cgi::~Cgi(void) {
 
     if (fcntl(_cgiFd, F_GETFL) == -1)
         close(_cgiFd);
+    // remove(_cgiFile.c_str());
 }
 
 std::string Cgi::decodeQuery(std::string query) {
@@ -110,22 +116,21 @@ void Cgi::freeEnv() {
     free(_cenv);
 }
 
-int Cgi::execCGI(Request request) {
     
-    // creer l'environnement d'execution
-    if (create_env(request))
+int Cgi::execCGI(Request request) {
+    char **args = NULL;
+    char *exec = NULL;
+
+    // create the execution environment
+    if (create_env(request) || _cgiFd == -1)
         return 500;
     
-    char **args;
     args = (char **)malloc(sizeof(char *) * 3);
-    args[1] = (char *)malloc(sizeof(char) * 8);
+    args[1] = (char *)malloc(sizeof(char) * (_filePath.size() + 1));
     strcpy(args[1], _filePath.c_str());
     args[2] = NULL;
 
-    // determiner l'executable
-    char *exec;
-    
-
+    // determine executable and arguments
     std::string ext = _filePath.substr(_filePath.rfind(".") + 1);
     if (ext == "py") {
         args[0] = (char *)malloc(sizeof(char) * (strlen("python3") + 1));
@@ -133,7 +138,7 @@ int Cgi::execCGI(Request request) {
         exec = (char *)malloc(sizeof(char) * (strlen("/usr/bin/python3") + 1));
         strcpy(exec, "/usr/bin/python3");
     }
-    else if (ext == "php") { // config
+    else if (ext == "php") {
         args[0] = (char *)malloc(sizeof(char) * (strlen("php") + 1));
         strcpy(args[0], "php");
         exec = (char *)malloc(sizeof(char) * (strlen("/usr/bin/php") + 1));
@@ -141,15 +146,14 @@ int Cgi::execCGI(Request request) {
     } else {
         return 501;
     }
-    
     pid_t pid;
-    if (_cgiFd == -1)
-        return 500;
     pid = fork();
     if (pid == -1) {
         return 500;
     }
     if (pid == 0) {
+        signal(SIGALRM, handleAlarm);
+        alarm(3);
         dup2(_cgiFd, STDOUT_FILENO);
         close(_cgiFd);
         if (execve(exec, args, _cenv) == -1) {
@@ -158,14 +162,36 @@ int Cgi::execCGI(Request request) {
             free(args);
             free(exec);
             freeEnv();
+            close(_cgiFd);
             return 500;
         }
     } else {
         free(args[0]);
         free(args[1]);
         free(args);
+        free(exec);
         freeEnv();
+        close(_cgiFd);
+
+        std::cout << "LA" << std::endl;
+        int st;
+        pid_t child_pid = waitpid(pid, &st, 0);
+        if (child_pid > 0) {
+            if (WIFEXITED(st)) {
+                std::cout << "Le processus enfant s'est terminé avec le code de sortie : " << WEXITSTATUS(st) << std::endl;
+            } else if (WIFSIGNALED(st)) {
+                return 408;
+                std::cout << "Le processus enfant s'est terminé à cause du signal : " << WTERMSIG(st) << std::endl;
+            }
+        } else {
+            std::cerr << "Erreur lors de la récupération du statut du processus enfant" << std::endl;
+        }
     }
-    waitpid(pid, NULL, 0);
     return 200;
+}
+
+void Cgi::handleAlarm(int signal) {
+    (void)signal;
+    std::cout << "fct handle alarm called !!" << std::endl;
+    exit(1);
 }

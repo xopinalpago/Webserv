@@ -1,16 +1,9 @@
 #include "Response.hpp"
 
-Response::Response() {
-
-    setMessages();
-    setBackupPages();
-    _status = 200;
-    _ctype = "text/html";
-}
+Response::Response() {}
 
 Response::Response(Request request) {
 
-    // _request = user.getRequest();
     _request = request;
     _server = request.getServer();
     setMessages();
@@ -29,10 +22,19 @@ Response::Response(const Response& cpy) {
 }
 
 Response& Response::operator=(const Response& rhs) {
-    (void)rhs;
-    // if (this != &rhs) {
 
-    // }
+    if (this != &rhs) {
+        _request = rhs._request;
+        _server = rhs._server;
+        messages = rhs.messages;
+        errorBackup = rhs.errorBackup;
+        types = rhs.types;
+        _status = rhs._status;
+        _clength = rhs._clength;
+        _filePath = rhs._filePath;
+        _ctype = rhs._ctype;
+        _finalRes = rhs._finalRes;
+    }
     return *this;
 }
 
@@ -138,10 +140,9 @@ void Response::errorData() {
 	    errorFile.open(fileName.c_str());
     }
     if (!errorFile.is_open()) {
-        _data = errorBackup[_status];
+        _body << errorBackup[_status];
     } else {
 	    _body << errorFile.rdbuf();
-	    _data = _body.str();
     }
 }
 
@@ -165,6 +166,9 @@ std::string Response::makeHeader() {
     header << "HTTP/1.1 " << _status << " " << messages[_status] << std::endl;
     header << "Content-Type: " << _ctype << std::endl;
     header << "Content-Length: " << _clength << std::endl << std::endl;
+    // std::cout << "************HEADER************" << std::endl;
+    // std::cout << header.str() << std::endl;
+    // std::cout << "******************************" << std::endl;
     return (header.str());
 }
 
@@ -182,6 +186,7 @@ void Response::processRequest() {
                     }
                     delete cgi;
                 } else {
+                    // determiner si c'est un fichier ou un dossier 
                     std::ifstream file(_filePath.c_str());
 					if (file.fail()) {
 						_status = 404;
@@ -204,6 +209,7 @@ void Response::processRequest() {
             _content << makeHeader();
 			_content << _body.str();
 			_finalRes = _content.str();
+            return;
         }
     } else
         _status = 413;

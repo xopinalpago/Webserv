@@ -9,7 +9,7 @@
     </head>
 	<body>
         <h1 class="title">Form</h1>
-        <form id="firstForm" action="../response.py" method="GET">
+        <form id="firstForm" action="../response.php" method="POST">
             <label for="name">Name :</label>
             <input type="text" name="name" id="name" value="Ducobu" required/>
             
@@ -22,7 +22,7 @@
             <input id="submit" type="submit" value="Send"/>
         </form>
         <button type="button" onclick="cleanForm()">Erase</button>
-        <a href="index.html"><button>PAGE 1</button></a>
+        <a href="site_index.html"><button>Index</button></a>
 
         <form action="../delete.php" method="POST">
             <input type="submit" value="Supprimer la ressource" onclick="return confirm('Êtes-vous sûr de vouloir supprimer la ressource ?')"></input>

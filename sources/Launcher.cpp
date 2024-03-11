@@ -45,7 +45,6 @@ void Launcher::listenServer(Server &server)
 	int addrlen = sizeof(server.address);
 	User  new_client;
 
-	// printf("  Listening socket is readable\n");
 	new_sd = accept(server.getFd(), (struct sockaddr *)&server.address, (socklen_t*)&addrlen);
 	if (new_sd < 0)
 	{
@@ -91,10 +90,8 @@ void    Launcher::closeConnection(int fd)
 
 int Launcher::readServer(User &user)
 {
-	int bytes = 0;
     int rc = BUFFER_SIZE;
 	char bf[BUFFER_SIZE + 1];
-
 	Request request;
 
     while (rc == BUFFER_SIZE) {
@@ -122,7 +119,6 @@ int Launcher::readServer(User &user)
 		// request.append(bf, rc);
 		request.setAllRequest(bf);
 		// request.allRequest.append(bf, rc);
-        bytes += rc;
     }
 
 	if (request.parseRequest())
@@ -130,10 +126,29 @@ int Launcher::readServer(User &user)
 		closeConnection(user.getFd());
 		return (0);
 	}
+
+	// int clientID = user.getFd();
+    // std::string requestString = request.allRequest;
+
+    // std::map<int, std::vector<RequestInfo> >::iterator it = requestMap.find(clientID);
+    // if (it != requestMap.end()) {
+    //     const std::vector<RequestInfo>& clientRequests = it->second;
+    //     for (std::vector<RequestInfo>::const_iterator reqIt = clientRequests.begin(); reqIt != clientRequests.end(); ++reqIt) {
+    //         if (reqIt->requestString == requestString) {
+    //             std::cout << "Requête ignorée (déjà envoyée récemment)" << std::endl;
+    //             return 0;
+    //         }
+    //     }
+    // }
 	user.setRequest(request);
 	user.setServer(Servers);
 	FD_CLR(user.getFd(), &readfds);
 	FD_SET(user.getFd(), &writefds);
+
+	std::cout << "**************REQUEST***************" << std::endl;
+	std::cout << request.getAllRequest() << std::endl;
+	std::cout << "************************************" << std::endl;
+
 	return (1);
 }
 
@@ -141,11 +156,7 @@ void	Launcher::sendServer(User &user)
 {
 	Response *res = new Response(user.getRequest());
 
-	// Cgi cgi;
-	// std::string method = user.getRequest().getMethod();
-	// std::string content = cgi.displayPage(method, user);
 	int rc3 = send(user.getFd(), res->getFinalRes().c_str(), res->getFinalRes().size(), 0);
-	// int rc3 = send(user.getFd(), content.c_str(), content.size(), 0);
 	if (rc3 < 0)
 		strerror(errno); // gestion d'erreur ?
 	else
@@ -198,7 +209,6 @@ int Launcher::initServer(Server &server)
         return(errorFunction("bind"), 1);
     }
 	Servers[server.getFd()] = server;
-	// pourquoi le plus grand fd est celui du socket ?
 	max_sd = server.getFd();
     return (0);
 }
@@ -247,22 +257,14 @@ int Launcher::runServer(void)
 	{
 		timeout.tv_sec  = 1;
 		timeout.tv_usec = 0;
-		// pourquoi des fd temporaires ?
 		std::memcpy(&tmp_readfds, &readfds, sizeof(readfds));
 		std::memcpy(&tmp_writefds, &writefds, sizeof(writefds));
-		// std::cout << "Waiting for select..." << std::endl;
-		// signifcation rc ?
 		rc = select(max_sd + 1, &tmp_readfds, &tmp_writefds, NULL, &timeout);
 		if (rc < 0)
 		{
 			closeAllConnection();
 			return(errorFunction("select"), 1);
 		}
-		// if (rc == 0)
-		// {
-        //     std::cerr << "select() timed out" << std::endl;
-		// 	return (1);
-		// }
 		for (int i = 0; i <= max_sd; i++)
 		{
 			if (FD_ISSET(i, &tmp_readfds) && Servers.count(i))

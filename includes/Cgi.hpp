@@ -17,6 +17,7 @@
 #include <fstream>
 #include <sys/stat.h> // chmod
 
+
 #include "Request.hpp"
 
 class Cgi {
@@ -34,12 +35,10 @@ class Cgi {
         std::string decodeQuery(std::string query);
         std::string extractQuery(Request request);
 
-        std::map<std::string, std::string> getEnv() const {
-            return this->_env;
-        }
-        char **getCenv() const {
-            return this->_cenv;
-        }
+        std::map<std::string, std::string> getEnv() const { return this->_env; }
+        char **getCenv() const { return this->_cenv; }
+        int getCgiFd() const { return this->_cgiFd; }
+        static void handleAlarm(int signal);
 
     private :
         std::map<std::string, std::string> _env;
