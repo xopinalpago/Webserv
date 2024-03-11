@@ -1,5 +1,10 @@
 #include "Cgi.hpp"
 
+#include <iostream>
+#include <unistd.h>
+#include <signal.h>
+#include <sys/wait.h>
+
 Cgi::Cgi(void) {}
 
 Cgi::Cgi(std::string filePath) {
@@ -111,8 +116,8 @@ void Cgi::freeEnv() {
     free(_cenv);
 }
 
-int Cgi::execCGI(Request request) {
     
+int Cgi::execCGI(Request request) {
     char **args = NULL;
     char *exec = NULL;
 
@@ -141,13 +146,23 @@ int Cgi::execCGI(Request request) {
     } else {
         return 501;
     }
-    
+
+
+    // int pipefd[2];
+    // if (pipe(pipefd) == -1) {
+    //     return 501;
+    // }
     pid_t pid;
     pid = fork();
     if (pid == -1) {
         return 500;
     }
     if (pid == 0) {
+        signal(SIGALRM, handleAlarm);
+        alarm(3);
+        // close(pipefd[0]);
+        // dup2(pipefd[1], STDOUT_FILENO);
+        // close(pipefd[1]);
         dup2(_cgiFd, STDOUT_FILENO);
         close(_cgiFd);
         if (execve(exec, args, _cenv) == -1) {
@@ -166,7 +181,29 @@ int Cgi::execCGI(Request request) {
         free(exec);
         freeEnv();
         close(_cgiFd);
+
+        std::cout << "LA" << std::endl;
+        int st;
+        // Attendre la fin du processus enfant
+        pid_t child_pid = waitpid(pid, &st, 0);
+        if (child_pid > 0) {
+            // Vérifier si le processus enfant s'est terminé normalement
+            if (WIFEXITED(st)) {
+                std::cout << "Le processus enfant s'est terminé avec le code de sortie : " << WEXITSTATUS(st) << std::endl;
+            } else if (WIFSIGNALED(st)) {
+                return 408;
+                std::cout << "Le processus enfant s'est terminé à cause du signal : " << WTERMSIG(st) << std::endl;
+            }
+        } else {
+            std::cerr << "Erreur lors de la récupération du statut du processus enfant" << std::endl;
+        }
     }
-    waitpid(pid, NULL, 0);
+    // waitpid(pid, NULL, 0);
     return 200;
+}
+
+void Cgi::handleAlarm(int signal) {
+    (void)signal;
+    std::cout << "fct handle alarm called !!" << std::endl;
+    exit(1);
 }
