@@ -8,11 +8,13 @@
 </head>
 <body>
     <h1 class="title">Upload</h1>
-    <!-- <p>Try to upload some file here !</p> -->
-    <form action="../upload.php" method="POST" enctype="multipart/form-data">
-        <label for="file">Selectionner un fichier:</label>
-        <input type="file" name="fileToUpload" id="fileToUpload" accept="*/*">
-        <input type="submit" value="Upload" name="submit">
+    <form enctype="multipart/form-data" action="../upload.php" method="POST">
+        <input type="hidden" name="MAX_FILE_SIZE" value="30000" />
+        Envoyez ce fichier : <input name="userfile" type="file" />
+        <input type="submit" value="Envoyer le fichier" />
+        <!-- <label for="file">Selectionner un fichier:</label> -->
+        <!-- <input type="file" name="fileToUpload" id="fileToUpload" accept="*/*"> -->
+        <!-- <input type="submit" value="Upload" name="submit"> -->
     </form>
     <a href="site_index.html"><button>Index</button></a>
 </body>

@@ -43,10 +43,10 @@ std::string		Request::getHost(void)
 	return (this->host);
 }
 
-// std::string		Request::getContentType(void)
-// {
-// 	return (this->contentType);
-// }
+std::string		Request::getContentType(void)
+{
+	return (this->contentType);
+}
 
 // std::string		Request::getPathFile(void)
 // {
@@ -223,6 +223,12 @@ int	Request::parseRequest(void)
 		{
 			pos = vAllRequest[i].find(' ');
 			accept = vAllRequest[i].substr(pos + 1, vAllRequest[i].size() - pos);
+		}
+		else if (this->getMethod() == "POST" && vAllRequest[i].find("Content-Type") == 0 && contentType.size() == 0)
+		{
+			std::cout << "laaaaaaaaaa\n";
+			pos = vAllRequest[i].find(' ');
+			contentType = vAllRequest[i].substr(pos + 1, vAllRequest[i].find(";", pos) - pos - 1);
 		}
 	}
 	contentLength = allRequest.size();

@@ -55,31 +55,6 @@ std::string Cgi::extractQuery(Request request) {
     return res;
 }
 
-int Cgi::create_env(Request request) {
-
-    _env["SERVER_NAME"] = request.getServer().getServerName(); // conf
-    _env["SERVER_PROTOCOL"] = "HTTP/1.1";
-    _env["GATEWAY_INTERFACE"] = "CGI/1.1";
-    _env["REQUEST_METHOD"] = request.getMethod();
-    _env["CONTENT_TYPE"] = "text/html"; // user
-    _env["CONTENT_LENGTH"] = "882"; // user
-
-    if (request.getMethod() == "GET") {
-        std::size_t pos = request.getUri().find('?');
-        if (pos != std::string::npos) {
-            _env["QUERY_STRING"] = request.getUri().substr(pos + 1, request.getUri().size() - pos - 1);
-            _filePath = _filePath.substr(0, _filePath.find('?'));
-        }
-    } else if (request.getMethod() == "POST") {
-        _env["QUERY_STRING"] = extractQuery(request);
-    } else
-        _env["QUERY_STRING"] = "";
-    _env["SCRIPT_FILENAME"] = _filePath;
-    // _env["QUERY_STRING"] = decodeQuery(_env["QUERY_STRING"]);
-    _env["REQUEST_URI"] = request.getUri();
-    return (mapToChar());
-}
-
 int Cgi::mapToChar() {
 
     memset(&_cenv, 0, sizeof(_cenv));
@@ -116,23 +91,77 @@ void Cgi::freeEnv() {
     free(_cenv);
 }
 
-    
-int Cgi::execCGI(Request request) {
-    char **args = NULL;
-    char *exec = NULL;
+int Cgi::create_env(Request request) {
 
-    // return 500;
+    _env["SERVER_NAME"] = request.getServer().getServerName(); // conf
+    _env["SERVER_PROTOCOL"] = "HTTP/1.1";
+    _env["GATEWAY_INTERFACE"] = "CGI/1.1";
+    _env["REQUEST_METHOD"] = request.getMethod();
+    // _env["REQUEST_METHOD"] = "post";
+    _env["CONTENT_TYPE"] = request.getContentType(); // user
+    _env["CONTENT_LENGTH"] = request.getContentLength();
+
+    if (request.getMethod() == "GET") {
+        std::size_t pos = request.getUri().find('?');
+        if (pos != std::string::npos) {
+            _env["QUERY_STRING"] = request.getUri().substr(pos + 1, request.getUri().size() - pos - 1);
+            _filePath = _filePath.substr(0, _filePath.find('?'));
+        }
+    } else if (request.getMethod() == "POST") {
+        std::cout << "POSSSSSSSSSSST" << std::endl;
+        _env["QUERY_STRING"] = extractQuery(request);
+    } else
+        _env["QUERY_STRING"] = "";
+    _env["SCRIPT_FILENAME"] = _filePath;
+    // _env["QUERY_STRING"] = decodeQuery(_env["QUERY_STRING"]);
+    _env["REQUEST_URI"] = request.getUri();
+
+    std::cout << "CONTENT_TYPE : " << _env["CONTENT_TYPE"] << std::endl;
+    std::cout << "SCRIPT_FILENAME : " << _env["SCRIPT_FILENAME"] << std::endl;
+
+    return (mapToChar());
+}
+
+int Cgi::execScript(int *fd_in, int *fd_out) {
+
+    pid_t pid;
+    pid = fork();
+    if (pid == -1) {
+        return 500;
+    }
+    if (pid == 0) {
+        signal(SIGALRM, handleAlarm);
+        alarm(3);
+        dup2(*fd_in, STDIN_FILENO);
+        close(*fd_in);
+        dup2(_cgiFd, STDOUT_FILENO);
+        close(_cgiFd);
+        if (execve(exec, args, _cenv) == -1) {
+            close(*fd_out);
+            free(args[0]);
+            free(args[1]);
+            free(args);
+            free(exec);
+            freeEnv();
+            close(_cgiFd);
+            std::exit(500);
+        }
+    }
+    close(*fd_out);
+    return pid;
+}
+ 
+int Cgi::execCGI(Request request) {
 
     // create the execution environment
     if (create_env(request) || _cgiFd == -1)
         return 500;
     
+    // executables et arguments (en fonction du fichier de config)
     args = (char **)malloc(sizeof(char *) * 3);
     args[1] = (char *)malloc(sizeof(char) * (_filePath.size() + 1));
     strcpy(args[1], _filePath.c_str());
     args[2] = NULL;
-
-    // determine executable and arguments
     std::string ext = _filePath.substr(_filePath.rfind(".") + 1);
     if (ext == "py") {
         args[0] = (char *)malloc(sizeof(char) * (strlen("python3") + 1));
@@ -148,44 +177,45 @@ int Cgi::execCGI(Request request) {
     } else {
         return 501;
     }
-    pid_t pid;
-    pid = fork();
-    if (pid == -1) {
+
+    std::string body;
+    std::string req = request.getAllRequest();
+    size_t header_end = req.find("\r\n\r\n");
+    if (header_end != std::string::npos)
+        body = req.substr(header_end + 4, req.size() - header_end - 4);
+    else
+        body = "";
+    std::cout << "***********body***********" << std::endl;
+    std::cout << body << std::endl;
+    std::cout << "**************************" << std::endl;
+    int fd[2];
+    if (pipe(fd) == -1)
+        return 500;
+    int scriptStatus;
+    if (write(fd[1], body.c_str(), body.size()) == -1) {
+        close(fd[0]);
+        close(fd[1]);
         return 500;
     }
-    if (pid == 0) {
-        signal(SIGALRM, handleAlarm);
-        alarm(3);
-        dup2(_cgiFd, STDOUT_FILENO);
-        close(_cgiFd);
-        if (execve(exec, args, _cenv) == -1) {
-            free(args[0]);
-            free(args[1]);
-            free(args);
-            free(exec);
-            freeEnv();
-            close(_cgiFd);
-            return 500;
-        }
-    } else {
-        free(args[0]);
-        free(args[1]);
-        free(args);
-        free(exec);
-        freeEnv();
-        close(_cgiFd);
+    waitpid(execScript(&fd[0], &fd[1]), &scriptStatus, 0);
+    if (WEXITSTATUS(scriptStatus) == 500)
+        return 500;
 
-        int st;
-        pid_t child_pid = waitpid(pid, &st, 0);
-        if (child_pid > 0) {
-            if (WIFEXITED(st)) {
-            } else if (WIFSIGNALED(st)) {
-                return 408;
-            }
-        } else {
-            return 500;
-        }
-    }
+    free(args[0]);
+    free(args[1]);
+    free(args);
+    free(exec);
+    freeEnv();
+    close(_cgiFd);
+    close(fd[1]);
+    close(fd[0]);
+    // int st;
+    // pid_t child_pid = waitpid(pid, &st, 0);
+    // if (child_pid > 0) {
+    //     if (WIFSIGNALED(st))
+    //         return 408;
+    // } else
+    //     return 500;
     return 200;
 }
 

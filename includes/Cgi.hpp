@@ -38,7 +38,9 @@ class Cgi {
         std::map<std::string, std::string> getEnv() const { return this->_env; }
         char **getCenv() const { return this->_cenv; }
         int getCgiFd() const { return this->_cgiFd; }
-        static void handleAlarm(int signal);
+        int execScript(int *fd_in, int *fd_out);
+        int writePipe(int *fd_in, int *fd_out, std::string body);
+        static void handleAlarm(int signal); //??
 
     private :
         std::map<std::string, std::string> _env;
@@ -46,6 +48,8 @@ class Cgi {
         int                 _cgiFd;
         std::string         _cgiFile;
         std::string         _filePath;
+        char **args;
+        char *exec;
 };
 
 #endif

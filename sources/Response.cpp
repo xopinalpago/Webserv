@@ -186,10 +186,13 @@ void Response::processRequest() {
                     _status = cgi->execCGI(_request);
                     if (_status == 200) {
                         std::ifstream file(".cgi.txt");
-                        if (file.peek() == std::ifstream::traits_type::eof())
+                        if (file.peek() == std::ifstream::traits_type::eof()) {
+                            std::cout << "OK2" << std::endl;
                             _status = 204;
-                        else
+                        }
+                        else {
                             _body << file.rdbuf();
+                        }
                     }
                     delete cgi;
                 } else {
