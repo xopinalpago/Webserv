@@ -11,16 +11,20 @@ void	handle_sigint(int sig)
 int main(int argc, char **argv)
 {
 	Launcher 	run;
+	Config		config;
 
 	if (argc == 2)
 	{
 		try {
 			signal(SIGINT, &handle_sigint);
 			std::string filename(argv[1]);
-			if (run.initConfig(filename))
+			if (config.getLineFile(filename, run))
 				return (1);
-			if (run.runServer())
-				return (1);
+
+			// if (run.initConfig(filename))
+			// 	return (1);
+			// if (run.runServer())
+			// 	return (1);
 		}
 		catch (Launcher::SigError &e) {
 			run.closeAllConnection();

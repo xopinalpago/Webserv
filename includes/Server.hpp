@@ -20,6 +20,7 @@
 #endif
 
 #include "Utils.hpp"
+#include "Location.hpp"
 
 class Server
 {
@@ -35,6 +36,7 @@ class Server
         std::vector<std::string>    method;
         std::vector<std::string>    cgi_extension;
         std::map<int, std::string>  error_page;
+        std::map<std::string, Location> locations;
         
     public:
         Server(void);
@@ -68,6 +70,11 @@ class Server
         std::string                 getCgiExi(int i) const;
         std::map<int, std::string>& getErrorPage(void);
         std::string                 getErrorPagei(int i);
+
+		void setLoc(std::string key, Location data);
+        Location                 getLoci(std::string str);
+        std::map<std::string, Location>& getLoc(void);
+
 };
 
 #endif

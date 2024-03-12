@@ -13,6 +13,7 @@ SRCS = ${addprefix sources/, \
 			Utils.cpp \
 			Request.cpp \
 			Response.cpp \
+			Location.cpp \
 		}
 OBJS = $(SRCS:sources/%.cpp=objects/%.o)
 DEPS = $(SRCS:sources/%.cpp=objects/%.d)

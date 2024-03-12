@@ -111,6 +111,8 @@ std::vector<std::string> Server::getMethod(void) const
 
 std::string Server::getMethodi(int i) const
 {
+    if (i < 0 || i >= (int)this->method.size())
+        return ("");
     return (this->method[i]);
 }
 
@@ -130,6 +132,8 @@ std::vector<std::string> Server::getCgiEx(void) const
 
 std::string Server::getCgiExi(int i) const
 {
+    if (i < 0 || i >= (int)this->cgi_extension.size())
+            return ("");
     return (this->cgi_extension[i]);
 }
 
@@ -187,4 +191,23 @@ int Server::getClientMax(void) const
 std::string Server::getDirectory(void) const
 {
     return (this->directory_listing);
+}
+
+void Server::setLoc(std::string key, Location data)
+{
+    if (this->locations.find(key) == this->locations.end()) 
+    {
+        this->locations[key] = data;
+    }
+    return ;
+}
+
+Location Server::getLoci(std::string key)
+{
+    return (this->locations[key]);
+}		
+        
+std::map<std::string, Location>& Server::getLoc(void)
+{
+	return (this->locations);
 }

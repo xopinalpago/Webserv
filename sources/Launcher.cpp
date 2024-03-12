@@ -15,30 +15,30 @@ void Launcher::errorFunction(std::string word)
 	std::cout << word << " failed" << std::endl;
 }
 
-int Launcher::initConfig(std::string &filename)
-{
-	Config	config;
+// int Launcher::initConfig(std::string &filename)
+// {
+// 	Config	config;
 
-	config.setNbConfig(filename, "server ");
-	if (config.getNbConfig() == 0)
-		return (1);
-	if (config.getLineFile(filename))
-		return (1); 
-	for (int i = 1; i <= config.getNbConfig(); i++)
-	{
-		Server server;
-		if (config.parseFile(i, server))
-			return (1);
-		if (config.missElement(server))
-			return (1);
-		if (initServer(server))
-			return (1);
-	}
-	if (config.getNbConfig() > 1)
-		if (checkServers())
-			return (1);
-	return (0);
-}
+// 	// config.setNbConfig(filename, "server ");
+// 	// if (config.getNbConfig() == 0)
+// 	// 	return (1);
+// 	if (config.getLineFile(filename))
+// 		return (1); 
+// 	// for (int i = 1; i <= config.getNbConfig(); i++)
+// 	// {
+// 		// Server server;
+// 		if (config.parseFile(i, server))
+// 			return (1);
+// 		if (config.missElement(server))
+// 			return (1);
+// 		if (initServer(server))
+// 			return (1);
+// 	}
+// 	if (config.getNbConfig() > 1)
+// 		if (checkServers())
+// 			return (1);
+// 	return (0);
+// }
 
 void Launcher::listenServer(Server &server)
 {
