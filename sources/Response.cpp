@@ -95,8 +95,9 @@ bool Response::IsCgiExtension(std::string file)
     
     size_t pos = file.rfind(".");
     std::string ext = file.substr(pos + 1, _filePath.length() - pos + 1);
-    for (size_t i = 0; i < _server.getCgiEx().size(); ++i) {
-        if (_server.getCgiEx()[i] == ext) {
+    // for (size_t i = 0; i < _server.getCgiEx().size(); ++i) {
+    for (size_t i = 0; i < _server.getLoci("/cgi-bin").getCgiEx().size(); ++i) {        
+        if (_server.getLoci("/cgi-bin").getCgiEx()[i] == ext) {
             return true;
         }
     }
@@ -106,9 +107,13 @@ bool Response::IsCgiExtension(std::string file)
 void Response::setPathFile()
 {
     std::string str = _request.getUri();
-	if (!str.compare("/"))
+	if (str[str.length() - 1] == '/')
 	{
-		str = _server.getIndex();
+        if (_server.getRoot().size() == 0)
+        {
+            str = _request.getLocation().getRoot().insert(_request.getLocation().getRoot().size(), "/");
+            str = str.insert(str.size(), _request.getLocation().getIndex());
+        }
 	} else {
         std::string uri = _request.getUri();
         if (uri.find('?') != std::string::npos) {
@@ -119,7 +124,11 @@ void Response::setPathFile()
         if (IsCgiExtension(str) == true) {
             str = str.substr(1, str.length() - 1);
         } else {
-            str = "pages" + str;
+            //pages
+            str = _request.getLocation().getRoot() + str;
+            std::cout << std::endl;
+            std::cout << "/////str///// = " << str << std::endl;
+            std::cout << std::endl;
         }
     }
     _filePath = str;
@@ -148,8 +157,9 @@ void Response::errorData() {
 
 bool Response::authorizedMethod() {
 
-    for (size_t i = 0; i < _server.getMethod().size(); ++i) {
-        if (_server.getMethod()[i] == _request.getMethod()) {
+    for (size_t i = 0; i < _server.getLoci("/").getMethod().size(); ++i) {
+        // if (_server.getMethod()[i] == _request.getMethod()) {
+        if (_server.getLoci("/").getMethod()[i] == _request.getMethod()) {
             return true;
         }
     }

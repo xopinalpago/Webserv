@@ -385,7 +385,7 @@ int Config::fillServer(Server &server)
 		return (1);
 	
 	
-	std::cout << server.getLoci("/test").getMethodi(0) << std::endl;
+	// std::cout << server.getLoci("/test").getMethodi(0) << std::endl;
 
 	return (0);
 }

@@ -55,6 +55,7 @@ int User::setServer(std::map<int, Server> Servers)
 		server = itemp->second;
 		request.setServer(itemp->second);
 	}
+	request.setLocation(request.getServer().getLoc());
 	return (1);
 }
 

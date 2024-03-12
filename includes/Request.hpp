@@ -23,6 +23,7 @@ class Request
 		int				keepAlive;
 		std::vector<std::string> vAllRequest;
 		Server			server;
+		Location		loc;
 
 	public:
 		Request();
@@ -38,8 +39,10 @@ class Request
 		int	getContentLength(void);
 		int				getKeepAlive(void);
 		Server			getServer(void) const;
+		Location		getLocation(void);
 
 		int		setAllRequest(std::string request);
+		int		setLocation(std::map<std::string, Location> locations);
 		// int		setMethod(std::string method);
 		// int		setUri(std::string uri);
 		// int		setVersion(std::string version);
@@ -51,6 +54,7 @@ class Request
 		void	setServer(Server server);
 		int		parseRequest(void);
 		void 	splitString(void);
+
 
 };
 

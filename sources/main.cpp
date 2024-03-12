@@ -23,8 +23,8 @@ int main(int argc, char **argv)
 
 			// if (run.initConfig(filename))
 			// 	return (1);
-			// if (run.runServer())
-			// 	return (1);
+			if (run.runServer())
+				return (1);
 		}
 		catch (Launcher::SigError &e) {
 			run.closeAllConnection();

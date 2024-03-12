@@ -112,6 +112,11 @@ std::vector<std::string> Location::getCgiEx(void) const
     return (this->cgi_extension);
 }
 
+std::string Location::getIndex(void) const
+{
+    return (this->index);
+}
+
 std::string Location::getCgiExi(int i) const
 {
     if (i < 0 || i >= (int)this->cgi_extension.size())

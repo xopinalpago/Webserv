@@ -43,6 +43,7 @@ class Location
 		void setCgiPath(std::string key, std::string data);
 		std::string getPath(void) const;
 		std::string getRoot(void) const;
+		std::string 				getIndex(void) const;
 		std::vector<std::string> 	getMethod(void) const;
         std::string 				getMethodi(int i) const;
 		std::string 				getCgiExi(int i) const;

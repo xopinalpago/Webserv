@@ -142,6 +142,7 @@ int Launcher::readServer(User &user)
     // }
 	user.setRequest(request);
 	user.setServer(Servers);
+
 	FD_CLR(user.getFd(), &readfds);
 	FD_SET(user.getFd(), &writefds);
 
