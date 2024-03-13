@@ -7,7 +7,7 @@ Request::Request(void)
 	uri = "";
 	version = "";
 	host = "";
-	// contentType = "";
+	contentType = "";
 	contentLength = 0;
 	keepAlive = 0;	
 	return ;
@@ -46,6 +46,11 @@ std::string		Request::getHost(void)
 std::string		Request::getContentType(void)
 {
 	return (this->contentType);
+}
+
+std::string		Request::getContentId(void)
+{
+	return (this->contentId);
 }
 
 // std::string		Request::getPathFile(void)
@@ -226,9 +231,16 @@ int	Request::parseRequest(void)
 		}
 		else if (this->getMethod() == "POST" && vAllRequest[i].find("Content-Type") == 0 && contentType.size() == 0)
 		{
-			std::cout << "laaaaaaaaaa\n";
+			// std::cout << "laaaaaaaaaa\n";
 			pos = vAllRequest[i].find(' ');
-			contentType = vAllRequest[i].substr(pos + 1, vAllRequest[i].find(";", pos) - pos - 1);
+			// std::cout << "POS = " << pos << std::endl;
+			contentType = vAllRequest[i].substr(pos + 1, vAllRequest[i].find(';') - pos - 1);
+			// std::cout << "contentType : " << contentType << std::endl;
+			if (contentType == "multipart/form-data") {
+				pos = vAllRequest[i].find("boundary=");
+				contentId = vAllRequest[i].substr(pos + 9, vAllRequest[i].size() - pos);
+				// std::cout << "contentId : " << contentId << std::endl;
+			}
 		}
 	}
 	contentLength = allRequest.size();

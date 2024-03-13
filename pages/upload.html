@@ -8,14 +8,16 @@
 </head>
 <body>
     <h1 class="title">Upload</h1>
-    <form enctype="multipart/form-data" action="../upload.php" method="POST">
+    <form enctype="multipart/form-data" action="./upload" method="POST">
+        <!-- MAX_FILE_SIZE must precede the file input field -->
         <input type="hidden" name="MAX_FILE_SIZE" value="30000" />
-        Envoyez ce fichier : <input name="userfile" type="file" />
-        <input type="submit" value="Envoyer le fichier" />
+        <!-- Name of input element determines name in $_FILES array -->
+        Send this file: <input name="userfile" type="file" />
+        <input type="submit" value="Send File" />
+    </form>
         <!-- <label for="file">Selectionner un fichier:</label> -->
         <!-- <input type="file" name="fileToUpload" id="fileToUpload" accept="*/*"> -->
         <!-- <input type="submit" value="Upload" name="submit"> -->
-    </form>
     <a href="site_index.html"><button>Index</button></a>
 </body>
 </html>

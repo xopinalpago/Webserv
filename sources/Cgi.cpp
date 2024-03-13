@@ -108,16 +108,18 @@ int Cgi::create_env(Request request) {
             _filePath = _filePath.substr(0, _filePath.find('?'));
         }
     } else if (request.getMethod() == "POST") {
-        std::cout << "POSSSSSSSSSSST" << std::endl;
+        // std::cout << "POSSSSSSSSSSST" << std::endl;
         _env["QUERY_STRING"] = extractQuery(request);
     } else
         _env["QUERY_STRING"] = "";
     _env["SCRIPT_FILENAME"] = _filePath;
+    // _env["SCRIPT_FILENAME"] = "/upload.php";
     // _env["QUERY_STRING"] = decodeQuery(_env["QUERY_STRING"]);
     _env["REQUEST_URI"] = request.getUri();
+    // _env["REQUEST_URI"] = "/upload.php";
 
     std::cout << "CONTENT_TYPE : " << _env["CONTENT_TYPE"] << std::endl;
-    std::cout << "SCRIPT_FILENAME : " << _env["SCRIPT_FILENAME"] << std::endl;
+    // std::cout << "SCRIPT_FILENAME : " << _env["SCRIPT_FILENAME"] << std::endl;
 
     return (mapToChar());
 }
@@ -150,7 +152,7 @@ int Cgi::execScript(int *fd_in, int *fd_out) {
     close(*fd_out);
     return pid;
 }
- 
+ // < pipe php ./upload.php > .cgi.txt
 int Cgi::execCGI(Request request) {
 
     // create the execution environment
@@ -185,14 +187,14 @@ int Cgi::execCGI(Request request) {
         body = req.substr(header_end + 4, req.size() - header_end - 4);
     else
         body = "";
-    std::cout << "***********body***********" << std::endl;
-    std::cout << body << std::endl;
-    std::cout << "**************************" << std::endl;
+    // std::cout << "***********body***********" << std::endl;
+    // std::cout << body << std::endl;
+    // std::cout << "**************************" << std::endl;
     int fd[2];
     if (pipe(fd) == -1)
         return 500;
     int scriptStatus;
-    if (write(fd[1], body.c_str(), body.size()) == -1) {
+    if (write(fd[1], request.getAllRequest().c_str(), body.size()) == -1) {
         close(fd[0]);
         close(fd[1]);
         return 500;

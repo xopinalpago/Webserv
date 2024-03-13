@@ -16,6 +16,7 @@ class Request
 		std::string		version;
 		std::string		host;
 		std::string		contentType;
+		std::string		contentId;
 		std::string     referer;
 		std::string     accept;
 		// std::string		pathFile;
@@ -34,6 +35,7 @@ class Request
 		std::string		getVersion(void);
 		std::string		getHost(void);
 		std::string		getContentType(void);
+		std::string		getContentId(void);
 		// std::string		getPathFile(void);
 		int	getContentLength(void);
 		int				getKeepAlive(void);

@@ -99,27 +99,47 @@ int Launcher::readServer(User &user)
 		rc = recv(user.getFd(), bf, BUFFER_SIZE, 0);
 		if (rc == 0)
 		{
+			std::cout << "CLOSE1" << std::endl;
 			closeConnection(user.getFd());
 			return (rc);
 		}
 		else if (rc < 0)
 		{
+			std::cout << "CLOSE2" << std::endl;
 			closeConnection(user.getFd());
 			return (rc);
 		}
 		else
 			user.updateTime();
-        // if (rc <= 0)
-		// {
-        //     if (rc == -1)
-        //         std::cout << strerror(errno) << std::endl;
-        //     return rc;
-        // }
 		bf[rc] = 0;
-		// request.append(bf, rc);
 		request.setAllRequest(bf);
-		// request.allRequest.append(bf, rc);
-    }
+
+		// std::cout << "**************bf***************" << std::endl;
+		// std::cout << bf << std::endl;
+		// std::cout << "************************************" << std::endl;
+		// size_t headerEnd = request.getAllRequest().find("\r\n\r\n");
+        // if (headerEnd != std::string::npos) {
+		// 	std::
+		// }
+        // //     // Sépare l'en-tête du corps de la requête
+        // //     std::string header = request.getAllRequest().substr(0, headerEnd + 4); // +4 pour inclure "\r\n\r\n"
+        //     std::string body = request.getAllRequest().substr(headerEnd + 4); // Le reste est le corps de la requête
+        //     if (!body.empty()) {
+		// 		std::cout << "**************BODY***************" << std::endl;
+		// 		std::cout << body << std::endl;
+		// 		std::cout << "************************************" << std::endl;
+        //     	// request.setAllRequest(body);
+		// 	}
+
+        // //     // Traiter le corps de la requête
+		// // 		request.setAllRequest(body);
+        // //         // Traiter le corps de la requête ici si nécessaire
+        // //     }
+
+        // //     break; // Sort de la boucle une fois que l'en-tête est terminé
+
+    	// }
+	}
 
 	if (request.parseRequest())
 	{
@@ -145,6 +165,7 @@ int Launcher::readServer(User &user)
 	FD_CLR(user.getFd(), &readfds);
 	FD_SET(user.getFd(), &writefds);
 
+	std::cout << "SIZE = " << request.getAllRequest().size() << std::endl;
 	std::cout << "**************REQUEST***************" << std::endl;
 	std::cout << request.getAllRequest() << std::endl;
 	std::cout << "************************************" << std::endl;

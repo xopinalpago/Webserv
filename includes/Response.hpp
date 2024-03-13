@@ -8,6 +8,7 @@
 #include <sstream> // stringstream
 
 #include "Cgi.hpp"
+#include "Upload.hpp"
 
 class Response {
 
@@ -47,7 +48,7 @@ class Response {
         Server                      _server;
 
         std::map<int, std::string>          messages;
-        std::map<int, std::string>          errorBackup;
+        std::map<int, std::string>          backup;
         std::map<std::string, std::string>  types;
 
         int                         _status;
