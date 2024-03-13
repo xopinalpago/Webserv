@@ -123,12 +123,15 @@ void Response::setPathFile()
         }
         if (IsCgiExtension(str) == true) {
             str = str.substr(1, str.length() - 1);
-        } else {
+        } 
+        else if (_request.getLocation().getPath() == "/")
+        {
             //pages
             str = _request.getLocation().getRoot() + str;
-            std::cout << std::endl;
-            std::cout << "/////str///// = " << str << std::endl;
-            std::cout << std::endl;
+        }
+        else if (str[0] == '/')
+        {
+            str = str.substr(1, str.size());
         }
     }
     _filePath = str;

@@ -246,53 +246,34 @@ std::vector<std::string> splitBySlash(std::string str) {
 
 int Request::setLocation(std::map<std::string, Location> locations)
 {
-	size_t len_corresp = 0;
-	// std::string key = "/";
-	std::map<std::string, Location>::iterator iter = locations.end();
-
-	std::vector<std::string> uri = splitBySlash(this->getUri());
+	std::string locPath;
+	Location tempLoc;
+	size_t	end;
 
 	for (std::map<std::string, Location>::iterator it = locations.begin(); it != locations.end(); ++it)
-    {
-		std::cout << "this->getUri() = " << this->getUri() << std::endl;
-		std::cout << "it->first = " << it->first << std::endl;
-		std::vector<std::string> tmp = splitBySlash(it->first);
-
-		size_t minElement = (uri.size() < tmp.size()) ? uri.size() : tmp.size();
-		for (size_t i = 1; i <= minElement; i++)
+	{
+		locPath = it->first;
+		if (tempLoc.getPath().length() == 0 && locPath == "/")
 		{
-			if (uri[i - 1] == tmp[i - 1] && i > len_corresp)
-			{
-				len_corresp = i;
-				iter = it;
-			}
+			tempLoc = it->second;
+			continue;
 		}
-		
-		// std::string tmp = "";
-		// if (this->getUri() != "/" && this->getUri()[this->getUri().length() - 1] == '/')
-		// 	tmp = this->getUri().substr(0, this->getUri().length() - 1);
-		// else
-		// 	tmp = this->getUri();
-		
-        // if(tmp.find(it->first) == 0)
-        // {
-        //        if(it->first == "/" || tmp.length() == it->first.length() || tmp[it->getPath().length()] == '/')
-        //        {
-        //             if(it->getPath().length() > biggest_match)
-        //             {
-        //                 biggest_match = it->getPath().length();
-        //                 location_key = it->getPath();
-        //             }
-        //        }
-        // }
-		// if (uri == it->first)
-		// {
-		// 	this->loc = it->second;
-		// 	return (0);
-		// }
+		for (end = 0; uri[end] != '\0' && locPath[end] != '\0' && uri[end] == locPath[end]; end++)
+		{
+			;
+		}
+		if (locPath[end] == '\0' && (uri[end] == '\0' || uri[end] == '/'))
+		{
+			if (tempLoc.getPath().length() == 0 || (tempLoc.getPath().length() != 0 && tempLoc.getPath().length() < it->first.length()))
+				tempLoc = it->second;
+		}
 	}
-	// if (len_corresp > 0)
-	// 	return (0)
-	this->loc = iter->second;
+	if (tempLoc.getPath().length() != 0)
+	{
+		std::cout << "tempLoc = " << tempLoc.getPath() << std::endl;
+		this->loc = tempLoc;
+	}
+	else
+		return (1);
 	return (0);
 }
