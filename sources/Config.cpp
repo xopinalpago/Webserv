@@ -4,37 +4,65 @@ Config::Config(void) {}
 
 Config::~Config(void) {}
 
-int Config::getNbConfig(void)
-{
-	return (this->nb_config);
-}
+// int Config::getNbConfig(void)
+// {
+// 	return (this->nb_config);
+// }
 
-void Config::setNbConfig(std::string &filename, std::string to_find)
-{
-    std::ifstream file(filename.c_str());
-    std::string line;
-    int count = 0;
+// void Config::setNbConfig(std::string &filename, std::string to_find)
+// {
+//     std::ifstream file(filename.c_str());
+//     std::string line;
+//     int count = 0;
 
-    if (file.is_open())
-	{
-        while (getline(file, line))
-		{
-            size_t pos = 0;
-            while ((pos = line.find(to_find, pos)) != std::string::npos)
-			{
-                count++;
-                pos += to_find.length();
+//     if (file.is_open())
+// 	{
+//         while (getline(file, line))
+// 		{
+//             size_t pos = 0;
+//             while ((pos = line.find(to_find, pos)) != std::string::npos)
+// 			{
+//                 count++;
+//                 pos += to_find.length();
+//             }
+//         }
+//         file.close();
+//     }
+// 	else
+// 	{
+// 		this->nb_config = 0;
+// 		return ;
+//     }
+// 	this->nb_config = count;
+//     return ;
+// }
+
+int Config::checkLocation(Server &server)
+{
+    std::vector<std::string> keys;
+
+	if (server.getLoc().size() == 1)
+		return (0);
+    for (std::map<std::string, Location>::iterator it = server.getLoc().begin(); it != server.getLoc().end(); ++it)
+    {
+        keys.push_back(it->first);
+    }
+
+    for (size_t i = 0; i < keys.size() - 1; ++i)
+    {
+        for (size_t j = i + 1; j < keys.size(); ++j)
+        {
+            std::string key1 = keys[i];
+            std::string key2 = keys[j];
+			std::cout << "key1 = " << key1 << std::endl;
+			std::cout << "key2 = " << key2 << std::endl;
+            if (server.getLoc()[key1].getPath() == server.getLoc()[key2].getPath())
+            {
+                return (1);
             }
         }
-        file.close();
     }
-	else
-	{
-		this->nb_config = 0;
-		return ;
-    }
-	this->nb_config = count;
-    return ;
+    return (0);
 }
 
 int Config::getLineFile(std::string &filename, Launcher &launcher)
@@ -57,14 +85,9 @@ int Config::getLineFile(std::string &filename, Launcher &launcher)
             if (!line.empty())
 			{
 				if (line.find("server {") == 0)
-				{
 					nbErrorPage = 0;
-				}
 				if (line.find("location") == 0)
-				{
-					// std::cout << line << std::endl;
                     insideLocation = true;
-				}
 				else if (line == "}" && insideLocation)
 				{
 					location.push_back(line);
@@ -82,16 +105,13 @@ int Config::getLineFile(std::string &filename, Launcher &launcher)
 				else if (!insideLocation && !insideError && line.find("}") == 0)
 				{
 					Server server;
-					// std::cout << line << std::endl;
-					fillServer(server);
-					// if (missElement(server))
-					// 	return (1);
+					if (fillServer(server))
+						return (1);
 					launcher.initServer(server);
 					serverConfig.clear();
 					location.clear();
 					error_page.clear();
 				}
-
 				if (!insideLocation && !insideError) 
                     serverConfig.push_back(line);
 				else if (insideLocation)
@@ -115,71 +135,12 @@ int Config::getLineFile(std::string &filename, Launcher &launcher)
     return (0);
 }
 
-// int Config::cleanMethod(int serverToRead, Server &server)
-// {
-// 	int servernb = 0;
-//     for (size_t i = 0; i < method.size(); i++)
-// 	{
-// 		if (method[i].length() > 0)
-// 		{
-// 			if (method[i].find("method ") == 0)
-// 			{
-// 				servernb += 1;
-// 			}
-// 			if (servernb == serverToRead && method[i].find("method {"))
-// 			{
-// 				std::string tmp_trim = Utils::trim(method[i]);
-// 				std::string tmp = tmp_trim.substr(0, tmp_trim.size() - 1);
-// 				if (tmp == "GET" || tmp == "HEAD" || tmp == "PATCH" || tmp == "POST" || tmp == "PUT" || tmp == "OPTIONS" || tmp == "DELETE")
-// 					server.setMethod(tmp);
-// 				else
-// 					return (1);
-// 			}
-// 		}
-// 	}
-// 	if (server.getMethod().empty())
-// 		return (1);
-// 	return (0);
-// }
-
-// int Config::cleanCGI(int serverToRead, Server &server)
-// {
-// 	int servernb = 0;
-//     for (size_t i = 0; i < cgi_extension.size(); i++)
-// 	{
-// 		if (cgi_extension[i].length() > 0)
-// 		{
-// 			if (cgi_extension[i].find("cgi_extension ") == 0)
-// 			{
-// 				servernb += 1;
-// 			}
-// 			if (servernb == serverToRead && cgi_extension[i].find("cgi_extension {"))
-// 			{
-// 				std::string tmp_trim = Utils::trim(cgi_extension[i]);
-// 				std::string tmp = tmp_trim.substr(0, tmp_trim.size() - 1);
-// 				if (tmp == "php" || tmp == "py")
-// 					server.setCgiEx(tmp);
-// 				else
-// 					return (1);
-// 			}
-// 		}
-// 	}
-// 	if (server.getCgiEx().empty())
-// 		return (1);
-// 	return (0);
-// }
-
 int Config::cleanError(Server &server)
 {
-	// int servernb = 0;
     for (size_t i = 0; i < error_page.size(); i++)
 	{
 		if (error_page[i].length() > 0)
 		{
-			// if (error_page[i].find("error_page ") == 0)
-			// {
-			// 	servernb += 1;
-			// }
 			if (error_page[i].find("error_page {"))
 			{
 				if (!std::isdigit(error_page[i][0]))
@@ -217,12 +178,6 @@ int Config::missElement(Server &server)
 	if (server.getClientMax() <= 0)
 		return (1);
 	if (server.getHost() <= 0)
-		return (1);
-	if (server.getRoot().length() == 0)
-		return (1);
-	if (server.getIndex().length() == 0)
-		return (1);
-	if (server.getDirectory().length() == 0)
 		return (1);
 	return (0);
 }
@@ -266,12 +221,12 @@ int Config::makeServerName(Server &server, std::string str, int &nbServerName)
 	return (0);
 }
 
-int Config::makeRoot(Server &server, std::string str, int &nbRoot)
+int Config::makeRoot(Location &loc, std::string str, int &nbRoot)
 {
 	std::string root = getValue(str);
 	if (root.length() == 0)
 		return (1);
-	if (server.setRoot(root))
+	if (loc.setRoot(root))
 		return (1);
 	nbRoot++;
 	if (nbRoot > 1)
@@ -279,12 +234,12 @@ int Config::makeRoot(Server &server, std::string str, int &nbRoot)
 	return (0);
 }
 
-int Config::makeIndex(Server &server, std::string str, int &nbIndex)
+int Config::makeIndex(Location &loc, std::string str, int &nbIndex)
 {
 	std::string index = getValue(str);
 	if (index.length() == 0)
 		return (1);
-	if (server.setIndex(index))
+	if (loc.setIndex(index))
 		return (1);
 	nbIndex++;
 	if (nbIndex > 1)
@@ -305,29 +260,82 @@ int Config::makeClientMax(Server &server, std::string str, int &nbClientMax)
 	return (0);
 }
 
-int Config::makeDirectory(Server &server, std::string str, int &nbDirectory)
+int Config::makeAutoIndex(Location &loc, std::string str, int &nbAutoIndex)
 {
-	std::string directory_listing = getValue(str);
-	if (directory_listing.length() == 0)
+	std::string autoIndex = getValue(str);
+	if (autoIndex.length() == 0)
 		return (1);
-	if (server.setDirectory(directory_listing))
+	if (loc.setAutoindex(autoIndex))
 		return (1);
-	nbDirectory++;
-	if (nbDirectory > 1)
+	nbAutoIndex++;
+	if (nbAutoIndex > 1)
+		return (1);
+	return (0);
+}
+
+int Config::makeMethod(Location &loc, std::string str, int &nbAllowMethods)
+{
+	int pos = 0;
+	while (str.find(' ', pos) != str.npos)
+	{
+		std::string method = getValueLoc(str, pos);
+		if (method.length() == 0)
+			return (1);
+		loc.setMethod(method);
+	}
+	nbAllowMethods++;
+	if (nbAllowMethods > 1)
+		return (1);
+	return (0);
+}
+
+int Config::makeCgiEx(Location &loc, std::string str, int &nbCgiEx)
+{
+	int pos = 0;
+	while (str.find(' ', pos) != str.npos)
+	{
+		std::string cigEx = getValueLoc(str, pos);
+		if (cigEx.length() == 0)
+			return (1);
+		loc.setCgiEx(cigEx);
+	}
+	nbCgiEx++;
+	if (nbCgiEx > 1)
+		return (1);
+	return (0);
+}
+
+int Config::makeCgiPath(Location &loc, std::string str, int &nbCgiPath)
+{
+	int pos = 0;
+	if (str.find(' ', pos) == str.npos)
+		return (1);
+	while (str.find(' ', pos) != str.npos)
+	{
+		int	fpos = str.find(' ', pos);
+		int	lpos = str.find(' ', fpos + 1);
+		int	llpos = str.find(' ', lpos + 1);
+		std::string key = str.substr(fpos + 1, lpos - fpos - 1);
+		std::string path = str.substr(lpos + 1, llpos - lpos - 1);
+		if (!path.empty() && path[path.length() - 1] == ';')
+			path.erase(path.length() - 1);
+		if (key.empty() || path.empty() || lpos < 0)
+			return (1);
+		loc.setCgiPath(key, path);
+		pos = llpos;
+	}
+	nbCgiPath++;
+	if (nbCgiPath > 1)
 		return (1);
 	return (0);
 }
 
 int Config::fillServer(Server &server)
 {
-	// int servernb = 0;
 	int nbPort = 0;
 	int nbHost = 0;
 	int nbServerName = 0;
-	int nbRoot = 0;
-	int nbIndex = 0;
 	int nbClientMax = 0;
-	int nbDirectory = 0;
 
     for (size_t i = 0; i < serverConfig.size(); i++)
 	{
@@ -346,47 +354,40 @@ int Config::fillServer(Server &server)
 			if (makeServerName(server, serverConfig[i], nbServerName))
 				return (1);
 		}
-		else if (serverConfig[i].find("root") == 0)
-		{
-			if (makeRoot(server, serverConfig[i], nbRoot))
-				return (1);
-		}
-		else if (serverConfig[i].find("index") == 0)
-		{
-			if (makeIndex(server, serverConfig[i], nbIndex))
-				return (1);
-		}
 		else if (serverConfig[i].find("client_max_body_size") == 0)
 		{
 			if (makeClientMax(server, serverConfig[i], nbClientMax))
 				return (1);
 		}
-		else if (serverConfig[i].find("directory_listing") == 0)
-		{
-			if (makeDirectory(server, serverConfig[i], nbDirectory))
-				return (1);
-		}
-	// 	}
     }
-	// if (cleanMethod(serverToRead, server))
-	// 	return (1);
-	// if (cleanCGI(serverToRead, server))
-	// 	return (1);
-
-	// for (size_t i = 0; i < location.size(); ++i) {
-    //     std::cout << location[i] << std::endl;
-    // }
-	// std::cout << std::endl;
-
 	if (fillLocation(server))
 		return (1);
-
 	if (cleanError(server))
 		return (1);
-	
-	
 	// std::cout << server.getLoci("/test").getMethodi(0) << std::endl;
 
+	return (0);
+}
+
+std::string Config::getValueLoc(std::string line, int &pos)
+{
+	int	fpos = line.find(' ', pos);
+	int	lpos = line.find(' ', fpos + 1);
+	std::string str = line.substr(fpos + 1, lpos - fpos - 1);
+	if (!str.empty() && str[str.length() - 1] == ';')
+		str.erase(str.length() - 1);
+	pos = lpos;
+	return (str);
+}
+
+int Config::missElementLocRoot(Location &loc)
+{
+	if (loc.getRoot().length() == 0)
+		return (1);
+	if (loc.getIndex().length() == 0)
+		return (1);
+	if (loc.getMethod().size() == 0)
+		return (1);
 	return (0);
 }
 
@@ -398,84 +399,54 @@ int	Config::fillLocation(Server &server)
 	{
 		if (location[i].find("location") == 0)
 		{
+			int nbRoot = 0;
+			int nbIndex = 0;
+			int nbAutoIndex = 0;
+			int nbAllowMethods = 0;
+			int nbCgiEx = 0;
+			int nbCgiPath = 0;
 			Location loc;
-			int	fpos = location[i].find(' ', 0);
-			int	lpos = location[i].find(' ', fpos + 1);
-			loc.setPath(location[i].substr(fpos + 1, lpos - fpos - 1));
-			std::string last = location[i].substr(lpos + 1, lpos - location[i].size());
-			if (last != "{")
+			if (loc.setPath(location[i]))
 				return (1);
 			while (location[i] != "}")
 			{
-				// std::cout << location[i] << std::endl;
 				if (location[i].find("root") == 0)
 				{
-					if (loc.setRoot(getValue(location[i])))
+					if (makeRoot(loc, location[i], nbRoot))
 						return (1);
 				}
 				else if (location[i].find("index") == 0)
 				{
-					if (loc.setIndex(getValue(location[i])))
+					if (makeIndex(loc, location[i], nbIndex))
 						return (1);
 				}
 				else if (location[i].find("autoindex") == 0)
 				{
-					if (loc.setAutoindex(getValue(location[i])))
+					if (makeAutoIndex(loc, location[i], nbAutoIndex))
 						return (1);
 				}
 				else if (location[i].find("allow_methods") == 0)
 				{
-					int pos = 0;
-					while (location[i].find(' ', pos) != location[i].npos)
-					{
-						int	fpos = location[i].find(' ', pos);
-						int	lpos = location[i].find(' ', fpos + 1);
-						std::string str = location[i].substr(fpos + 1, lpos - fpos - 1);
-						if (!str.empty() && str[str.length() - 1] == ';')
-							str.erase(str.length() - 1);
-						loc.setMethod(str);
-						pos = lpos;
-					}
+					if (makeMethod(loc, location[i], nbAllowMethods))
+						return (1);
 				}
 				else if (location[i].find("cgi_extension") == 0)
 				{
-					int pos = 0;
-					while (location[i].find(' ', pos) != location[i].npos)
-					{
-						int	fpos = location[i].find(' ', pos);
-						int	lpos = location[i].find(' ', fpos + 1);
-						std::string str = location[i].substr(fpos + 1, lpos - fpos - 1);
-						if (!str.empty() && str[str.length() - 1] == ';')
-							str.erase(str.length() - 1);
-						loc.setCgiEx(str);
-						pos = lpos;
-					}
-
+					if (makeCgiEx(loc, location[i], nbCgiEx))
+						return (1);
 				}
 				else if (location[i].find("cgi_path") == 0)
 				{
-					int pos = 0;
-					while (location[i].find(' ', pos) != location[i].npos)
-					{
-						int	fpos = location[i].find(' ', pos);
-						int	lpos = location[i].find(' ', fpos + 1);
-						int	llpos = location[i].find(' ', lpos + 1);
-						std::string key = location[i].substr(fpos + 1, lpos - fpos - 1);
-						std::string path = location[i].substr(lpos + 1, llpos - lpos - 1);
-						if (!path.empty() && path[path.length() - 1] == ';')
-							path.erase(path.length() - 1);
-						if (key.empty() || path.empty())
-							return (1);
-						// std::cout << "key = " << key << std::endl;
-						// std::cout << "path = " << path << std::endl; 
-						loc.setCgiPath(key, path);
-						pos = llpos;
-						// std::cout << loc.getCgiPathi(key) << std::endl;
-					}
+					if (makeCgiPath(loc, location[i], nbCgiPath))
+						return (1);
 				}
 				i++;
 			}
-			server.setLoc(loc.getPath(), loc);
+			if (loc.getPath() == "/")
+				if (missElementLocRoot(loc))
+					return (1);
+			if (server.setLoc(loc.getPath(), loc))
+				return (1);
 			// server.locations[loc.getPath()] = loc;
 		}
 		i++;

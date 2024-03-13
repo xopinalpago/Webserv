@@ -20,9 +20,6 @@ int main(int argc, char **argv)
 			std::string filename(argv[1]);
 			if (config.getLineFile(filename, run))
 				return (1);
-
-			// if (run.initConfig(filename))
-			// 	return (1);
 			if (run.runServer())
 				return (1);
 		}

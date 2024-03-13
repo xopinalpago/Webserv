@@ -33,13 +33,16 @@ int Location::setClientMax(int client_max_body_size)
     return (0);
 }
 
-int Location::setPath(std::string path)
+int Location::setPath(std::string str)
 {
-    if (path.length() == 0)
-    {
+    int	fpos = str.find(' ', 0);
+    int	lpos = str.find(' ', fpos + 1);
+	this->path = str.substr(fpos + 1, lpos - fpos - 1);
+    if (this->path.length() == 0)
         return (1);
-    }
-	this->path = path;
+    std::string last = str.substr(lpos + 1, lpos - str.size());
+    if (last != "{")
+        return (1);
     return (0);
 }
 
@@ -74,6 +77,11 @@ void Location::setCgiEx(std::string tmp)
 std::string Location::getRoot(void) const
 {
     return (this->root);
+}
+
+int Location::getAutoindex(void) const
+{
+    return (this->autoindex);
 }
 
 int Location::setIndex(std::string index)

@@ -30,11 +30,6 @@ class Server
         int                         client_max_body_size;
         in_addr_t                   host;
         std::string                 server_name;
-        std::string                 root;
-        std::string                 index;
-        std::string                 directory_listing;
-        std::vector<std::string>    method;
-        std::vector<std::string>    cgi_extension;
         std::map<int, std::string>  error_page;
         std::map<std::string, Location> locations;
         
@@ -48,10 +43,7 @@ class Server
         int 	                    setFd(int fd);
         int 	                    setHost(std::string host);
         int 	                    setServerName(std::string server_name);
-        int 	                    setRoot(std::string root);
-        int 	                    setIndex(std::string index);
         int 	                    setClientMax(int client_max_body_size);
-        int 	                    setDirectory(std::string directory_listing);
         void 	                    setMethod(std::string tmp);
         void 	                    setErrorPage(int key, std::string tmp);
         void 	                    setCgiEx(std::string tmp);
@@ -61,9 +53,6 @@ class Server
         int        					getClientMax(void) const;
         in_addr_t    				getHost(void) const;
         std::string 				getServerName(void) const;
-        std::string 				getRoot(void) const;
-        std::string 				getIndex(void) const;
-        std::string 				getDirectory(void) const;
         std::vector<std::string> 	getMethod(void) const;
         std::string 				getMethodi(int i) const;
         std::vector<std::string>    getCgiEx(void) const;
@@ -71,7 +60,7 @@ class Server
         std::map<int, std::string>& getErrorPage(void);
         std::string                 getErrorPagei(int i);
 
-		void setLoc(std::string key, Location data);
+		int setLoc(std::string key, Location data);
         Location                 getLoci(std::string str);
         std::map<std::string, Location>& getLoc(void);
 

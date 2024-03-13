@@ -109,12 +109,9 @@ void Response::setPathFile()
     std::string str = _request.getUri();
 	if (str[str.length() - 1] == '/')
 	{
-        if (_server.getRoot().size() == 0)
-        {
-            str = _request.getLocation().getRoot().insert(_request.getLocation().getRoot().size(), "/");
-            str = str.insert(str.size(), _request.getLocation().getIndex());
-        }
-	} else {
+        str = _request.getLocation().getRoot().insert(_request.getLocation().getRoot().size(), "/");
+        str = str.insert(str.size(), _request.getLocation().getIndex());
+    } else {
         std::string uri = _request.getUri();
         if (uri.find('?') != std::string::npos) {
             str = uri.substr(0, uri.find('?'));
@@ -160,9 +157,10 @@ void Response::errorData() {
 
 bool Response::authorizedMethod() {
 
-    for (size_t i = 0; i < _server.getLoci("/").getMethod().size(); ++i) {
+    for (size_t i = 0; i < _request.getLocation().getMethod().size(); ++i) {
         // if (_server.getMethod()[i] == _request.getMethod()) {
-        if (_server.getLoci("/").getMethod()[i] == _request.getMethod()) {
+        if (_request.getLocation().getMethod()[i] == _request.getMethod()) {
+			std::cout << _request.getLocation().getPath() << std::endl;
             return true;
         }
     }

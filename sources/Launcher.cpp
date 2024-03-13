@@ -251,6 +251,8 @@ int Launcher::runServer(void)
 {
 	end_server = false;
 
+	if (checkServers())
+		return (1);
 	checkServerName();
 	if (initSets())
 		return (1);
@@ -297,9 +299,18 @@ int Launcher::checkServers(void)
 
     for (std::map<int, Server>::iterator it = Servers.begin(); it != Servers.end(); ++it)
     {
+		int root = 0;
+    	for (std::map<std::string, Location>::iterator itloc = it->second.getLoc().begin(); itloc != it->second.getLoc().end(); ++itloc)
+		{
+			if (itloc->first == "/")
+				root = 1;
+		}
+		if (root == 0)
+			return (1);
         keys.push_back(it->first);
     }
-
+	if (Servers.size() == 1)
+		return (0);
     for (size_t i = 0; i < keys.size() - 1; ++i)
     {
         for (size_t j = i + 1; j < keys.size(); ++j)

@@ -50,6 +50,7 @@ class Location
 		std::vector<std::string> 	getCgiEx(void) const;
 		std::string 				getCgiPathi(std::string key);
 		std::map<std::string, std::string> 	getCgiPath(void) const;
+		int getAutoindex(void) const;
 };
 
 #endif
