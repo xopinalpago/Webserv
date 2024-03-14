@@ -53,15 +53,15 @@ int Server::setServerName(std::string server_name)
     return (0);
 }
 
-// int Server::setIndex(std::string index)
-// {
-//     if (index.length() == 0)
-//     {
-//         return (1);
-//     }
-// 	this->index = index;
-//     return (0);
-// }
+int Server::setIndex(std::string index)
+{
+    if (index.length() == 0)
+    {
+        return (1);
+    }
+	this->index = index;
+    return (0);
+}
 
 int Server::setClientMax(int client_max_body_size)
 {
@@ -176,10 +176,10 @@ std::string Server::getServerName(void) const
     return (this->server_name);
 }
 
-// std::string Server::getIndex(void) const
-// {
-//     return (this->index);
-// }
+std::string Server::getIndex(void) const
+{
+    return (this->index);
+}
 
 int Server::getClientMax(void) const
 {

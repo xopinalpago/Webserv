@@ -18,7 +18,21 @@ class Config {
         ~Config(void);
         int         getLineFile(std::string &filename, Launcher &launcher);
 
-    private :
+		class ConfigException : public std::exception {
+		public :
+			ConfigException(std::string err) throw() {
+				_err = "Config Error: " + err;
+			}
+			virtual const char* what() const throw() {
+				return (_err.c_str());
+			}
+			~ConfigException() throw() {}
+		
+		private:
+			std::string _err;
+		};
+    
+	private :
         // int nb_config;
         std::vector<std::string> serverConfig;
         // std::vector<std::string> method;
@@ -38,6 +52,7 @@ class Config {
         int         makeRoot(Location &loc, std::string str, int &nbRoot);
         int         makeRoot(Server &server, std::string str, int &nbRoot);
         int         makeIndex(Location &loc, std::string str, int &nbIndex);
+        int         makeIndex(Server &server, std::string str, int &nbIndex);
         int         makeClientMax(Server &server, std::string str, int &nbClientMax);
         int         makeAutoIndex(Location &loc, std::string str, int &nbAutoIndex);
         std::string getValue(std::string line);

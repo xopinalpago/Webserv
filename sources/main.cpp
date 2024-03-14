@@ -18,13 +18,16 @@ int main(int argc, char **argv)
 		try {
 			signal(SIGINT, &handle_sigint);
 			std::string filename(argv[1]);
-			if (config.getLineFile(filename, run))
-				return (1);
+			config.getLineFile(filename, run);
 			if (run.runServer())
 				return (1);
 		}
 		catch (Launcher::SigError &e) {
 			run.closeAllConnection();
+			return (0);
+		}
+		catch (Config::ConfigException &e) {
+			std::cerr << e.what() << std::endl;
 			return (0);
 		}
 	}

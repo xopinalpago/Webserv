@@ -31,6 +31,7 @@ class Server
         in_addr_t                   host;
         std::string                 server_name;
         std::string                 root;
+        std::string					index;
         std::map<int, std::string>  error_page;
         std::map<std::string, Location> locations;
         
@@ -49,6 +50,7 @@ class Server
         void 	                    setErrorPage(int key, std::string tmp);
         void 	                    setCgiEx(std::string tmp);
         int                         setRoot(std::string root);
+        int                         setIndex(std::string index);
 
         int         				getPort(void) const;
         int         				getFd(void) const;
@@ -56,6 +58,7 @@ class Server
         in_addr_t    				getHost(void) const;
         std::string                 getRoot(void) const;
         std::string 				getServerName(void) const;
+        std::string 				getIndex(void) const;
         std::vector<std::string> 	getMethod(void) const;
         std::string 				getMethodi(int i) const;
         std::vector<std::string>    getCgiEx(void) const;
