@@ -16,8 +16,16 @@ class Config {
     public :
         Config(void);
         ~Config(void);
-		int         fillServer(Server &server);
         int         getLineFile(std::string &filename, Launcher &launcher);
+
+    private :
+        // int nb_config;
+        std::vector<std::string> serverConfig;
+        // std::vector<std::string> method;
+        std::vector<std::string> location;
+        std::vector<std::string> error_page;
+
+		int         fillServer(Server &server);
         int         missElement(Server &server);
         // int         cleanMethod(int serverToRead, Server &server);
         // int         cleanCGI(int serverToRead, Server &server);
@@ -28,6 +36,7 @@ class Config {
         int         makeHost(Server &server, std::string str, int &nbHost);
         int         makeServerName(Server &server, std::string str, int &nbServerName);
         int         makeRoot(Location &loc, std::string str, int &nbRoot);
+        int         makeRoot(Server &server, std::string str, int &nbRoot);
         int         makeIndex(Location &loc, std::string str, int &nbIndex);
         int         makeClientMax(Server &server, std::string str, int &nbClientMax);
         int         makeAutoIndex(Location &loc, std::string str, int &nbAutoIndex);
@@ -38,15 +47,9 @@ class Config {
         int makeMethod(Location &loc, std::string str, int &nbAllowMethods);
         int makeCgiEx(Location &loc, std::string str, int &nbCgiEx);
         int makeCgiPath(Location &loc, std::string str, int &nbCgiPath);
-        int missElementLocRoot(Location &loc);
-
-    private :
-        // int nb_config;
-        std::vector<std::string> serverConfig;
-        // std::vector<std::string> method;
-        std::vector<std::string> location;
-        std::vector<std::string> error_page;
-
+        int missElementLoc(Location &loc);
+        int missElementCgi(Location &loc);
+        int setDefaultMethods(Location &loc);
 };
 
 #endif

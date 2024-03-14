@@ -173,6 +173,8 @@ std::string Config::getValue(std::string line)
 
 int Config::missElement(Server &server)
 {
+	if (server.getRoot().length() == 0)
+		return (1);
 	if (server.getPort() <= 0)
 		return (1);
 	if (server.getClientMax() <= 0)
@@ -260,6 +262,19 @@ int Config::makeClientMax(Server &server, std::string str, int &nbClientMax)
 	return (0);
 }
 
+int Config::makeRoot(Server &server, std::string str, int &nbRoot)
+{
+	std::string root = getValue(str);
+	if (root.length() == 0)
+		return (1);
+	if (server.setRoot(root))
+		return (1);
+	nbRoot++;
+	if (nbRoot > 1)
+		return (1);
+	return (0);
+}
+
 int Config::makeAutoIndex(Location &loc, std::string str, int &nbAutoIndex)
 {
 	std::string autoIndex = getValue(str);
@@ -336,6 +351,7 @@ int Config::fillServer(Server &server)
 	int nbHost = 0;
 	int nbServerName = 0;
 	int nbClientMax = 0;
+	int nbRoot = 0;
 
     for (size_t i = 0; i < serverConfig.size(); i++)
 	{
@@ -359,6 +375,11 @@ int Config::fillServer(Server &server)
 			if (makeClientMax(server, serverConfig[i], nbClientMax))
 				return (1);
 		}
+		else if (serverConfig[i].find("root") == 0)
+		{
+			if (makeRoot(server, serverConfig[i], nbRoot))
+				return (1);
+		}
     }
 	if (fillLocation(server))
 		return (1);
@@ -380,14 +401,32 @@ std::string Config::getValueLoc(std::string line, int &pos)
 	return (str);
 }
 
-int Config::missElementLocRoot(Location &loc)
+int Config::missElementLoc(Location &loc)
 {
 	if (loc.getRoot().length() == 0)
 		return (1);
-	if (loc.getIndex().length() == 0)
-		return (1);
 	if (loc.getMethod().size() == 0)
 		return (1);
+	return (0);
+}
+
+int Config::missElementCgi(Location &loc)
+{
+	if (loc.getCgiEx().size() == 0)
+		return (1);
+	if (loc.getCgiPath().size() == 0)
+		return (1);
+	return (0);
+}
+
+int Config::setDefaultMethods(Location &loc)
+{
+	if (loc.getMethod().size() == 0)
+	{
+		loc.setMethod("GET");
+		loc.setMethod("POST");
+		loc.setMethod("DELETE");
+	}
 	return (0);
 }
 
@@ -442,12 +481,17 @@ int	Config::fillLocation(Server &server)
 				}
 				i++;
 			}
-			if (loc.getPath() == "/")
-				if (missElementLocRoot(loc))
+			if (loc.getMethod().size() == 0)
+				setDefaultMethods(loc);
+			if (loc.getRoot().size() == 0 && server.getRoot().size() != 0)
+				loc.setRoot(server.getRoot());
+			if (missElementLoc(loc))
+				return (1);
+			if (loc.getPath() == "/cgi-bin")
+				if (missElementCgi(loc))
 					return (1);
 			if (server.setLoc(loc.getPath(), loc))
 				return (1);
-			// server.locations[loc.getPath()] = loc;
 		}
 		i++;
 	}

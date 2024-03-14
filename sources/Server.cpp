@@ -73,6 +73,21 @@ int Server::setClientMax(int client_max_body_size)
     return (0);
 }
 
+std::string Server::getRoot(void) const
+{
+    return (this->root);
+}
+
+int Server::setRoot(std::string root)
+{
+    if (root.length() == 0)
+    {
+        return (1);
+    }
+	this->root = root;
+    return (0);
+}
+
 // int Server::setDirectory(std::string directory_listing)
 // {
 //     if (directory_listing.length() == 0)

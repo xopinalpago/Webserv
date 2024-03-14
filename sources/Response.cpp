@@ -109,8 +109,8 @@ void Response::setPathFile()
     std::string str = _request.getUri();
 	if (str[str.length() - 1] == '/')
 	{
-        str = _request.getLocation().getRoot().insert(_request.getLocation().getRoot().size(), "/");
-        str = str.insert(str.size(), _request.getLocation().getIndex());
+        str = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndex();
+        // str = str.insert(str.size(), _request.getLocation().getIndex());
     } else {
         std::string uri = _request.getUri();
         if (uri.find('?') != std::string::npos) {
@@ -118,17 +118,24 @@ void Response::setPathFile()
         } else {
             str = uri;
         }
+
+        std::string str2 = "/cgi-bin";
         if (IsCgiExtension(str) == true) {
             str = str.substr(1, str.length() - 1);
         } 
-        else if (_request.getLocation().getPath() == "/")
+        else if (str.compare(0, str2.length(), str2) == 0)
         {
-            //pages
+            str = str.substr(str2.size(), str.size() - str2.size());
             str = _request.getLocation().getRoot() + str;
         }
-        else if (str[0] == '/')
+        else if (_request.getLocation().getRoot() == _server.getRoot())
         {
-            str = str.substr(1, str.size());
+            str = _server.getRoot() + "/" + str;
+        }
+        else
+        {
+            std::string tempPath2 = str.substr(_request.getLocation().getPath().length(), str.length() - _request.getLocation().getPath().length());
+            str = _request.getLocation().getRoot() + tempPath2;
         }
     }
     _filePath = str;
