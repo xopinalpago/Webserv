@@ -44,7 +44,7 @@ int Config::getLineFile(std::string &filename)
 	int nbCgiEx = 0;
 	int nbErrorPage = 0;
 
-    if (infile)
+    if (infile.is_open())
 	{
         std::string line;
         bool insideMethod = false;
@@ -292,7 +292,7 @@ int Config::makeIndex(Server &server, std::string str, int &nbIndex)
 
 int Config::makeClientMax(Server &server, std::string str, int &nbClientMax)
 {
-	int client_max_body_size = Utils::stringToInt(getValue(str));
+	unsigned int client_max_body_size = Utils::stringToInt(getValue(str));
 	if (client_max_body_size <= 0)
 		return (1);
 	if (server.setClientMax(client_max_body_size))

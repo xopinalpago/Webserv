@@ -75,7 +75,7 @@ int Server::setIndex(std::string index)
     return (0);
 }
 
-int Server::setClientMax(int client_max_body_size)
+unsigned int Server::setClientMax(unsigned int client_max_body_size)
 {
     if (client_max_body_size > 10000)
     {
@@ -179,7 +179,7 @@ std::string Server::getIndex(void) const
     return (this->index);
 }
 
-int Server::getClientMax(void) const
+unsigned int Server::getClientMax(void) const
 {
     return (this->client_max_body_size);
 }

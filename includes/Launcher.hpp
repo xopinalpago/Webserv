@@ -26,6 +26,8 @@ class Launcher
         int                 max_sd;
         int                 new_sd;
         int                 end_server;
+		int					totalBytes;
+		
 		// std::map<int, std::vector<RequestInfo> > requestMap;
 
 		void 	errorFunction(std::string word);

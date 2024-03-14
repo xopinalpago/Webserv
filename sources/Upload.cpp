@@ -27,61 +27,65 @@ Upload& Upload::operator=(const Upload& rhs) {
 
 void Upload::parseUpload() {
 
-    // std::cout << "PARSING" << std::endl;
-    std::string body;
-    std::string req = _request.getAllRequest();
-    size_t header_end = req.find("\r\n\r\n");
-    if (header_end != std::string::npos)
-        body = req.substr(header_end + 4, req.size() - header_end - 4);
-    else {
-        body = "";
-        return ;
-    }
     // std::cout << "***********body***********" << std::endl;
-    // std::cout << body << std::endl;
+    // std::cout << _request.getBody() << std::endl;
     // std::cout << "**************************" << std::endl;
-    // std::stringstream ss(body);
-    // std::string line;
-    // bool bodyStart = false;
-    // while (std::getline(ss, line)) {
-    //     if (line.find("Content-Disposition:") != std::string::npos && line.find("filename=") != std::string::npos && filename == "") {
-    //         int pos = line.find("filename=");
-    //         filename = line.substr(pos + 10, line.size() - pos - 12);
-    //     } else if (line.find("Content-Type:") != std::string::npos) {
-    //         bodyStart = true;
-    //         std::getline(ss, line);
-    //     } else if (bodyStart == true) {
-    //         if (line.find(_request.getContentId()) != std::string::npos) {
-    //             break;
-    //             // std::cout << 
-    //         }
-    //         fileBody += line + '\n';
-    //     }
-    // }
+    std::string         body = _request.getBody();
+    std::stringstream   ss(body);
+    std::string         line;
+    std::string         next;
+    std::stringstream   res;
 
-    // std::cout << "fileBody : \n" << fileBody << "|" << std::endl;
-    // std::cout << "filename : " << filename << std::endl;
-
+    bool bodyStart = false;
+    std::getline(ss, line);
+    while (std::getline(ss, next)) {
+        if (line.find("Content-Disposition:") != std::string::npos && line.find("filename=") != std::string::npos && filename == "") {
+            int pos = line.find("filename=");
+            filename = line.substr(pos + 10, line.size() - pos - 12);
+        } else if (line.find("Content-Type:") != std::string::npos) {
+            bodyStart = true;
+            std::getline(ss, next);
+        } else if (bodyStart == true) {
+            for (size_t i = 0; i < line.length(); ++i) {
+                if (line[i] != 13 && line[i] != 10)
+                    res << line[i];
+            }
+            if (!(next.find(_request.getContentId()) != std::string::npos)) {
+                res << std::endl;
+            }
+        }
+        line = next;
+    }
+    fileBody = res.str();
 }
 
 int Upload::doUpload() {
 
-    std::string folder_name = "UpLoad"; // recuperer dans l'uri
-    if (std::system(("test -d " + std::string(folder_name)).c_str()) != 0) {
-        if (std::system(("mkdir " + std::string(folder_name)).c_str()) == 0) {
-            parseUpload();
-            // std::cout << "filename : " << filename << std::endl;
-            // recuperer le nom du fichier
-            // faire une boucle : (sortir que si le fichier est cree avec break)
-                // si le fichier est deja dans le dossier cree :
-                    // nouveau nom de fichier avec (i)
-                // sinon creer le fichier
-                    // break
-            // recuperer le corps du fichier
-            // ecrire le corps du fichier dans le fichier
-        } else
-            return 500; // error while creating 
-    } else
-        return 2; // directory already exists
-    return 200;
+    std::string folder_name = _request.getUri();
+    if (folder_name[0] == '/')
+        folder_name = folder_name.substr(1, folder_name.size() - 1);
+    if (std::system(("test -d " + std::string(folder_name)).c_str()) != 0)
+        if (std::system(("mkdir " + std::string(folder_name)).c_str()) < 0)
+            return 2; // error while creating 
+    parseUpload();
+    std::stringstream path;
+    path << folder_name << "/" << filename;
+    std::cout << "filename : " << filename << std::endl;
+    if (access(path.str().c_str(), F_OK) == 0) {
+        int i = 0;
+        while (access(path.str().c_str(), F_OK) == 0) {
+            i++;
+            path.str("");
+            path << folder_name << "/";
+            path << filename.substr(0, filename.find('.'));
+            path << "(" << i << ")";
+            path << filename.substr(filename.find('.'), filename.size() - filename.find('.'));
+        }
+    }
+    std::ofstream file(path.str().c_str());
+    if (file.is_open()) {
+        file << fileBody;
+        return 1;
+    }
+    return 2;
 }

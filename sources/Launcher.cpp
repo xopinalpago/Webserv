@@ -93,73 +93,87 @@ int Launcher::readServer(User &user)
     int rc = BUFFER_SIZE;
 	char bf[BUFFER_SIZE + 1];
 	Request request;
+	totalBytes = 0;
 
+	// premiere lecture
     while (rc == BUFFER_SIZE) {
 		memset(bf, 0, sizeof(bf));
 		rc = recv(user.getFd(), bf, BUFFER_SIZE, 0);
 		if (rc == 0)
 		{
-			std::cout << "CLOSE1" << std::endl;
 			closeConnection(user.getFd());
 			return (rc);
 		}
 		else if (rc < 0)
 		{
-			std::cout << "CLOSE2" << std::endl;
 			closeConnection(user.getFd());
 			return (rc);
 		}
 		else
 			user.updateTime();
 		bf[rc] = 0;
+		totalBytes += rc;
 		request.setAllRequest(bf);
-
-		// std::cout << "**************bf***************" << std::endl;
-		// std::cout << bf << std::endl;
-		// std::cout << "************************************" << std::endl;
-		// size_t headerEnd = request.getAllRequest().find("\r\n\r\n");
-        // if (headerEnd != std::string::npos) {
-		// 	std::
-		// }
-        // //     // Sépare l'en-tête du corps de la requête
-        // //     std::string header = request.getAllRequest().substr(0, headerEnd + 4); // +4 pour inclure "\r\n\r\n"
-        //     std::string body = request.getAllRequest().substr(headerEnd + 4); // Le reste est le corps de la requête
-        //     if (!body.empty()) {
-		// 		std::cout << "**************BODY***************" << std::endl;
-		// 		std::cout << body << std::endl;
-		// 		std::cout << "************************************" << std::endl;
-        //     	// request.setAllRequest(body);
-		// 	}
-
-        // //     // Traiter le corps de la requête
-		// // 		request.setAllRequest(body);
-        // //         // Traiter le corps de la requête ici si nécessaire
-        // //     }
-
-        // //     break; // Sort de la boucle une fois que l'en-tête est terminé
-
-    	// }
 	}
+	// calculer le body
+	std::string body;
+    std::string req = request.getAllRequest();
+    size_t header_end = req.find("\r\n\r\n");
+    if (header_end != std::string::npos) {
+        body = req.substr(header_end + 4, req.size() - header_end - 4);
+		request.setBody(body);
+	} else {
+        body = "";
+		request.setBody(body);
+	}
+	// std::cout << "body size : " << body.size() << std::endl;
 
+	// std::cout << "**************BODY***************" << std::endl;
+	// std::cout << body << std::endl;
+	// std::cout << "************************************" << std::endl;
+	// parsing
 	if (request.parseRequest())
 	{
 		closeConnection(user.getFd());
 		return (0);
 	}
+	// si y'a un content 
+	if (request.getContentLength() > 0 && body.length() < request.getContentLength()) {
+		// std::cout << "body a lire" << std::endl;
+		rc = BUFFER_SIZE;
+		while (rc == BUFFER_SIZE) {
+			memset(bf, 0, sizeof(bf));
+			rc = recv(user.getFd(), bf, BUFFER_SIZE, 0);
+			if (rc == 0)
+			{
+				closeConnection(user.getFd());
+				return (rc);
+			}
+			else if (rc < 0)
+			{
+				closeConnection(user.getFd());
+				return (rc);
+			}
+			else
+				user.updateTime();
+			bf[rc] = 0;
+			totalBytes += rc;
+			request.setAllRequest(bf);
+		}
+		// recalculer le body :
+		req = request.getAllRequest();
+		header_end = req.find("\r\n\r\n");
+		if (header_end != std::string::npos) {
+			body = req.substr(header_end + 4, req.size() - header_end - 4);
+			request.setBody(body);
+		}
+		else {
+			body = "";
+			request.setBody(body);
+		}
+		// std::cout << "body size2 : " << body.size() << std::endl;
+	}
 
-	// int clientID = user.getFd();
-    // std::string requestString = request.allRequest;
-
-    // std::map<int, std::vector<RequestInfo> >::iterator it = requestMap.find(clientID);
-    // if (it != requestMap.end()) {
-    //     const std::vector<RequestInfo>& clientRequests = it->second;
-    //     for (std::vector<RequestInfo>::const_iterator reqIt = clientRequests.begin(); reqIt != clientRequests.end(); ++reqIt) {
-    //         if (reqIt->requestString == requestString) {
-    //             std::cout << "Requête ignorée (déjà envoyée récemment)" << std::endl;
-    //             return 0;
-    //         }
-    //     }
-    // }
 	user.setRequest(request);
 	user.setServer(Servers);
 	FD_CLR(user.getFd(), &readfds);

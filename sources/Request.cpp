@@ -23,6 +23,11 @@ std::string		Request::getAllRequest(void)
 	return (this->allRequest);
 }
 
+std::string		Request::getBody(void)
+{
+	return (this->body);
+}
+
 std::string		Request::getMethod(void)
 {
 	return (this->method);
@@ -58,7 +63,7 @@ std::string		Request::getContentId(void)
 // 	return (this->pathFile);
 // }
 
-int	Request::getContentLength(void)
+unsigned int	Request::getContentLength(void)
 {
 	return (this->contentLength);
 }
@@ -77,6 +82,16 @@ int	Request::setAllRequest(std::string request)
     }
 	this->allRequest.append(request);
     return (0);
+}
+
+int Request::setBody(std::string body)
+{
+	if (body.length() == 0)
+	{
+		return (1);
+	}
+	this->body = body;
+	return (0);
 }
 
 // int	Request::setMethod(std::string method)
@@ -139,7 +154,7 @@ int	Request::setHost(std::string host)
 //     return (0);
 // }
 
-int	Request::setContentLength(unsigned int cLength)
+unsigned int	Request::setContentLength(unsigned int cLength)
 {
     if (cLength < 0)
     {
@@ -229,20 +244,23 @@ int	Request::parseRequest(void)
 			pos = vAllRequest[i].find(' ');
 			accept = vAllRequest[i].substr(pos + 1, vAllRequest[i].size() - pos);
 		}
+		else if (vAllRequest[i].find("Content-Length:") == 0)
+		{
+			size_t start = vAllRequest[i].find(':') + 2;
+			std::istringstream iss(vAllRequest[i].substr(start));
+			iss >> contentLength;
+			// std::cout << "contentLength : " << contentLength << std::endl;
+		}
 		else if (this->getMethod() == "POST" && vAllRequest[i].find("Content-Type") == 0 && contentType.size() == 0)
 		{
-			// std::cout << "laaaaaaaaaa\n";
 			pos = vAllRequest[i].find(' ');
-			// std::cout << "POS = " << pos << std::endl;
 			contentType = vAllRequest[i].substr(pos + 1, vAllRequest[i].find(';') - pos - 1);
-			// std::cout << "contentType : " << contentType << std::endl;
 			if (contentType == "multipart/form-data") {
 				pos = vAllRequest[i].find("boundary=");
-				contentId = vAllRequest[i].substr(pos + 9, vAllRequest[i].size() - pos);
-				// std::cout << "contentId : " << contentId << std::endl;
+				contentId = vAllRequest[i].substr(pos + 9, vAllRequest[i].size() - (pos + 9) - 1);
 			}
 		}
 	}
-	contentLength = allRequest.size();
+	// contentLength = allRequest.size();
 	return (0);
 }

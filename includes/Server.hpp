@@ -16,7 +16,7 @@
 #include <arpa/inet.h>
 
 #ifndef BUFFER_SIZE
-#define BUFFER_SIZE 2048
+#define BUFFER_SIZE 1024
 #endif
 
 #include "Utils.hpp"
@@ -26,7 +26,7 @@ class Server
     private:
         int                         fd;
         int                         port;
-        int                         client_max_body_size;
+        unsigned int                client_max_body_size;
         in_addr_t                   host;
         std::string                 server_name;
         std::string                 root;
@@ -48,7 +48,7 @@ class Server
         int 	                    setServerName(std::string server_name);
         int 	                    setRoot(std::string root);
         int 	                    setIndex(std::string index);
-        int 	                    setClientMax(int client_max_body_size);
+        unsigned int                setClientMax(unsigned int client_max_body_size);
         int 	                    setDirectory(std::string directory_listing);
         void 	                    setMethod(std::string tmp);
         void 	                    setErrorPage(int key, std::string tmp);
@@ -56,7 +56,7 @@ class Server
  
         int         				getPort(void) const;
         int         				getFd(void) const;
-        int        					getClientMax(void) const;
+        unsigned int        		getClientMax(void) const;
         in_addr_t    				getHost(void) const;
         std::string 				getServerName(void) const;
         std::string 				getRoot(void) const;
