@@ -97,9 +97,26 @@ bool Response::IsCgiExtension(std::string file)
     
     size_t pos = file.rfind(".");
     std::string ext = file.substr(pos + 1, _filePath.length() - pos + 1);
-    // for (size_t i = 0; i < _server.getCgiEx().size(); ++i) {
     for (size_t i = 0; i < _server.getLoci("/cgi-bin").getCgiEx().size(); ++i) {        
         if (_server.getLoci("/cgi-bin").getCgiEx()[i] == ext) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Response::isDirectory(std::string filePath) {
+
+    std::string path2;
+    if (filePath[filePath.size() - 1] == '/')
+        path2 = filePath.substr(0, filePath.size() - 1);
+    else
+        path2 = filePath;
+    // std::cout << "PATH2 : " << path2 << std::endl;
+    struct stat path_stat;
+    if (stat(path2.c_str(), &path_stat) == 0) {
+        if (S_ISDIR(path_stat.st_mode) != 0) {
+            // std::cout << "DIRECTORY" << std::endl;
             return true;
         }
     }
@@ -109,11 +126,13 @@ bool Response::IsCgiExtension(std::string file)
 void Response::setPathFile()
 {
     std::string str = _request.getUri();
-	if (str[str.length() - 1] == '/')
-	{
+    // std::cout << "PATH1 : " << str << std::endl;
+    if (str == "/")
         str = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndex();
-        // str = str.insert(str.size(), _request.getLocation().getIndex());
-    } else {
+    else if (isDirectory(str))
+        str = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndex();
+    else
+    {
         std::string uri = _request.getUri();
         if (uri.find('?') != std::string::npos) {
             str = uri.substr(0, uri.find('?'));
@@ -122,7 +141,7 @@ void Response::setPathFile()
         }
 
         std::string str2 = "/cgi-bin";
-        if (IsCgiExtension(str) == true) {
+        if (IsCgiExtension(str) == true && !(_request.getContentType() == "multipart/form-data")) {
             str = str.substr(1, str.length() - 1);
         } 
         else if (str.compare(0, str2.length(), str2) == 0)
@@ -132,10 +151,7 @@ void Response::setPathFile()
         }
         else if (_request.getLocation().getRoot() == _server.getRoot())
         {
-            // std::cout << "str0 : " << str << std::endl;
-            // std::cout << "_server.getRoot() : " << _server.getRoot() << std::endl;
             str = _server.getRoot() + str;
-            // std::cout << "str : " << str << std::endl;
         }
         else
         {
@@ -185,7 +201,6 @@ void Response::errorData() {
 bool Response::authorizedMethod() {
 
     for (size_t i = 0; i < _request.getLocation().getMethod().size(); ++i) {
-        // if (_server.getMethod()[i] == _request.getMethod()) {
         if (_request.getLocation().getMethod()[i] == _request.getMethod()) {
 			// std::cout << _request.getLocation().getPath() << std::endl;
             return true;
@@ -213,7 +228,9 @@ std::string Response::makeHeader() {
 void Response::processRequest() {
 
     if (_request.getContentLength() <= _server.getClientMax()) {
-        if (authorizedMethod()) {
+        if (_request.getVersion() != "HTTP/1.1")
+            _status = 505;
+        else if (authorizedMethod()) {
             if (_request.getMethod() == "GET" || _request.getMethod() == "POST") {
                 if (IsCgiExtension(_filePath)) {
                     Cgi *cgi = new Cgi(_filePath);
@@ -231,7 +248,7 @@ void Response::processRequest() {
                     }
                     delete cgi;
                 } else {
-                    if (_request.getContentType() == "multipart/form-data") {
+                    if (_request.getContentType() == "multipart/form-data") { // upload
                         Upload *upload = new Upload(_request);
                         _status = upload->doUpload();
                         if (_status == 1 || _status == 2) {
@@ -241,18 +258,21 @@ void Response::processRequest() {
                             _status = 500;
                         delete upload;
                     }
-                    if (_filePath.find('.') != std::string::npos) { // fichier
+                    else if (isDirectory(_filePath)) { // dossier
+                        // std::cout << "doss" << std::endl;
+                        // si directory listing est actif
+                        if (_request.getLocation().getAutoindex() == 1) {
+                            
+                        _status = 500;
+                        }
+                    }
+                    else { // fichier
                         std::ifstream file(_filePath.c_str());
 					    if (file.fail()) {
-                            std::cout << "test\n";
 					    	_status = 404;
 					    } else
 					    	_body << file.rdbuf();
                     }
-                    // } else { // dossier
-                    //     
-                        // directory listing ?
-                    // }
                 }
             } else if (_request.getMethod() == "DELETE") {
                 if (remove(_filePath.c_str()) != 0) {
@@ -265,8 +285,7 @@ void Response::processRequest() {
         } else
             _status = 405;
         if (_status == 200 && _body) {
-            std::string ext = _filePath.substr(_filePath.rfind(".") + 1);
-            _ctype = types[ext];
+            _ctype = types[_filePath.substr(_filePath.rfind(".") + 1)];
             _content << makeHeader();
 			_content << _body.str();
 			_finalRes = _content.str();
@@ -278,5 +297,4 @@ void Response::processRequest() {
     _content << makeHeader();
 	_content << _body.str();
 	_finalRes = _content.str();
-
 }
