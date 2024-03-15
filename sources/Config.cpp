@@ -159,7 +159,10 @@ int Config::missElement(Server &server)
 
 int Config::makePort(Server &server, std::string str, int &nbPort)
 {
-	int port = Utils::stringToInt(getValue(str));
+	std::string port_str = getValue(str);
+	if (port_str.empty())
+		throw ConfigException("Invalid Port");
+	int port = Utils::stringToInt(port_str);
 	if (port <= 0)
 		throw ConfigException("Invalid Port");
 	if (server.setPort(port))
@@ -224,7 +227,10 @@ int Config::makeIndex(Location &loc, std::string str, int &nbIndex)
 
 int Config::makeClientMax(Server &server, std::string str, int &nbClientMax)
 {
-	unsigned int client_max_body_size = Utils::stringToInt(getValue(str));
+	std::string client_max_body_size_str = getValue(str);
+	if (client_max_body_size_str.empty())
+		throw ConfigException("Invalid Client Max Body Size");
+	unsigned int client_max_body_size = Utils::stringToInt(client_max_body_size_str);
 	if (client_max_body_size <= 0)
 		throw ConfigException("Invalid Client Max Body Size");
 	if (server.setClientMax(client_max_body_size))
