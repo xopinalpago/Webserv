@@ -36,6 +36,8 @@ clean:
 
 fclean: clean
 	$(RM) $(NAME)
+	rm -r uploads
+	rm .cgi.txt
 
 re: fclean all
 
