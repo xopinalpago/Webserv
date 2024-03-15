@@ -59,13 +59,13 @@ int Cgi::mapToChar() {
 
     memset(&_cenv, 0, sizeof(_cenv));
     std::map<std::string, std::string>::iterator it;
-    _cenv = (char**)malloc(sizeof(char*) * (_env.size() + 1));
+    _cenv = new char*[_env.size() + 1];
     if (!_cenv)
         return 1;
     int i = 0;
     for (it = _env.begin() ; it != _env.end() ; ++it) {
         int len = (it->first).length() + 1 + (it->second).length() + 1;
-        _cenv[i] = (char*)malloc(sizeof(char) * len);
+        _cenv[i] = new char [len];
         if (!_cenv[i])
             return 1;
         strcpy(_cenv[i], (it->first).c_str());
@@ -160,6 +160,10 @@ int Cgi::execCGI(Request request) {
         return 500;
     
     // executables et arguments (en fonction du fichier de config)
+    // si c'est une extension qui n'est pas 
+
+
+
     args = (char **)malloc(sizeof(char *) * 3);
     args[1] = (char *)malloc(sizeof(char) * (_filePath.size() + 1));
     strcpy(args[1], _filePath.c_str());
@@ -172,8 +176,8 @@ int Cgi::execCGI(Request request) {
         strcpy(exec, "/usr/bin/python3");
     }
     else if (ext == "php") {
-        args[0] = (char *)malloc(sizeof(char) * (strlen("php") + 1));
-        strcpy(args[0], "php");
+        args[0] = (char *)malloc(sizeof(char) * (strlen("/usr/bin/php") + 1));
+        strcpy(args[0], "/usr/bin/php");
         exec = (char *)malloc(sizeof(char) * (strlen("/usr/bin/php") + 1));
         strcpy(exec, "/usr/bin/php");
     } else {

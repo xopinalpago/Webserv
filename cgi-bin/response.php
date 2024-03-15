@@ -4,8 +4,8 @@
     echo '<!DOCTYPE html>
     <html lang="en">
         <head>
-            <link href="./style/style.css" rel="stylesheet">
-            <link href="./style/form.css" rel="stylesheet">
+            <link href="/style/style.css" rel="stylesheet">
+            <link href="/style/form.css" rel="stylesheet">
             <title>Response</title>
         </head>
         <body>

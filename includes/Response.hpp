@@ -10,7 +10,8 @@
 #include "Cgi.hpp"
 #include "Upload.hpp"
 
-class Response {
+class 
+Response {
 
     public :
         Response();
@@ -42,6 +43,7 @@ class Response {
         bool        IsCgiExtension(std::string file);
         std::string makeHeader();
         bool        authorizedMethod();
+        bool        isDirectory(std::string path);
 
     private :
         Request                     _request;
