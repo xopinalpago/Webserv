@@ -182,8 +182,8 @@ int Launcher::readServer(User &user)
 
 	std::cout << "SIZE = " << request.getAllRequest().size() << std::endl;
 	std::cout << "**************REQUEST***************" << std::endl;
-	// std::cout << request.getAllRequest() << std::endl;
-	std::cout << "URI = " << request.getUri() << std::endl;
+	std::cout << request.getAllRequest() << std::endl;
+	// std::cout << "URI = " << request.getUri() << std::endl;
 	// std::cout << "URI = " << request.getUri() << std::endl;
 	std::cout << "************************************" << std::endl;
 
@@ -200,7 +200,7 @@ void	Launcher::sendServer(User &user)
 	else
 		user.updateTime();
 	// std::cout << "******* content dans sendServer *******" << std::endl;
-	// std::cout << content << std::endl;
+	// std::cout << res->getFinalRes().c_str() << std::endl;
 	// std::cout << "***************************************" << std::endl;
 
 	FD_CLR(user.getFd(), &writefds);

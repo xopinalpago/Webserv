@@ -97,7 +97,6 @@ bool Response::IsCgiExtension(std::string file)
     
     size_t pos = file.rfind(".");
     std::string ext = file.substr(pos + 1, _filePath.length() - pos + 1);
-    // for (size_t i = 0; i < _server.getCgiEx().size(); ++i) {
     for (size_t i = 0; i < _server.getLoci("/cgi-bin").getCgiEx().size(); ++i) {        
         if (_server.getLoci("/cgi-bin").getCgiEx()[i] == ext) {
             return true;
@@ -109,11 +108,11 @@ bool Response::IsCgiExtension(std::string file)
 void Response::setPathFile()
 {
     std::string str = _request.getUri();
-	if (str[str.length() - 1] == '/')
+	if (str[str.length() - 1] == '/' && !(_request.getContentType() == "multipart/form-data"))
 	{
         str = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndex();
-        // str = str.insert(str.size(), _request.getLocation().getIndex());
     } else {
+
         std::string uri = _request.getUri();
         if (uri.find('?') != std::string::npos) {
             str = uri.substr(0, uri.find('?'));
@@ -122,7 +121,7 @@ void Response::setPathFile()
         }
 
         std::string str2 = "/cgi-bin";
-        if (IsCgiExtension(str) == true) {
+        if (IsCgiExtension(str) == true && !(_request.getContentType() == "multipart/form-data")) {
             str = str.substr(1, str.length() - 1);
         } 
         else if (str.compare(0, str2.length(), str2) == 0)
@@ -132,7 +131,7 @@ void Response::setPathFile()
         }
         else if (_request.getLocation().getRoot() == _server.getRoot())
         {
-            str = _server.getRoot() + "/" + str;
+            str = _server.getRoot() + str;
         }
         else
         {
@@ -155,7 +154,7 @@ void Response::errorData() {
         errorFile.open((_server.getErrorPage()[_status]).c_str());
     } else {
         std::stringstream ss;
-        ss << "./pages/error_pages/error_page_" << 500 << ".html";
+        ss << "./pages/error_pages/error_page_" << _status << ".html";
         std::string fileName = ss.str();
 	    errorFile.open(fileName.c_str());
     }
@@ -170,9 +169,8 @@ void Response::errorData() {
 bool Response::authorizedMethod() {
 
     for (size_t i = 0; i < _request.getLocation().getMethod().size(); ++i) {
-        // if (_server.getMethod()[i] == _request.getMethod()) {
         if (_request.getLocation().getMethod()[i] == _request.getMethod()) {
-			std::cout << _request.getLocation().getPath() << std::endl;
+			// std::cout << _request.getLocation().getPath() << std::endl;
             return true;
         }
     }
@@ -198,7 +196,9 @@ std::string Response::makeHeader() {
 void Response::processRequest() {
 
     if (_request.getContentLength() <= _server.getClientMax()) {
-        if (authorizedMethod()) {
+        if (_request.getVersion() != "HTTP/1.1")
+            _status = 505;
+        else if (authorizedMethod()) {
             if (_request.getMethod() == "GET" || _request.getMethod() == "POST") {
                 if (IsCgiExtension(_filePath)) {
                     Cgi *cgi = new Cgi(_filePath);
@@ -226,10 +226,9 @@ void Response::processRequest() {
                             _status = 500;
                         delete upload;
                     }
-                    if (_filePath.find('.') != std::string::npos) { // fichier
+                    else if (_filePath.find('.') != std::string::npos) { // fichier
                         std::ifstream file(_filePath.c_str());
 					    if (file.fail()) {
-                            std::cout << "test\n";
 					    	_status = 404;
 					    } else
 					    	_body << file.rdbuf();

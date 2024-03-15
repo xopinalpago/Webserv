@@ -1,6 +1,6 @@
 <?php
     $query = $_SERVER["QUERY_STRING"];
-    // echo "La valeur de la variable d'environnement NOM_VARIABLE est : " . $query;
+    header("Location: /response.php?$query");
     echo '<!DOCTYPE html>
     <html lang="en">
         <head>
@@ -12,7 +12,7 @@
             <h1 class="title">Response</h1>
             <h2>Hello, World!</h2>
             <p>' . $query . '</p>
-            <a href="site_index.html"><button>INDEX</button></a>
+            <a href="/site_index.html"><button>INDEX</button></a>
         </body>
     </html>';
 ?>

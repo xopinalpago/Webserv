@@ -54,8 +54,8 @@ int Config::checkLocation(Server &server)
         {
             std::string key1 = keys[i];
             std::string key2 = keys[j];
-			std::cout << "key1 = " << key1 << std::endl;
-			std::cout << "key2 = " << key2 << std::endl;
+			// std::cout << "key1 = " << key1 << std::endl;
+			// std::cout << "key2 = " << key2 << std::endl;
             if (server.getLoc()[key1].getPath() == server.getLoc()[key2].getPath())
             {
                 return (1);

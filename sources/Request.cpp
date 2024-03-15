@@ -40,6 +40,10 @@ std::string		Request::getUri(void)
 
 std::string		Request::getVersion(void)
 {
+	// std::cout << "version: " << version << std::endl;
+	// std::cout << "size: " << version.size() << std::endl;
+	// std::cout << "last: " << version[version.size()-2] << std::endl;
+
 	return (this->version);
 }
 
@@ -208,7 +212,7 @@ int	Request::parseRequest(void)
 	int	lpos = vAllRequest[0].find(' ', fpos + 1);
 	method	= vAllRequest[0].substr(0, fpos);
 	uri = vAllRequest[0].substr(fpos + 1, lpos - fpos - 1);
-	version = vAllRequest[0].substr(lpos + 1, lpos - vAllRequest[0].size());
+	version = vAllRequest[0].substr(lpos + 1, vAllRequest[0].size() - lpos - 2);
 
 	if (method.length() == 0 || uri.length() == 0 || version.length() == 0)
 		return (1);
@@ -306,7 +310,7 @@ int Request::setLocation(std::map<std::string, Location> locations)
 	}
 	if (tempLoc.getPath().length() != 0)
 	{
-		std::cout << "tempLoc = " << tempLoc.getPath() << std::endl;
+		// std::cout << "tempLoc = " << tempLoc.getPath() << std::endl;
 		this->loc = tempLoc;
 	}
 	else

@@ -118,7 +118,7 @@ int Cgi::create_env(Request request) {
     _env["REQUEST_URI"] = request.getUri();
     // _env["REQUEST_URI"] = "/upload.php";
 
-    std::cout << "CONTENT_TYPE : " << _env["CONTENT_TYPE"] << std::endl;
+    // std::cout << "CONTENT_TYPE : " << _env["CONTENT_TYPE"] << std::endl;
     // std::cout << "SCRIPT_FILENAME : " << _env["SCRIPT_FILENAME"] << std::endl;
 
     return (mapToChar());
