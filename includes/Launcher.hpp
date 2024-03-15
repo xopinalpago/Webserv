@@ -4,7 +4,7 @@
 #include <map>
 #include <vector>
 
-#include "Config.hpp"
+// #include "Config.hpp"
 #include "Server.hpp"
 #include "User.hpp"
 #include "Request.hpp"
@@ -35,7 +35,6 @@ class Launcher
         void	sendServer(User &user);
         void    listenServer(Server &server);
 		int 	initSets(void);
-		int 	initServer(Server &server);
 		void 	getUserServer(User &user);
 		int		checkServers(void);
 		void 	checkServerName(void);
@@ -45,6 +44,7 @@ class Launcher
 		Launcher(void);
 		~Launcher(void);
 
+		int 	initServer(Server &server);
 		int 	initConfig(std::string &filename);
 		int 	runServer(void);
 		void	closeAllConnection(void);

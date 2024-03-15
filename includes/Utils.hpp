@@ -15,6 +15,7 @@ class Utils {
 		static int 			stringToInt(std::string str);
 		static int			inVector(std::vector<std::string> vec, std::string elem);
 		static std::string 	trim(std::string& str);
+		static std::string 	trimTab(std::string& str);
 };
 
 #endif

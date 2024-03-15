@@ -190,6 +190,11 @@ Server	Request::getServer(void) const
 	return (this->server);
 }
 
+Location	Request::getLocation(void)
+{
+	return (this->loc);
+}
+
 void	Request::setServer(Server server)
 {
 	this->server = server;
@@ -262,5 +267,49 @@ int	Request::parseRequest(void)
 		}
 	}
 	// contentLength = allRequest.size();
+	return (0);
+}
+
+std::vector<std::string> splitBySlash(std::string str) {
+    std::vector<std::string> tokens;
+    std::stringstream ss(str);
+    std::string token;
+    while (std::getline(ss, token, '/')) {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
+
+int Request::setLocation(std::map<std::string, Location> locations)
+{
+	std::string locPath;
+	Location tempLoc;
+	size_t	end;
+
+	for (std::map<std::string, Location>::iterator it = locations.begin(); it != locations.end(); ++it)
+	{
+		locPath = it->first;
+		if (tempLoc.getPath().length() == 0 && locPath == "/")
+		{
+			tempLoc = it->second;
+			continue;
+		}
+		for (end = 0; uri[end] != '\0' && locPath[end] != '\0' && uri[end] == locPath[end]; end++)
+		{
+			;
+		}
+		if (locPath[end] == '\0' && (uri[end] == '\0' || uri[end] == '/'))
+		{
+			if (tempLoc.getPath().length() == 0 || (tempLoc.getPath().length() != 0 && tempLoc.getPath().length() < it->first.length()))
+				tempLoc = it->second;
+		}
+	}
+	if (tempLoc.getPath().length() != 0)
+	{
+		std::cout << "tempLoc = " << tempLoc.getPath() << std::endl;
+		this->loc = tempLoc;
+	}
+	else
+		return (1);
 	return (0);
 }

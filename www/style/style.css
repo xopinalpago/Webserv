@@ -1,0 +1,33 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    background-color: lightgray;
+}
+
+.title {
+    display: flex;
+    justify-content: center;
+    margin-top: 0;
+    font-size:5em;
+    color: #4b4b4b;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+button {
+    font-size: larger;
+    text-transform: uppercase;
+    width: 200px;
+    font-family: 'Times';
+    background-color: white;
+    border-width: 0;
+    color: #4b4b4b;
+    border-radius: 10px;
+    border: 4px double #cccccc;
+    padding: 20px;
+}
+
+button:active {
+    border-style: inset;
+}

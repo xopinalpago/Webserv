@@ -23,6 +23,8 @@ class User
 		User(void);
 		User(Server &server);
 		~User(void);
+		
+		Location		loc;
 
 		int			getFd(void) const;
 		Request 	getRequest(void) const;

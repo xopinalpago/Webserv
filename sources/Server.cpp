@@ -7,8 +7,6 @@ Server::Server(void)
 	this->client_max_body_size = 0;
     this->host = 0;
 	this->server_name = "";
-	this->root = "";
-	this->index = "";
     return ;
 }
 
@@ -55,16 +53,6 @@ int Server::setServerName(std::string server_name)
     return (0);
 }
 
-int Server::setRoot(std::string root)
-{
-    if (root.length() == 0)
-    {
-        return (1);
-    }
-	this->root = root;
-    return (0);
-}
-
 int Server::setIndex(std::string index)
 {
     if (index.length() == 0)
@@ -85,53 +73,72 @@ unsigned int Server::setClientMax(unsigned int client_max_body_size)
     return (0);
 }
 
-int Server::setDirectory(std::string directory_listing)
+std::string Server::getRoot(void) const
 {
-    if (directory_listing.length() == 0)
+    return (this->root);
+}
+
+int Server::setRoot(std::string root)
+{
+    if (root.length() == 0)
     {
         return (1);
     }
-	this->directory_listing = directory_listing;
+	this->root = root;
     return (0);
 }
 
-void Server::setMethod(std::string tmp)
-{
-    if (Utils::inVector(this->method, tmp)) 
-    {
-        this->method.push_back(tmp);
-    }
-    return ;
-}
+// int Server::setDirectory(std::string directory_listing)
+// {
+//     if (directory_listing.length() == 0)
+//     {
+//         return (1);
+//     }
+// 	this->directory_listing = directory_listing;
+//     return (0);
+// }
 
-std::vector<std::string> Server::getMethod(void) const
-{
-    return (this->method);
-}
+// void Server::setMethod(std::string tmp)
+// {
+//     if (Utils::inVector(this->method, tmp)) 
+//     {
+//         this->method.push_back(tmp);
+//     }
+//     return ;
+// }
 
-std::string Server::getMethodi(int i) const
-{
-    return (this->method[i]);
-}
+// std::vector<std::string> Server::getMethod(void) const
+// {
+//     return (this->method);
+// }
 
-void Server::setCgiEx(std::string tmp)
-{
-    if (Utils::inVector(this->cgi_extension, tmp)) 
-    {
-        this->cgi_extension.push_back(tmp);
-    }
-    return ;
-}
+// std::string Server::getMethodi(int i) const
+// {
+//     if (i < 0 || i >= (int)this->method.size())
+//         return ("");
+//     return (this->method[i]);
+// }
 
-std::vector<std::string> Server::getCgiEx(void) const
-{
-    return (this->cgi_extension);
-}
+// void Server::setCgiEx(std::string tmp)
+// {
+//     if (Utils::inVector(this->cgi_extension, tmp)) 
+//     {
+//         this->cgi_extension.push_back(tmp);
+//     }
+//     return ;
+// }
 
-std::string Server::getCgiExi(int i) const
-{
-    return (this->cgi_extension[i]);
-}
+// std::vector<std::string> Server::getCgiEx(void) const
+// {
+//     return (this->cgi_extension);
+// }
+
+// std::string Server::getCgiExi(int i) const
+// {
+//     if (i < 0 || i >= (int)this->cgi_extension.size())
+//             return ("");
+//     return (this->cgi_extension[i]);
+// }
 
 void Server::setErrorPage(int key, std::string tmp)
 {
@@ -169,11 +176,6 @@ std::string Server::getServerName(void) const
     return (this->server_name);
 }
 
-std::string Server::getRoot(void) const
-{
-    return (this->root);
-}
-
 std::string Server::getIndex(void) const
 {
     return (this->index);
@@ -184,7 +186,27 @@ unsigned int Server::getClientMax(void) const
     return (this->client_max_body_size);
 }
 
-std::string Server::getDirectory(void) const
+// std::string Server::getDirectory(void) const
+// {
+//     return (this->directory_listing);
+// }
+
+int Server::setLoc(std::string key, Location data)
 {
-    return (this->directory_listing);
+    if (this->locations.find(key) == this->locations.end()) 
+    {
+        this->locations[key] = data;
+        return (0);
+    }
+    return (1);
+}
+
+Location Server::getLoci(std::string key)
+{
+    return (this->locations[key]);
+}		
+        
+std::map<std::string, Location>& Server::getLoc(void)
+{
+	return (this->locations);
 }

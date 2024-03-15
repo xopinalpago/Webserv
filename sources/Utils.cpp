@@ -42,6 +42,16 @@ std::string Utils::trim(std::string& str)
     return (str.substr(first, (last - first + 1)));
 }
 
+std::string Utils::trimTab(std::string& str)
+{
+    size_t first = str.find_first_not_of('\t');
+    if (std::string::npos == first) {
+        return str;
+    }
+    size_t last = str.find_last_not_of('\t');
+    return (str.substr(first, (last - first + 1)));
+}
+
 int Utils::inVector(std::vector<std::string> vec, std::string elem)
 {
     for (size_t i = 0; i < vec.size(); i++)

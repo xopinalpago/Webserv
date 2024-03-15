@@ -1,0 +1,14 @@
+main {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+#welcome {
+    margin-bottom: 0;
+    font-size: smaller;
+    color:dimgray;
+}
+

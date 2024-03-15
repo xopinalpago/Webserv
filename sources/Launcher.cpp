@@ -15,30 +15,30 @@ void Launcher::errorFunction(std::string word)
 	std::cout << word << " failed" << std::endl;
 }
 
-int Launcher::initConfig(std::string &filename)
-{
-	Config	config;
+// int Launcher::initConfig(std::string &filename)
+// {
+// 	Config	config;
 
-	config.setNbConfig(filename, "server ");
-	if (config.getNbConfig() == 0)
-		return (1);
-	if (config.getLineFile(filename))
-		return (1); 
-	for (int i = 1; i <= config.getNbConfig(); i++)
-	{
-		Server server;
-		if (config.parseFile(i, server))
-			return (1);
-		if (config.missElement(server))
-			return (1);
-		if (initServer(server))
-			return (1);
-	}
-	if (config.getNbConfig() > 1)
-		if (checkServers())
-			return (1);
-	return (0);
-}
+// 	// config.setNbConfig(filename, "server ");
+// 	// if (config.getNbConfig() == 0)
+// 	// 	return (1);
+// 	if (config.getLineFile(filename))
+// 		return (1); 
+// 	// for (int i = 1; i <= config.getNbConfig(); i++)
+// 	// {
+// 		// Server server;
+// 		if (config.parseFile(i, server))
+// 			return (1);
+// 		if (config.missElement(server))
+// 			return (1);
+// 		if (initServer(server))
+// 			return (1);
+// 	}
+// 	if (config.getNbConfig() > 1)
+// 		if (checkServers())
+// 			return (1);
+// 	return (0);
+// }
 
 void Launcher::listenServer(Server &server)
 {
@@ -176,12 +176,15 @@ int Launcher::readServer(User &user)
 
 	user.setRequest(request);
 	user.setServer(Servers);
+
 	FD_CLR(user.getFd(), &readfds);
 	FD_SET(user.getFd(), &writefds);
 
 	std::cout << "SIZE = " << request.getAllRequest().size() << std::endl;
 	std::cout << "**************REQUEST***************" << std::endl;
-	std::cout << request.getAllRequest() << std::endl;
+	// std::cout << request.getAllRequest() << std::endl;
+	std::cout << "URI = " << request.getUri() << std::endl;
+	// std::cout << "URI = " << request.getUri() << std::endl;
 	std::cout << "************************************" << std::endl;
 
 	return (1);
@@ -285,6 +288,8 @@ int Launcher::runServer(void)
 {
 	end_server = false;
 
+	if (checkServers())
+		return (1);
 	checkServerName();
 	if (initSets())
 		return (1);
@@ -331,9 +336,18 @@ int Launcher::checkServers(void)
 
     for (std::map<int, Server>::iterator it = Servers.begin(); it != Servers.end(); ++it)
     {
+		int root = 0;
+    	for (std::map<std::string, Location>::iterator itloc = it->second.getLoc().begin(); itloc != it->second.getLoc().end(); ++itloc)
+		{
+			if (itloc->first == "/")
+				root = 1;
+		}
+		if (root == 0)
+			return (1);
         keys.push_back(it->first);
     }
-
+	if (Servers.size() == 1)
+		return (0);
     for (size_t i = 0; i < keys.size() - 1; ++i)
     {
         for (size_t j = i + 1; j < keys.size(); ++j)

@@ -97,8 +97,9 @@ bool Response::IsCgiExtension(std::string file)
     
     size_t pos = file.rfind(".");
     std::string ext = file.substr(pos + 1, _filePath.length() - pos + 1);
-    for (size_t i = 0; i < _server.getCgiEx().size(); ++i) {
-        if (_server.getCgiEx()[i] == ext) {
+    // for (size_t i = 0; i < _server.getCgiEx().size(); ++i) {
+    for (size_t i = 0; i < _server.getLoci("/cgi-bin").getCgiEx().size(); ++i) {        
+        if (_server.getLoci("/cgi-bin").getCgiEx()[i] == ext) {
             return true;
         }
     }
@@ -108,21 +109,35 @@ bool Response::IsCgiExtension(std::string file)
 void Response::setPathFile()
 {
     std::string str = _request.getUri();
-	if (!str.compare("/"))
+	if (str[str.length() - 1] == '/')
 	{
-		str = _server.getIndex();
-	} else {
+        str = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndex();
+        // str = str.insert(str.size(), _request.getLocation().getIndex());
+    } else {
         std::string uri = _request.getUri();
         if (uri.find('?') != std::string::npos) {
             str = uri.substr(0, uri.find('?'));
         } else {
             str = uri;
         }
+
+        std::string str2 = "/cgi-bin";
         if (IsCgiExtension(str) == true) {
             str = str.substr(1, str.length() - 1);
+        } 
+        else if (str.compare(0, str2.length(), str2) == 0)
+        {
+            str = str.substr(str2.size(), str.size() - str2.size());
+            str = _request.getLocation().getRoot() + str;
         }
-        else {
-            str = "pages" + str;
+        else if (_request.getLocation().getRoot() == _server.getRoot())
+        {
+            str = _server.getRoot() + "/" + str;
+        }
+        else
+        {
+            std::string tempPath2 = str.substr(_request.getLocation().getPath().length(), str.length() - _request.getLocation().getPath().length());
+            str = _request.getLocation().getRoot() + tempPath2;
         }
     }
     _filePath = str;
@@ -154,8 +169,10 @@ void Response::errorData() {
 
 bool Response::authorizedMethod() {
 
-    for (size_t i = 0; i < _server.getMethod().size(); ++i) {
-        if (_server.getMethod()[i] == _request.getMethod()) {
+    for (size_t i = 0; i < _request.getLocation().getMethod().size(); ++i) {
+        // if (_server.getMethod()[i] == _request.getMethod()) {
+        if (_request.getLocation().getMethod()[i] == _request.getMethod()) {
+			std::cout << _request.getLocation().getPath() << std::endl;
             return true;
         }
     }
