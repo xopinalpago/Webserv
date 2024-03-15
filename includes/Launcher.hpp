@@ -30,7 +30,6 @@ class Launcher
 		
 		// std::map<int, std::vector<RequestInfo> > requestMap;
 
-		void 	errorFunction(std::string word);
 		int		readServer(User &user);
         void	sendServer(User &user);
         void    listenServer(Server &server);
@@ -48,10 +47,38 @@ class Launcher
 		int 	initConfig(std::string &filename);
 		int 	runServer(void);
 		void	closeAllConnection(void);
+		// void    closeAllConnectionExcep(void);
 
 		std::map<int, User> 	Users;
 		std::map<int, Server> 	Servers;
-	class SigError : public std::exception {};
+
+		class LauncherException : public std::exception {
+		public :
+			LauncherException(std::string err) throw() {
+				_err = "Launcher Error: " + err;
+			}
+			virtual const char* what() const throw() {
+				return (_err.c_str());
+			}
+			~LauncherException() throw() {}
+		
+		private:
+			std::string _err;
+		};
+		class LauncherInitException : public std::exception {
+		public :
+			LauncherInitException(std::string err) throw() {
+				_err = "Launcher Error: " + err;
+			}
+			virtual const char* what() const throw() {
+				return (_err.c_str());
+			}
+			~LauncherInitException() throw() {}
+		
+		private:
+			std::string _err;
+		};
+		class SigError : public std::exception {};
 };
 
 #endif

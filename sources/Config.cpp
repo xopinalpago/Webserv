@@ -37,33 +37,7 @@ Config::~Config(void) {}
 //     return ;
 // }
 
-int Config::checkLocation(Server &server)
-{
-    std::vector<std::string> keys;
 
-	if (server.getLoc().size() == 1)
-		return (0);
-    for (std::map<std::string, Location>::iterator it = server.getLoc().begin(); it != server.getLoc().end(); ++it)
-    {
-        keys.push_back(it->first);
-    }
-
-    for (size_t i = 0; i < keys.size() - 1; ++i)
-    {
-        for (size_t j = i + 1; j < keys.size(); ++j)
-        {
-            std::string key1 = keys[i];
-            std::string key2 = keys[j];
-			std::cout << "key1 = " << key1 << std::endl;
-			std::cout << "key2 = " << key2 << std::endl;
-            if (server.getLoc()[key1].getPath() == server.getLoc()[key2].getPath())
-            {
-                return (1);
-            }
-        }
-    }
-    return (0);
-}
 
 int Config::getLineFile(std::string &filename, Launcher &launcher)
 {
@@ -308,7 +282,12 @@ int Config::makeMethod(Location &loc, std::string str, int &nbAllowMethods)
 		std::string method = getValueLoc(str, pos);
 		if (method.length() == 0)
 			throw ConfigException("Invalid Method");
-		loc.setMethod(method);
+		if (method == "GET" || method == "POST" || method == "DELETE")
+			loc.setMethod(method);
+		else if (method == "HEAD" || method == "PUT" || method == "CONNECT" || method == "OPTIONS" || method == "TRACE" || method == "PATCH")
+			throw ConfigException("Method Not Implemented");
+		else 
+			throw ConfigException("Invalid Method");
 	}
 	nbAllowMethods++;
 	if (nbAllowMethods > 1)

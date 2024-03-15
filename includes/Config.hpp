@@ -57,7 +57,6 @@ class Config {
         int         makeAutoIndex(Location &loc, std::string str, int &nbAutoIndex);
         std::string getValue(std::string line);
         int	        fillLocation(Server &server);
-        int         checkLocation(Server &server);
         std::string getValueLoc(std::string line, int &pos);
         int makeMethod(Location &loc, std::string str, int &nbAllowMethods);
         int makeCgiEx(Location &loc, std::string str, int &nbCgiEx);

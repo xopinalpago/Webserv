@@ -132,16 +132,31 @@ void Response::setPathFile()
         }
         else if (_request.getLocation().getRoot() == _server.getRoot())
         {
-            str = _server.getRoot() + "/" + str;
+            // std::cout << "str0 : " << str << std::endl;
+            // std::cout << "_server.getRoot() : " << _server.getRoot() << std::endl;
+            str = _server.getRoot() + str;
+            // std::cout << "str : " << str << std::endl;
         }
         else
         {
-            std::string tempPath2 = str.substr(_request.getLocation().getPath().length(), str.length() - _request.getLocation().getPath().length());
+            std::string tempPath2;
+            if (_request.getLocation().getPath() == "/")
+            {
+                tempPath2 = str;
+            }
+            else
+            {
+                // std::cout << "str0 : " << str << std::endl;
+                tempPath2 = str.substr(_request.getLocation().getPath().length(), str.length() - _request.getLocation().getPath().length());
+                // std::cout << "tempPath2 : " << tempPath2 << std::endl;
+                // std::cout << "_request.getLocation().getRoot() : " << _request.getLocation().getRoot() << std::endl;
+            }
             str = _request.getLocation().getRoot() + tempPath2;
+            // std::cout << "str2 : " << str << std::endl;
         }
     }
     _filePath = str;
-    // std::cout << "_filePath : " << _filePath << std::endl;
+    std::cout << "_filePath : " << _filePath << std::endl;
 
 }
 
@@ -155,7 +170,7 @@ void Response::errorData() {
         errorFile.open((_server.getErrorPage()[_status]).c_str());
     } else {
         std::stringstream ss;
-        ss << "./pages/error_pages/error_page_" << 500 << ".html";
+        ss << "./pages/error_pages/error_page_" << _status << ".html";
         std::string fileName = ss.str();
 	    errorFile.open(fileName.c_str());
     }
@@ -172,7 +187,7 @@ bool Response::authorizedMethod() {
     for (size_t i = 0; i < _request.getLocation().getMethod().size(); ++i) {
         // if (_server.getMethod()[i] == _request.getMethod()) {
         if (_request.getLocation().getMethod()[i] == _request.getMethod()) {
-			std::cout << _request.getLocation().getPath() << std::endl;
+			// std::cout << _request.getLocation().getPath() << std::endl;
             return true;
         }
     }

@@ -306,7 +306,7 @@ int Request::setLocation(std::map<std::string, Location> locations)
 	}
 	if (tempLoc.getPath().length() != 0)
 	{
-		std::cout << "tempLoc = " << tempLoc.getPath() << std::endl;
+		// std::cout << "tempLoc = " << tempLoc.getPath() << std::endl;
 		this->loc = tempLoc;
 	}
 	else

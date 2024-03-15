@@ -30,22 +30,23 @@ void User::setFd(int fd)
 
 int User::setServer(std::map<int, Server> Servers)
 {
-	std::string hostname = "";
-	int port = 0;
+	std::string hostname;
 	if (request.getHost().find(':') != std::string::npos)
 	{
 		hostname = request.getHost().substr(0, request.getHost().length() - (request.getHost().length() - request.getHost().find(':')));
-		port = Utils::stringToInt(request.getHost().substr(request.getHost().find(':') + 1, request.getHost().length() - request.getHost().find(':') - 2));
 	}
-	// else
-	// 	hostname = request.getHost();
+	else
+	{
+		hostname = request.getHost().substr(0, request.getHost().size() - 1);
+	}
 
     for (std::map<int, Server>::iterator it = Servers.begin(); it != Servers.end(); ++it)
 	{
-		if (it->second.getServerName() == hostname && it->second.getPort() == port)
+		if (it->second.getServerName() == hostname)
 		{
 			server = it->second;
 			request.setServer(it->second);
+			request.setLocation(request.getServer().getLoc());
 			return (0);
 		}
 	}
