@@ -34,11 +34,15 @@ objects/%.o: sources/%.cpp
 clean:
 	$(RM) objects
 
-fclean: clean
+fclean: clean clean_cgi clean_uploads
 	$(RM) $(NAME)
-	rm -r uploads
-	rm .cgi.txt
+
+clean_cgi:
+	rm -f .cgi.txt
+
+clean_uploads:
+	rm -rf uploads
 
 re: fclean all
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re clean_cgi clean_uploads

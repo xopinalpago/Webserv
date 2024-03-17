@@ -1,10 +1,16 @@
-h1 {
+.title {
     height: 200px;
+    display: flex;
+    align-items: center;
+    
+    color: white;
+    font-size: 5em;
+    font-weight: normal;
+    text-transform: uppercase;
+
     margin-top: 0;
     padding-top: 80px;
     padding-left: 100px;
-    display: flex;
-    align-items: center;
 }
 
 .box {
@@ -32,7 +38,7 @@ h1 {
     padding-left: 100px;
     padding-top: 30px;
     padding-bottom: 30px;
-    transition: color 0.5s, background-color 0.5s ease;
+    transition: color 1s, background-color 1s ease;
     position: relative;
 }
 
