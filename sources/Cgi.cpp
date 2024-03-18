@@ -97,7 +97,6 @@ int Cgi::create_env(Request request) {
     _env["SERVER_PROTOCOL"] = "HTTP/1.1";
     _env["GATEWAY_INTERFACE"] = "CGI/1.1";
     _env["REQUEST_METHOD"] = request.getMethod();
-    // _env["REQUEST_METHOD"] = "post";
     _env["CONTENT_TYPE"] = request.getContentType(); // user
     _env["CONTENT_LENGTH"] = request.getContentLength();
 
@@ -108,15 +107,12 @@ int Cgi::create_env(Request request) {
             _filePath = _filePath.substr(0, _filePath.find('?'));
         }
     } else if (request.getMethod() == "POST") {
-        // std::cout << "POSSSSSSSSSSST" << std::endl;
         _env["QUERY_STRING"] = extractQuery(request);
     } else
         _env["QUERY_STRING"] = "";
     _env["SCRIPT_FILENAME"] = _filePath;
-    // _env["SCRIPT_FILENAME"] = "/upload.php";
     // _env["QUERY_STRING"] = decodeQuery(_env["QUERY_STRING"]);
     _env["REQUEST_URI"] = request.getUri();
-    // _env["REQUEST_URI"] = "/upload.php";
 
     // std::cout << "CONTENT_TYPE : " << _env["CONTENT_TYPE"] << std::endl;
     // std::cout << "SCRIPT_FILENAME : " << _env["SCRIPT_FILENAME"] << std::endl;
@@ -152,37 +148,35 @@ int Cgi::execScript(int *fd_in, int *fd_out) {
     close(*fd_out);
     return pid;
 }
- // < pipe php ./upload.php > .cgi.txt
+
 int Cgi::execCGI(Request request) {
 
-    // create the execution environment
     if (create_env(request) || _cgiFd == -1)
         return 500;
     
-    // executables et arguments (en fonction du fichier de config)
-    // si c'est une extension qui n'est pas 
+    std::map<std::string, std::string> paths = request.getLocation().getCgiPath();
+    std::map<std::string, std::string>::iterator it = paths.begin();
+    std::map<std::string, std::string>::iterator ite = paths.end();
 
+    exec = NULL;
+    args = NULL;
+    std::string ext = _filePath.substr(_filePath.rfind("."));
 
-
-    args = (char **)malloc(sizeof(char *) * 3);
-    args[1] = (char *)malloc(sizeof(char) * (_filePath.size() + 1));
+    args = new char*[3];
+    args[1] = new char [_filePath.size() + 1];
     strcpy(args[1], _filePath.c_str());
     args[2] = NULL;
-    std::string ext = _filePath.substr(_filePath.rfind(".") + 1);
-    if (ext == "py") {
-        args[0] = (char *)malloc(sizeof(char) * (strlen("python3") + 1));
-        strcpy(args[0], "python3");
-        exec = (char *)malloc(sizeof(char) * (strlen("/usr/bin/python3") + 1));
-        strcpy(exec, "/usr/bin/python3");
+    while (it != ite) {
+        if (ext == it->first) {
+            args[0] = new char [strlen(paths[ext].c_str()) + 1];
+            strcpy(args[0], paths[ext].c_str());
+            exec = new char [strlen(paths[ext].c_str()) + 1];
+            strcpy(exec, paths[ext].c_str());
+        }
+        ++it;
     }
-    else if (ext == "php") {
-        args[0] = (char *)malloc(sizeof(char) * (strlen("/usr/bin/php") + 1));
-        strcpy(args[0], "/usr/bin/php");
-        exec = (char *)malloc(sizeof(char) * (strlen("/usr/bin/php") + 1));
-        strcpy(exec, "/usr/bin/php");
-    } else {
+    if (!exec)
         return 501;
-    }
 
     std::string body;
     std::string req = request.getAllRequest();
@@ -191,9 +185,6 @@ int Cgi::execCGI(Request request) {
         body = req.substr(header_end + 4, req.size() - header_end - 4);
     else
         body = "";
-    // std::cout << "***********body***********" << std::endl;
-    // std::cout << body << std::endl;
-    // std::cout << "**************************" << std::endl;
     int fd[2];
     if (pipe(fd) == -1)
         return 500;

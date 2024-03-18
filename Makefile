@@ -1,5 +1,5 @@
 CC = c++
-CFLAGS = -Wall -Wextra -Werror -std=c++98 -MMD
+CFLAGS = -Wall -Wextra -Werror -g3 -std=c++98 -MMD
 RM = rm -rf
 NAME = webserv
 

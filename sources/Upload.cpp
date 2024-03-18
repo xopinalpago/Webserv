@@ -58,10 +58,10 @@ void Upload::parseUpload() {
 
 int Upload::doUpload() {
 
-    std::string folder_name = "uploads";
+    std::string folder_name = "uploads"; // config
     if (std::system(("test -d " + std::string(folder_name)).c_str()) != 0)
         if (std::system(("mkdir " + std::string(folder_name)).c_str()) < 0)
-            return 2; // error while creating 
+            return 2;
     parseUpload();
     std::stringstream path;
     path << folder_name << "/" << filename;

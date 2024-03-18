@@ -112,11 +112,11 @@ bool Response::isDirectory(std::string filePath) {
         path2 = filePath.substr(0, filePath.size() - 1);
     else
         path2 = filePath;
-    // std::cout << "PATH2 : " << path2 << std::endl;
+    if (path2[0] == '/')
+        path2 = path2.substr(1, filePath.size() - 1);
     struct stat path_stat;
     if (stat(path2.c_str(), &path_stat) == 0) {
         if (S_ISDIR(path_stat.st_mode) != 0) {
-            // std::cout << "DIRECTORY" << std::endl;
             return true;
         }
     }
@@ -126,20 +126,16 @@ bool Response::isDirectory(std::string filePath) {
 void Response::setPathFile()
 {
     std::string str = _request.getUri();
-    // std::cout << "PATH1 : " << str << std::endl;
-    if (str == "/")
+    if (str == "/") {
         str = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndex();
-    else if (isDirectory(str))
-        str = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndex();
-    else
-    {
+        std::cout << "str : " << str << std::endl;
+    } else {
         std::string uri = _request.getUri();
         if (uri.find('?') != std::string::npos) {
             str = uri.substr(0, uri.find('?'));
         } else {
             str = uri;
         }
-
         std::string str2 = "/cgi-bin";
         if (IsCgiExtension(str) == true && !(_request.getContentType() == "multipart/form-data")) {
             str = str.substr(1, str.length() - 1);
@@ -172,8 +168,9 @@ void Response::setPathFile()
         }
     }
     _filePath = str;
-    std::cout << "_filePath : " << _filePath << std::endl;
-
+    if (isDirectory(_filePath) && _request.getLocation().getIndex() != "") {
+        _filePath = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndex();
+    }
 }
 
 
@@ -193,7 +190,6 @@ void Response::errorData() {
     if (!errorFile.is_open()) {
         _body << backup[_status];
     } else if (errorFile.is_open() == true) {
-        errorFile.seekg(0, std::ios::beg);
         _body << errorFile.rdbuf();
     }
 }
@@ -215,7 +211,10 @@ std::string Response::makeHeader() {
     std::string ext = _filePath.substr(_filePath.rfind(".") + 1);
 
     _clength = _body.str().length();
-    _ctype = types[ext];
+    if (_status != 200)
+        _ctype = types["html"];
+    else
+        _ctype = types[ext];
     header << "HTTP/1.1 " << _status << " " << messages[_status] << std::endl;
     header << "Content-Type: " << _ctype << std::endl;
     header << "Content-Length: " << _clength << std::endl << std::endl;
@@ -248,7 +247,7 @@ void Response::processRequest() {
                     }
                     delete cgi;
                 } else {
-                    if (_request.getContentType() == "multipart/form-data") { // upload
+                    if (_request.getContentType() == "multipart/form-data") {
                         Upload *upload = new Upload(_request);
                         _status = upload->doUpload();
                         if (_status == 1 || _status == 2) {
@@ -258,18 +257,17 @@ void Response::processRequest() {
                             _status = 500;
                         delete upload;
                     }
-                    else if (isDirectory(_filePath)) { // dossier
-                        // std::cout << "doss" << std::endl;
-                        // si directory listing est actif
+                    else if (isDirectory(_filePath)) {
                         if (_request.getLocation().getAutoindex() == 1) {
-                            
-                        _status = 500;
-                        }
+                            _status = directoryListing(_filePath);
+                        } else
+                            _status = 403;
                     }
-                    else { // fichier
+                    else {
                         std::ifstream file(_filePath.c_str());
 					    if (file.fail()) {
 					    	_status = 404;
+                            _status = 204;
 					    } else
 					    	_body << file.rdbuf();
                     }
@@ -297,4 +295,34 @@ void Response::processRequest() {
     _content << makeHeader();
 	_content << _body.str();
 	_finalRes = _content.str();
+}
+
+int Response::directoryListing(const std::string& directoryPath) {
+
+    std::cout << "Directory listing" << std::endl;
+    std::vector<std::string> lstFiles;
+    DIR *dir;
+    struct dirent *ent;
+
+    dir = opendir(directoryPath.c_str());
+    if (dir != NULL) {
+        while ((ent = readdir(dir)) != NULL) {
+            if (std::string(ent->d_name) != "." && std::string(ent->d_name) != "..") {
+                lstFiles.push_back(ent->d_name);
+            }
+        }
+        closedir(dir);
+    } else {
+        std::cout << "erreur ouverture dossier !" << std::endl;
+        return 500;
+    }
+    std::sort(lstFiles.begin(), lstFiles.end());
+    std::string response = "<!DOCTYPE html>\n<html>\n<head>\n<title>Index of /</title>\n</head>\n<body>\n";
+    response += "<h1>Index of /</h1>\n<hr>\n<ul>\n";
+    for (std::vector<std::string>::const_iterator it = lstFiles.begin(); it != lstFiles.end(); ++it) {
+        response += "<li><a href=\"" + *it + "\">" + *it + "</a></li>\n";
+    }
+    response += "</ul>\n<hr>\n</body>\n</html>\n";
+    _body << response;
+    return 200;
 }
