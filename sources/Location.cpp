@@ -115,6 +115,31 @@ void Location::setCgiPath(std::string key, std::string data)
     return ;
 }
 
+void Location::setRedirectionCode(int code)
+{
+	this->redirectionCode = code;
+}
+
+int Location::setUploadDir(std::string path)
+{
+    if (path.length() == 0)
+    {
+        return (1);
+    }
+	this->upload_dir = path;
+    return (0);
+}
+
+int Location::setRedirectionPath(std::string data)
+{
+    if (data.length() == 0)
+    {
+        return (1);
+    }
+	this->redirectionPath = data;
+    return (0);
+}
+
 std::vector<std::string> Location::getCgiEx(void) const
 {
     return (this->cgi_extension);
@@ -149,4 +174,19 @@ std::string Location::getCgiPathi(std::string key)
 std::map<std::string, std::string> Location::getCgiPath(void) const
 {
 	return (this->cgi_path);
+}
+
+std::string Location::getRedirectionPath(void) const
+{
+	return (this->redirectionPath);
+}
+
+int Location::getRedirectionCode(void) const
+{
+	return (this->redirectionCode);
+}
+
+std::string Location::getUploadDir(void) const
+{
+	return (this->upload_dir);
 }

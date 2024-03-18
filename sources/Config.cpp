@@ -225,6 +225,19 @@ int Config::makeIndex(Location &loc, std::string str, int &nbIndex)
 	return (0);
 }
 
+int Config::makeUploadDir(Location &loc, std::string str, int &nbUploadDir)
+{
+	std::string uploadDir = getValue(str);
+	if (uploadDir.length() == 0)
+		throw ConfigException("Invalid Upload Dir");
+	if (loc.setUploadDir(uploadDir))
+		throw ConfigException("Invalid Upload Dir");
+	nbUploadDir++;
+	if (nbUploadDir > 1)
+		throw ConfigException("Too many Upload Dir");
+	return (0);
+}
+
 int Config::makeClientMax(Server &server, std::string str, int &nbClientMax)
 {
 	std::string client_max_body_size_str = getValue(str);
@@ -321,7 +334,7 @@ int Config::makeCgiPath(Location &loc, std::string str, int &nbCgiPath)
 {
 	int pos = 0;
 	if (str.find(' ', pos) == str.npos)
-		return (1);
+		throw ConfigException("Invalid Cgi Path");
 	while (str.find(' ', pos) != str.npos)
 	{
 		int	fpos = str.find(' ', pos);
@@ -339,6 +352,31 @@ int Config::makeCgiPath(Location &loc, std::string str, int &nbCgiPath)
 	nbCgiPath++;
 	if (nbCgiPath > 1)
 		throw ConfigException("Too many Cgi Path");
+	return (0);
+}
+
+int Config::makeRedirection(Location &loc, std::string str, int &nbRedirection)
+{
+	if (str.find(' ', 0) == str.npos)
+		throw ConfigException("Invalid Redirection");
+	int	fpos = str.find(' ', 0);
+	int	lpos = str.find(' ', fpos + 1);
+	int	llpos = str.find(' ', lpos + 1);
+	int key = Utils::stringToInt(str.substr(fpos + 1, lpos - fpos - 1));
+	std::string path = str.substr(lpos + 1, llpos - lpos - 1);
+	if (!path.empty() && path[path.length() - 1] == ';')
+		path.erase(path.length() - 1);
+	if (path.empty() || lpos < 0)
+		throw ConfigException("Invalid Redirection");
+	if (key != 300 && key != 301 && key != 302 && key != 303 && key != 304 && key != 307 && key != 308)
+		throw ConfigException("Invalid Redirection");
+	if (Utils::fileExists(path))
+		throw ConfigException("Invalid Path Redirection");
+	loc.setRedirectionPath(path);
+	loc.setRedirectionCode(key);
+	nbRedirection++;
+	if (nbRedirection > 1)
+		throw ConfigException("Too many Redirection");
 	return (0);
 }
 
@@ -440,6 +478,8 @@ int	Config::fillLocation(Server &server)
 			int nbAllowMethods = 0;
 			int nbCgiEx = 0;
 			int nbCgiPath = 0;
+			int nbRedirection = 0;
+			int nbUploadDir = 0;
 			Location loc;
 			if (loc.setPath(location[i]))
 				throw ConfigException("Invalid Path");
@@ -457,6 +497,10 @@ int	Config::fillLocation(Server &server)
 					makeCgiEx(loc, location[i], nbCgiEx);
 				else if (location[i].find("cgi_path") == 0)
 					makeCgiPath(loc, location[i], nbCgiPath);
+				else if (location[i].find("return") == 0)
+					makeRedirection(loc, location[i], nbRedirection);
+				else if (location[i].find("upload_dir") == 0)
+					makeUploadDir(loc, location[i], nbUploadDir);
 				i++;
 			}
 			if (loc.getMethod().size() == 0)

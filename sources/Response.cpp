@@ -113,13 +113,14 @@ bool Response::isDirectory(std::string filePath) {
     else
         path2 = filePath;
     if (path2[0] == '/')
-        path2 = path2.substr(1, filePath.size() - 1);
+        path2 = path2.substr(1, path2.size() - 1);
     struct stat path_stat;
     if (stat(path2.c_str(), &path_stat) == 0) {
         if (S_ISDIR(path_stat.st_mode) != 0) {
             return true;
         }
     }
+    // std::cout << "PATH2 : " << path2 << std::endl;
     return false;
 }
 
@@ -128,7 +129,6 @@ void Response::setPathFile()
     std::string str = _request.getUri();
     if (str == "/") {
         str = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndex();
-        std::cout << "str : " << str << std::endl;
     } else {
         std::string uri = _request.getUri();
         if (uri.find('?') != std::string::npos) {
@@ -147,13 +147,19 @@ void Response::setPathFile()
         }
         else if (_request.getLocation().getRoot() == _server.getRoot())
         {
+            // std::cout << "str0 : " << str << std::endl;
             str = _server.getRoot() + str;
+            // std::cout << "_request.getLocation().getRoot() : " << _request.getLocation().getRoot() << std::endl;
+            // std::cout << "_server.getRoot() : " << _server.getRoot() << std::endl;
         }
         else
         {
             std::string tempPath2;
             if (_request.getLocation().getPath() == "/")
             {
+                // std::cout << "str0 : " << str << std::endl;
+                // tempPath2 = str.substr(_request.getLocation().getPath().length(), str.length() - _request.getLocation().getPath().length());
+                // std::cout << "tempPath2 : " << tempPath2 << std::endl;
                 tempPath2 = str;
             }
             else
@@ -164,7 +170,6 @@ void Response::setPathFile()
                 // std::cout << "_request.getLocation().getRoot() : " << _request.getLocation().getRoot() << std::endl;
             }
             str = _request.getLocation().getRoot() + tempPath2;
-            // std::cout << "str2 : " << str << std::endl;
         }
     }
     _filePath = str;

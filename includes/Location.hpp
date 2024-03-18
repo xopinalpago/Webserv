@@ -26,6 +26,9 @@ class Location
       	std::vector<std::string>    			method;
 		std::vector<std::string>    			cgi_extension;
         std::map<std::string, std::string>	    cgi_path;
+		std::string							    redirectionPath;
+		std::string							    upload_dir;
+		int									    redirectionCode;
 		int										autoindex;
 		int										client_max_body_size;
 
@@ -41,6 +44,10 @@ class Location
 		int setIndex(std::string index);
 		void setCgiEx(std::string data);
 		void setCgiPath(std::string key, std::string data);
+		int setRedirectionPath(std::string data);
+		void setRedirectionCode(int code);
+		int setUploadDir(std::string path);
+
 		std::string getPath(void) const;
 		std::string getRoot(void) const;
 		std::string 				getIndex(void) const;
@@ -50,6 +57,10 @@ class Location
 		std::vector<std::string> 	getCgiEx(void) const;
 		std::string 				getCgiPathi(std::string key);
 		std::map<std::string, std::string> 	getCgiPath(void) const;
+		std::string 				getRedirectionPath(void) const;
+		int 				getRedirectionCode(void) const;
+		std::string 				getUploadDir(void) const;
+
 		int getAutoindex(void) const;
 };
 

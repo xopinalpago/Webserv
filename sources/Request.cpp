@@ -289,7 +289,6 @@ int Request::setLocation(std::map<std::string, Location> locations)
 	std::string locPath;
 	Location tempLoc;
 	size_t	end;
-
 	for (std::map<std::string, Location>::iterator it = locations.begin(); it != locations.end(); ++it)
 	{
 		locPath = it->first;
@@ -310,7 +309,6 @@ int Request::setLocation(std::map<std::string, Location> locations)
 	}
 	if (tempLoc.getPath().length() != 0)
 	{
-		// std::cout << "tempLoc = " << tempLoc.getPath() << std::endl;
 		this->loc = tempLoc;
 	}
 	else
