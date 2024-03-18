@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <map>
 #include <sstream> // stringstream
+#include <dirent.h>
 
 #include "Cgi.hpp"
 #include "Upload.hpp"
@@ -44,6 +45,7 @@ Response {
         std::string makeHeader();
         bool        authorizedMethod();
         bool        isDirectory(std::string path);
+        int         directoryListing(const std::string& directoryPath);
 
     private :
         Request                     _request;

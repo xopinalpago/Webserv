@@ -53,8 +53,10 @@ class Config {
         int         makeRoot(Server &server, std::string str, int &nbRoot);
         int         makeIndex(Location &loc, std::string str, int &nbIndex);
         int         makeIndex(Server &server, std::string str, int &nbIndex);
+        int         makeUploadDir(Location &loc, std::string str, int &nbUploadDir);
         int         makeClientMax(Server &server, std::string str, int &nbClientMax);
         int         makeAutoIndex(Location &loc, std::string str, int &nbAutoIndex);
+        int         makeRedirection(Location &loc, std::string str, int &nbRedirection);
         std::string getValue(std::string line);
         int	        fillLocation(Server &server);
         std::string getValueLoc(std::string line, int &pos);

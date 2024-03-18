@@ -112,25 +112,46 @@ bool Response::isDirectory(std::string filePath) {
         path2 = filePath.substr(0, filePath.size() - 1);
     else
         path2 = filePath;
-    // std::cout << "PATH2 : " << path2 << std::endl;
+    if (path2[0] == '/')
+        path2 = path2.substr(1, path2.size() - 1);
     struct stat path_stat;
     if (stat(path2.c_str(), &path_stat) == 0) {
         if (S_ISDIR(path_stat.st_mode) != 0) {
-            // std::cout << "DIRECTORY" << std::endl;
+            std::cout << "DIRECTORY" << std::endl;
             return true;
         }
     }
+    // std::cout << "PATH2 : " << path2 << std::endl;
     return false;
 }
+
+// bool Response::isDirectory(std::string path) {
+//     struct stat fileInfo;
+//     if (stat(path.c_str(), &fileInfo) != 0)
+//         return false; // Échec de l'obtention des informations sur le fichier
+
+//     return S_ISDIR(fileInfo.st_mode); // Vérifie si c'est un répertoire
+// }
 
 void Response::setPathFile()
 {
     std::string str = _request.getUri();
-    // std::cout << "PATH1 : " << str << std::endl;
+    // std::cout << "_request.getUri() : " << _request.getUri() << std::endl;
     if (str == "/")
         str = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndex();
     else if (isDirectory(str))
+    {
+        // if (_request.getLocation().getAutoindex() == 1)
+        // {
+            
+        // }
+        // else
+        // {
         str = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndex();
+        // std::cout << "STR : " << str << std::endl;
+        // }
+        // std::cout << "PATH2 : " << str << std::endl;
+    }
     else
     {
         std::string uri = _request.getUri();
@@ -151,13 +172,19 @@ void Response::setPathFile()
         }
         else if (_request.getLocation().getRoot() == _server.getRoot())
         {
+            // std::cout << "str0 : " << str << std::endl;
             str = _server.getRoot() + str;
+            // std::cout << "_request.getLocation().getRoot() : " << _request.getLocation().getRoot() << std::endl;
+            // std::cout << "_server.getRoot() : " << _server.getRoot() << std::endl;
         }
         else
         {
             std::string tempPath2;
             if (_request.getLocation().getPath() == "/")
             {
+                // std::cout << "str0 : " << str << std::endl;
+                // tempPath2 = str.substr(_request.getLocation().getPath().length(), str.length() - _request.getLocation().getPath().length());
+                // std::cout << "tempPath2 : " << tempPath2 << std::endl;
                 tempPath2 = str;
             }
             else
@@ -168,7 +195,6 @@ void Response::setPathFile()
                 // std::cout << "_request.getLocation().getRoot() : " << _request.getLocation().getRoot() << std::endl;
             }
             str = _request.getLocation().getRoot() + tempPath2;
-            // std::cout << "str2 : " << str << std::endl;
         }
     }
     _filePath = str;
@@ -259,12 +285,10 @@ void Response::processRequest() {
                         delete upload;
                     }
                     else if (isDirectory(_filePath)) { // dossier
-                        // std::cout << "doss" << std::endl;
-                        // si directory listing est actif
-                        if (_request.getLocation().getAutoindex() == 1) {
-                            
-                        _status = 500;
-                        }
+                        if (_request.getLocation().getAutoindex() == 1) { // actif
+                            _status = directoryListing(_filePath);
+                        } else
+                            _status = 500;
                     }
                     else { // fichier
                         std::ifstream file(_filePath.c_str());
@@ -297,4 +321,34 @@ void Response::processRequest() {
     _content << makeHeader();
 	_content << _body.str();
 	_finalRes = _content.str();
+}
+
+int Response::directoryListing(const std::string& directoryPath) {
+
+    std::cout << "Directory listing" << std::endl;
+    std::vector<std::string> lstFiles;
+    DIR *dir;
+    struct dirent *ent;
+
+    dir = opendir(directoryPath.c_str());
+    if (dir != NULL) {
+        while ((ent = readdir(dir)) != NULL) {
+            if (std::string(ent->d_name) != "." && std::string(ent->d_name) != "..") {
+                lstFiles.push_back(ent->d_name);
+            }
+        }
+        closedir(dir);
+    } else {
+        std::cout << "erreur ouverture dossier !" << std::endl;
+        return 500;
+    }
+    std::sort(lstFiles.begin(), lstFiles.end());
+    std::string response = "<!DOCTYPE html>\n<html>\n<head>\n<title>Index of /</title>\n</head>\n<body>\n";
+    response += "<h1>Index of /</h1>\n<hr>\n<ul>\n";
+    for (std::vector<std::string>::const_iterator it = lstFiles.begin(); it != lstFiles.end(); ++it) {
+        response += "<li><a href=\"" + *it + "\">" + *it + "</a></li>\n";
+    }
+    response += "</ul>\n<hr>\n</body>\n</html>\n";
+    _body << response;
+    return 200;
 }
