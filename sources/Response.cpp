@@ -43,6 +43,8 @@ void Response::setMessages() {
 	messages[100] = "Continue";
 	messages[200] = "OK";
 	messages[204] = "No Content";
+	messages[301] = "Moved Permanently";
+	messages[302] = "Found";
 	messages[400] = "Bad Request";
 	messages[401] = "Unauthorized";
 	messages[403] = "Forbidden";
@@ -58,7 +60,7 @@ void Response::setMessages() {
 void Response::setBackupPages() {
 
 	backup[204] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>204 - No Content</title></head><body><h1>204 - No Content</h1><p id=\"comment\">Oops! Your request has been processed successfully but there is no information to return.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
-	backup[400] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>400 - Bad Request</title></head><body><h1>400 - Bad Request</h1><p id=\"comment\">Oops! The request syntax is wrong.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
+    backup[400] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>400 - Bad Request</title></head><body><h1>400 - Bad Request</h1><p id=\"comment\">Oops! The request syntax is wrong.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
 	backup[401] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>401 - Unauthorized</title></head><body><h1>401 - Unauthorized</h1><p id=\"comment\">Oops! An authentication is required.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
 	backup[403] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>403 - Forbidden</title></head><body><h1>403 - Forbidden</h1><p id=\"comment\">Oops! Something went wrong.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
 	backup[404] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>404 - Page Not Found</title></head><body><h1>404 - Page Not Found</h1><p id=\"comment\">Oops! The page you're looking for does not exist.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
@@ -220,6 +222,10 @@ std::string Response::makeHeader() {
         _ctype = types["html"];
     else
         _ctype = types[ext];
+    if (_request.getLocation().getRedirectionPath() != "") {
+        _status = _request.getLocation().getRedirectionCode();
+        header << "Location: " << _request.getLocation().getRedirectionPath() << std::endl;
+    }
     header << "HTTP/1.1 " << _status << " " << messages[_status] << std::endl;
     header << "Content-Type: " << _ctype << std::endl;
     header << "Content-Length: " << _clength << std::endl << std::endl;
@@ -272,7 +278,6 @@ void Response::processRequest() {
                         std::ifstream file(_filePath.c_str());
 					    if (file.fail()) {
 					    	_status = 404;
-                            _status = 204;
 					    } else
 					    	_body << file.rdbuf();
                     }
@@ -304,7 +309,6 @@ void Response::processRequest() {
 
 int Response::directoryListing(const std::string& directoryPath) {
 
-    std::cout << "Directory listing" << std::endl;
     std::vector<std::string> lstFiles;
     DIR *dir;
     struct dirent *ent;
@@ -318,7 +322,6 @@ int Response::directoryListing(const std::string& directoryPath) {
         }
         closedir(dir);
     } else {
-        std::cout << "erreur ouverture dossier !" << std::endl;
         return 500;
     }
     std::sort(lstFiles.begin(), lstFiles.end());

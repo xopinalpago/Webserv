@@ -58,7 +58,11 @@ void Upload::parseUpload() {
 
 int Upload::doUpload() {
 
-    std::string folder_name = "uploads"; // config
+    std::string folder_name;
+    if (_request.getLocation().getUploadDir() != "")
+        folder_name = _request.getLocation().getUploadDir();
+    else
+        folder_name = "uploads";
     if (std::system(("test -d " + std::string(folder_name)).c_str()) != 0)
         if (std::system(("mkdir " + std::string(folder_name)).c_str()) < 0)
             return 2;
