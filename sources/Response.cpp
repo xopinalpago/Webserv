@@ -178,6 +178,9 @@ void Response::setPathFile()
     if (isDirectory(_filePath) && _request.getLocation().getIndex() != "") {
         _filePath = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndex();
     }
+    // std::cout << "location : " << _request.getLocation()
+    // std::cout << "root : " << _request.getLocation().getRoot() << std::endl;
+    // std::cout << "_filePath : " << _filePath << std::endl;
 }
 
 
@@ -218,10 +221,13 @@ std::string Response::makeHeader() {
     std::string ext = _filePath.substr(_filePath.rfind(".") + 1);
 
     _clength = _body.str().length();
+    std::cout << "_status : " << _status << std::endl;
     if (_status != 200)
         _ctype = types["html"];
     else
         _ctype = types[ext];
+    if (_ctype == "")
+        _ctype = types["html"];
     if (_request.getLocation().getRedirectionPath() != "") {
         _status = _request.getLocation().getRedirectionCode();
         header << "Location: " << _request.getLocation().getRedirectionPath() << std::endl;
@@ -237,7 +243,8 @@ std::string Response::makeHeader() {
 
 void Response::processRequest() {
 
-    if (_request.getContentLength() <= _server.getClientMax()) {
+    // std::cout << "taille : " << _request.getAllRequest().size() << std::endl;
+    if (_request.getAllRequest().size() <= _server.getClientMax()) {
         if (_request.getVersion() != "HTTP/1.1")
             _status = 505;
         else if (authorizedMethod()) {

@@ -29,10 +29,12 @@
             </div>
         </form>
 
-        <button type="button" onclick="cleanForm()">Erase</button>
+        <!-- <button type="button" onclick="cleanForm()">Erase</button> -->
         <a href="/site_index.html"><button>Index</button></a>
-        <form action="../cgi-bin/delete.php" method="POST">
+        <!-- <form action="../cgi-bin/delete.php" method="POST">
             <input type="submit" value="Supprimer la ressource" onclick="return confirm('Êtes-vous sûr de vouloir supprimer la ressource ?')"></input>
-        </form>
+        </form> -->
+        <button id="deleteButton">Supprimer la ressource</button>
+        <script src="delete.js"></script>
 	</body>
 </html>
