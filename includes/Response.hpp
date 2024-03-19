@@ -58,6 +58,12 @@ Response {
         int                         _status;
 		int                         _clength;
         std::string                 _filePath;
+
+        // std::string                 _uriPathInfo;
+        // std::string                 _uriQuery;
+        // std::string                 _scriptName;
+        // std::string                 _uriPath;
+
 		std::string                 _ctype;
         std::stringstream           _body;
         std::stringstream           _content;

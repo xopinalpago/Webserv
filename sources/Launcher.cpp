@@ -130,6 +130,10 @@ int Launcher::readServer(User &user)
 		bf[rc] = 0;
 		totalBytes += rc;
 		request.setAllRequest(bf);
+		// std::cout << std::endl;
+		// std::cout << "**************BUFFER***************" << std::endl;
+		// std::cout << bf << std::endl;
+		// std::cout << "************************************" << std::endl;
 	}
 	// calculer le body
 	std::string body;
@@ -199,10 +203,9 @@ int Launcher::readServer(User &user)
 	// std::cout << "SIZE = " << request.getAllRequest().size() << std::endl;
 	// std::cout << "URI = " << request.getUri() << std::endl;
 	// std::cout << "URI = " << request.getUri() << std::endl;
-	// std::cout << "**************REQUEST***************" << std::endl;
-	// std::cout << request.getAllRequest() << std::endl;
-	// std::cout << "************************************" << std::endl;
-
+	std::cout << "**************REQUEST***************" << std::endl;
+	std::cout << request.getAllRequest() << std::endl;
+	std::cout << "************************************" << std::endl;
 	return (1);
 }
 

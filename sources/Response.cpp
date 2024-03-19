@@ -43,6 +43,14 @@ void Response::setMessages() {
 	messages[100] = "Continue";
 	messages[200] = "OK";
 	messages[204] = "No Content";
+    messages[300] = "Multiple Choices";
+    messages[301] = "Moved Permanently";
+    messages[302] = "Found";
+    messages[303] = "See Other";
+    messages[304] = "Not Modified";
+    messages[305] = "Use Proxy";
+    messages[307] = "Temporary Redirect";
+    messages[308] = "Permanent Redirect";
 	messages[400] = "Bad Request";
 	messages[401] = "Unauthorized";
 	messages[403] = "Forbidden";
@@ -124,9 +132,112 @@ bool Response::isDirectory(std::string filePath) {
     return false;
 }
 
+// void Response::setPathFile() {
+
+//     std::string uri = _request.getUri();
+// 	size_t separator = uri.find('?');
+// 	size_t end = uri.rfind('#');
+// 	std::string tempPath;
+// 	std::string tempPath2;
+
+// 	//stock dans _uriPathInfo le PATH_INFO, puis de supprime de uri
+// 	size_t pos_py = uri.find(".py");
+// 	size_t pos_php = uri.find(".php");
+// 	if (pos_py == std::string::npos)
+// 	{
+// 		if (pos_php == std::string::npos)
+// 			_uriPathInfo = "";
+// 		else
+// 		{
+// 			if (separator != std::string::npos)
+// 				_uriPathInfo = uri.substr(pos_php + 4, separator - pos_php - 4);
+// 			else
+// 				_uriPathInfo = uri.substr(pos_php + 4, uri.size());
+// 			uri = uri.erase(pos_php + 4, _uriPathInfo.size());
+// 		}
+// 	}
+// 	else
+// 	{
+// 		if (separator != std::string::npos)
+// 			_uriPathInfo = uri.substr(pos_py + 3, separator - pos_py - 3);
+// 		else
+// 			_uriPathInfo = uri.substr(pos_py + 3, uri.size());
+// 		uri = uri.erase(pos_py + 3, _uriPathInfo.size());
+// 	}
+
+// 	// parsing de l'_uriQuerry et de l'_uriPath
+// 	separator = uri.find('?');
+// 	end = uri.rfind('#');
+// 	if (separator == std::string::npos)
+// 		tempPath = uri;
+// 	else
+// 	{
+// 		tempPath = uri.substr(0, separator);
+// 		if (uri[separator + 1] != '\0' && end == std::string::npos)
+// 			_uriQuery = uri.substr(separator + 1, uri.length() - (separator + 1));
+// 		else if (uri[separator + 1] != '\0')
+// 			_uriQuery = uri.substr(separator + 1, end - (separator + 1));
+// 	}
+// 	_scriptName = tempPath;
+// 	if (_request.getLocation().getPath().size() != 0 && _request.getLocation().getRedirectionPath().size() > 0)
+// 	{
+// 		// _resourceType = REDIRECTION;
+// 		std::cout << std::endl;
+// 		std::cout << "**************INFO***************" << std::endl;
+// 		std::cout << "_uriQuery = " << _uriQuery << std::endl;
+// 		std::cout << "tempPath = " << tempPath << std::endl;
+// 		std::cout << "_uriPathInfo = " << _uriPathInfo << std::endl;
+// 		std::cout << "uri = " << uri << std::endl;
+// 		std::cout << "**************INFO***************" << std::endl;
+// 		std::cout << std::endl;
+//         _filePath = _uriPath;
+// 		// return (_request.getLocation().getRedirectionCode());
+//         return ;
+// 	}
+// 	if (_request.getLocation().getPath().size() != 0 || _request.getLocation().getRoot() == _request.getServer().getRoot())
+// 		_uriPath = _request.getServer().getRoot() + "/" + tempPath;
+// 	else
+// 	{
+// 		tempPath2 = tempPath.substr(_request.getLocation().getPath().length(), tempPath.length() - _request.getLocation().getPath().length());
+// 		_uriPath = _request.getLocation().getRoot() + tempPath2;
+// 	}
+// 	std::cout << std::endl;
+// 	std::cout << "**************INFO***************" << std::endl;
+// 	std::cout << "_uriQuery = " << _uriQuery << std::endl;
+// 	std::cout << "tempPath = " << tempPath << std::endl;
+// 	std::cout << "_uriPathInfo = " << _uriPathInfo << std::endl;
+// 	std::cout << "uri = " << uri << std::endl;
+// 	std::cout << "**************INFO***************" << std::endl;
+// 	std::cout << std::endl;
+//     _filePath = _uriPath;
+
+// }
+
 void Response::setPathFile()
 {
     std::string str = _request.getUri();
+    // std::cout << std::endl;
+    // std::cout << "_request.getUri() : " << _request.getUri() << std::endl;
+    // std::cout << "_request.getLocation().getRoot() : " << _request.getLocation().getRoot() << std::endl;
+    // std::cout << "_request.getLocation().getRedirectionCode() : " << _request.getLocation().getRoot() << std::endl;
+    
+    if (_request.getLocation().getRedirectionPath().size() > 0)
+	{
+        // if (isDirectory(_request.getLocation().getRedirectionPath()))
+        // {
+        //     // std::cout << "_request.getServer().getLoci(_request.getLocation().getRedirectionPath()).getRoot() = " << _request.getServer().getLoci(_request.getLocation().getRedirectionPath()).getRoot() << std::endl;
+        //     std::string tmp = "/" + _request.getLocation().getRedirectionPath();
+        //     tmp = tmp.substr(0, tmp.size() - 1);
+        //     std::cout << "tmp = " << _request.getLocation().getRedirectionPath() << std::endl;
+        //     _filePath = _request.getServer().getLoci(tmp).getRoot() + "/" + _request.getServer().getLoci(tmp).getIndex();
+        // }
+        // else
+        // {
+        //     _filePath = _request.getLocation().getRedirectionPath();
+        // }
+        // std::cout << "_filePath : " << _filePath << std::endl;
+		return ;
+	}
     if (str == "/") {
         str = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndex();
     } else {
@@ -144,6 +255,7 @@ void Response::setPathFile()
         {
             str = str.substr(str2.size(), str.size() - str2.size());
             str = _request.getLocation().getRoot() + str;
+            // std::cout << "_request.getLocation().getRoot() : " << _request.getLocation().getRoot() << std::endl;
         }
         else if (_request.getLocation().getRoot() == _server.getRoot())
         {
@@ -176,6 +288,7 @@ void Response::setPathFile()
     if (isDirectory(_filePath) && _request.getLocation().getIndex() != "") {
         _filePath = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndex();
     }
+    std::cout << "_filePath : " << _filePath << std::endl;
 }
 
 
@@ -220,9 +333,19 @@ std::string Response::makeHeader() {
         _ctype = types["html"];
     else
         _ctype = types[ext];
+    // if (_request.getLocation().getRedirectionPath() != "") {
+    //     _status = _request.getLocation().getRedirectionCode();
+    //     header << "HTTP/1.1 " << _status << " " << messages[_status] << std::endl;
+    //     header << "Location: " << _request.getLocation().getRedirectionPath() << std::endl;
+    //     header << "Content-Type: text/html" << std::endl;
+    //     header << "Content-Length: " << _clength << std::endl << std::endl;
+    // }
+    // else
+    // {
     header << "HTTP/1.1 " << _status << " " << messages[_status] << std::endl;
     header << "Content-Type: " << _ctype << std::endl;
     header << "Content-Length: " << _clength << std::endl << std::endl;
+    // }
     // std::cout << "************HEADER************" << std::endl;
     // std::cout << header.str() << std::endl;
     // std::cout << "******************************" << std::endl;
@@ -231,11 +354,34 @@ std::string Response::makeHeader() {
 
 void Response::processRequest() {
 
+    // std::cout << "_server.getClientMax() = " << _server.getClientMax() << std::endl;
+    // std::cout << "_request.getContentLength() = " << _request.getContentLength() << std::endl;
     if (_request.getContentLength() <= _server.getClientMax()) {
         if (_request.getVersion() != "HTTP/1.1")
             _status = 505;
+        else if (_request.getLocation().getRedirectionPath() != "") {
+
+            // _status = _request.getLocation().getRedirectionCode();
+            // _content << "HTTP/1.1 " << _status << " " << messages[_status] << std::endl;
+            // _content << "Location: " << _request.getLocation().getRedirectionPath() << std::endl;
+			// _content << "Content-Length: " << 0 << std::endl << std::endl;
+
+            _status = _request.getLocation().getRedirectionCode();
+            _content << "HTTP/1.1 " << _status << " " << messages[_status] << std::endl;
+            _body << "<!doctype html>\n<html>\n<head>\n<title>" << _status << " : " << messages[_status] << "</title>\n<meta http-equiv=\"refresh\" content=\"3; URL=" << _request.getLocation().getRedirectionPath() << "\">\n</head>";
+            _body << "<body>" << _status << " : " << messages[_status] << "\n<br>\nRedirection to " << _request.getLocation().getRedirectionPath() <<  " in 3 seconds.\n</body>\n</html>\n";
+			_content << "Content-Length: " << _body.str().length() << std::endl << std::endl;
+            _content << _body.str();
+            _finalRes = _content.str();
+
+            // std::cout << "************FINAL RES************" << std::endl;
+            // std::cout << _finalRes;
+            // std::cout << "******************************" << std::endl;
+            return;
+        }
         else if (authorizedMethod()) {
             if (_request.getMethod() == "GET" || _request.getMethod() == "POST") {
+                
                 if (IsCgiExtension(_filePath)) {
                     Cgi *cgi = new Cgi(_filePath);
                     _status = cgi->execCGI(_request);
@@ -272,7 +418,7 @@ void Response::processRequest() {
                         std::ifstream file(_filePath.c_str());
 					    if (file.fail()) {
 					    	_status = 404;
-                            _status = 204;
+                            // _status = 204;
 					    } else
 					    	_body << file.rdbuf();
                     }
@@ -292,6 +438,9 @@ void Response::processRequest() {
             _content << makeHeader();
 			_content << _body.str();
 			_finalRes = _content.str();
+            // std::cout << "************FINAL RES************" << std::endl;
+            // std::cout << _finalRes << std::endl;
+            // std::cout << "******************************" << std::endl;
             return;
         }
     } else
@@ -300,6 +449,7 @@ void Response::processRequest() {
     _content << makeHeader();
 	_content << _body.str();
 	_finalRes = _content.str();
+
 }
 
 int Response::directoryListing(const std::string& directoryPath) {

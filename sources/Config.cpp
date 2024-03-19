@@ -133,8 +133,6 @@ int Config::cleanError(Server &server)
 			}
 		}
 	}
-	if (server.getErrorPage().empty())
-		throw ConfigException("No Error Page");
 	return (0);
 }
 
@@ -370,8 +368,8 @@ int Config::makeRedirection(Location &loc, std::string str, int &nbRedirection)
 		throw ConfigException("Invalid Redirection");
 	if (key != 300 && key != 301 && key != 302 && key != 303 && key != 304 && key != 307 && key != 308)
 		throw ConfigException("Invalid Redirection");
-	if (Utils::fileExists(path))
-		throw ConfigException("Invalid Path Redirection");
+	// if (Utils::fileExists(path))
+	// 	throw ConfigException("Invalid Path Redirection");
 	loc.setRedirectionPath(path);
 	loc.setRedirectionCode(key);
 	nbRedirection++;
@@ -424,7 +422,7 @@ std::string Config::getValueLoc(std::string line, int &pos)
 
 int Config::missElementLoc(Location &loc)
 {
-	if (loc.getRoot().length() == 0)
+	if (loc.getRoot().length() == 0 && loc.getRedirectionPath().size() == 0)
 		throw ConfigException("Missing Root");
 	if (loc.getMethod().size() == 0)
 		throw ConfigException("Missing Method");
@@ -437,6 +435,8 @@ int Config::missElementCgi(Location &loc)
 		throw ConfigException("Missing Cgi");
 	if (loc.getCgiPath().size() == 0)
 		throw ConfigException("Missing Cgi Path");
+	if (loc.getRedirectionPath().size() != 0)
+		throw ConfigException("Param return not allow for CGI");
 	return (0);
 }
 
@@ -489,8 +489,10 @@ int	Config::fillLocation(Server &server)
 					makeRoot(loc, location[i], nbRoot);
 				else if (location[i].find("index") == 0)
 					makeIndex(loc, location[i], nbIndex);
-				else if (location[i].find("autoindex") == 0)
+				else if (location[i].find("autoindex") == 0 && loc.getPath() != "/cgi-bin")
 					makeAutoIndex(loc, location[i], nbAutoIndex);
+				else if (location[i].find("autoindex") == 0 && loc.getPath() == "/cgi-bin")
+					throw ConfigException("Parametr autoindex not allow for CGI");
 				else if (location[i].find("allow_methods") == 0)
 					makeMethod(loc, location[i], nbAllowMethods);
 				else if (location[i].find("cgi_extension") == 0)
@@ -505,13 +507,14 @@ int	Config::fillLocation(Server &server)
 			}
 			if (loc.getMethod().size() == 0)
 				setDefaultMethods(loc);
-			if (loc.getRoot().size() == 0 && server.getRoot().size() != 0)
+			if (loc.getRoot().size() == 0 && server.getRoot().size() != 0 && loc.getRedirectionPath().size() == 0)
 				loc.setRoot(server.getRoot());
 			missElementLoc(loc);
 			if (loc.getPath() == "/cgi-bin")
 				missElementCgi(loc);
 			if (server.setLoc(loc.getPath(), loc))
 				throw ConfigException("Duplicate Location");
+			// std::cout << "loc.getRedirectionPath() = " << loc.getRedirectionPath() << std::endl; 
 		}
 		i++;
 	}

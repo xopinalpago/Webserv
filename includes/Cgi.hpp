@@ -48,7 +48,7 @@ class Cgi {
         int                 _cgiFd;
         std::string         _cgiFile;
         std::string         _filePath;
-        char **args;
+        char **_args;
         char *exec;
 };
 

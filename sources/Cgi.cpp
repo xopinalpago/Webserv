@@ -18,6 +18,8 @@ Cgi::Cgi(std::string filePath) {
             _cgiFd = -1;
         }
     }
+    exec = NULL;
+    _args = NULL;
 }
 
 Cgi::~Cgi(void) {
@@ -134,14 +136,44 @@ int Cgi::execScript(int *fd_in, int *fd_out) {
         close(*fd_in);
         dup2(_cgiFd, STDOUT_FILENO);
         close(_cgiFd);
-        if (execve(exec, args, _cenv) == -1) {
+        if (execve(exec, _args, _cenv) == -1) {
             close(*fd_out);
-            free(args[0]);
-            free(args[1]);
-            free(args);
+            free(_args[0]);
+            free(_args[1]);
+            free(_args);
             free(exec);
             freeEnv();
             close(_cgiFd);
+            std::exit(500);
+        }
+    }
+    close(*fd_out);
+    return pid;
+}
+
+int Cgi::writePipe(int *fd_in, int *fd_out, std::string body) {
+
+    pid_t pid;
+    pid = fork();
+    if (pid == -1) {
+        return 500;
+    }
+    if (pid == 0) {
+        signal(SIGALRM, handleAlarm);
+        alarm(3);
+        dup2(*fd_out, STDOUT_FILENO);
+        close(*fd_out);
+        close(*fd_in);
+        char * info = new char[body.size() + 1];
+        strcpy(info, body.c_str());
+        char *const args[] = { (char*)"/usr/bin/echo", info, NULL };
+        if (execve("/usr/bin/echo", args, NULL) == -1) {
+            free(_args[0]);
+            free(_args[1]);
+            free(_args);
+            free(exec);
+            freeEnv();
+            close(*fd_in);
             std::exit(500);
         }
     }
@@ -158,18 +190,17 @@ int Cgi::execCGI(Request request) {
     std::map<std::string, std::string>::iterator it = paths.begin();
     std::map<std::string, std::string>::iterator ite = paths.end();
 
-    exec = NULL;
-    args = NULL;
+
     std::string ext = _filePath.substr(_filePath.rfind("."));
 
-    args = new char*[3];
-    args[1] = new char [_filePath.size() + 1];
-    strcpy(args[1], _filePath.c_str());
-    args[2] = NULL;
+    _args = new char*[3];
+    _args[1] = new char [_filePath.size() + 1];
+    strcpy(_args[1], _filePath.c_str());
+    _args[2] = NULL;
     while (it != ite) {
         if (ext == it->first) {
-            args[0] = new char [strlen(paths[ext].c_str()) + 1];
-            strcpy(args[0], paths[ext].c_str());
+            _args[0] = new char [strlen(paths[ext].c_str()) + 1];
+            strcpy(_args[0], paths[ext].c_str());
             exec = new char [strlen(paths[ext].c_str()) + 1];
             strcpy(exec, paths[ext].c_str());
         }
@@ -189,30 +220,22 @@ int Cgi::execCGI(Request request) {
     if (pipe(fd) == -1)
         return 500;
     int scriptStatus;
-    if (write(fd[1], request.getAllRequest().c_str(), body.size()) == -1) {
-        close(fd[0]);
-        close(fd[1]);
-        return 500;
-    }
+    int writeStatus;
     waitpid(execScript(&fd[0], &fd[1]), &scriptStatus, 0);
+    waitpid(writePipe(&fd[0], &fd[1], body), &writeStatus, 0);
+    if (WIFSIGNALED(scriptStatus))
+        return 408;
     if (WEXITSTATUS(scriptStatus) == 500)
         return 500;
 
-    free(args[0]);
-    free(args[1]);
-    free(args);
+    free(_args[0]);
+    free(_args[1]);
+    free(_args);
     free(exec);
     freeEnv();
     close(_cgiFd);
     close(fd[1]);
     close(fd[0]);
-    // int st;
-    // pid_t child_pid = waitpid(pid, &st, 0);
-    // if (child_pid > 0) {
-    //     if (WIFSIGNALED(st))
-    //         return 408;
-    // } else
-    //     return 500;
     return 200;
 }
 
