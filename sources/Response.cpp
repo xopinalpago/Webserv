@@ -178,9 +178,9 @@ void Response::setPathFile()
     if (isDirectory(_filePath) && _request.getLocation().getIndex() != "") {
         _filePath = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndex();
     }
-    // std::cout << "location : " << _request.getLocation()
-    // std::cout << "root : " << _request.getLocation().getRoot() << std::endl;
-    // std::cout << "_filePath : " << _filePath << std::endl;
+    std::cout << "location : " << _request.getLocation().getPath() << std::endl;
+    std::cout << "root : " << _request.getLocation().getRoot() << std::endl;
+    std::cout << "_filePath : " << _filePath << std::endl;
 }
 
 
@@ -228,11 +228,11 @@ std::string Response::makeHeader() {
         _ctype = types[ext];
     if (_ctype == "")
         _ctype = types["html"];
-    if (_request.getLocation().getRedirectionPath() != "") {
-        _status = _request.getLocation().getRedirectionCode();
-        header << "Location: " << _request.getLocation().getRedirectionPath() << std::endl;
-    }
     header << "HTTP/1.1 " << _status << " " << messages[_status] << std::endl;
+    // if (_request.getLocation().getRedirectionPath() != "") {
+    //     _status = _request.getLocation().getRedirectionCode();
+    //     header << "Location: " << _request.getLocation().getRedirectionPath() << std::endl;
+    // }
     header << "Content-Type: " << _ctype << std::endl;
     header << "Content-Length: " << _clength << std::endl << std::endl;
     // std::cout << "************HEADER************" << std::endl;
@@ -249,6 +249,15 @@ void Response::processRequest() {
             _status = 505;
         else if (authorizedMethod()) {
             if (_request.getMethod() == "GET" || _request.getMethod() == "POST") {
+                // if (_request.getLocation().getRedirectionPath() != "") {
+                //     std::cout << "PATH : " << _request.getLocation().getRedirectionPath() << std::endl;
+                //     _status = _request.getLocation().getRedirectionCode();
+                //     _content << "HTTP/1.1 " << _status << " " << messages[_status] << std::endl;
+                //     _content << "Location: " << _request.getLocation().getRedirectionPath();
+                //     _content << std::endl << std::endl;
+                //     _finalRes = _content.str();
+                //     return;
+                // }
                 if (IsCgiExtension(_filePath)) {
                     Cgi *cgi = new Cgi(_filePath);
                     _status = cgi->execCGI(_request);
@@ -276,6 +285,7 @@ void Response::processRequest() {
                         delete upload;
                     }
                     else if (isDirectory(_filePath)) {
+                        std::cout << "DIRECTORY" << std::endl;
                         if (_request.getLocation().getAutoindex() == 1) {
                             _status = directoryListing(_filePath);
                         } else

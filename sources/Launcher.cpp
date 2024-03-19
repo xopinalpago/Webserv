@@ -215,9 +215,9 @@ void	Launcher::sendServer(User &user)
 		throw LauncherException("send failed");
 	else
 		user.updateTime();
-	std::cout << "******* content dans sendServer *******" << std::endl;
-	std::cout << res->getFinalRes().c_str() << std::endl;
-	std::cout << "***************************************" << std::endl;
+	// std::cout << "******* content dans sendServer *******" << std::endl;
+	// std::cout << res->getFinalRes().c_str() << std::endl;
+	// std::cout << "***************************************" << std::endl;
 
 	FD_CLR(user.getFd(), &writefds);
 	FD_SET(user.getFd(), &readfds);
