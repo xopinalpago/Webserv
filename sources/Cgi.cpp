@@ -154,15 +154,31 @@ int Cgi::execScript(int *fd_in, int *fd_out) {
         close(_cgiFd);
         if (execve(exec, _args, _cenv) == -1) {
             close(*fd_out);
-            delete [] _args;
-            delete [] exec;
-            delete [] _cenv;
+            free_tabs();
             close(_cgiFd);
             std::exit(500);
         }
     }
     close(*fd_out);
     return pid;
+}
+
+void Cgi::free_tabs() {
+    int i = 0;
+    while (_args[i]) {
+        delete [] _args[i];
+        i++;
+    }
+    delete [] _args;
+
+    i = 0;
+    while (_cenv[i]) {
+        delete [] _cenv[i];
+        i++;
+    }
+    delete [] _cenv;
+
+    delete [] exec;
 }
 
 int Cgi::writePipe(int *fd_in, int *fd_out, std::string body) {
@@ -182,11 +198,7 @@ int Cgi::writePipe(int *fd_in, int *fd_out, std::string body) {
         close(*fd_in);
         char *const args[] = { (char*)"/usr/bin/echo", info, NULL };
         if (execve("/usr/bin/echo", args, NULL) == -1) {
-            delete [] _args[0];
-            delete [] _args[1];
-            delete [] _args;
-            delete [] exec;
-            delete [] _cenv;
+            free_tabs();
             delete [] info;
             close(*fd_in);
             std::exit(500);
@@ -242,11 +254,7 @@ int Cgi::execCGI(Request request) {
         return 408;
     if (WEXITSTATUS(scriptStatus) == 500)
         return 500;
-    delete [] _args[0];
-    delete [] _args[1];
-    delete [] _args;
-    delete [] exec;
-    delete [] _cenv;
+    free_tabs();
     close(_cgiFd);
     close(fd[1]);
     close(fd[0]);

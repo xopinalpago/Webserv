@@ -34,6 +34,7 @@ class Cgi {
         int mapToChar();
         void displayEnv();
         void freeEnv();
+        void free_tabs();
         std::string decodeQuery(std::string query);
         std::string extractQuery(Request request);
 

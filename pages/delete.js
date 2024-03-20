@@ -1,4 +1,6 @@
 document.getElementById('deleteButton').addEventListener('click', function() {
+    
+    var source = event.target.getAttribute("data-source");
     var confirmation = confirm("Êtes-vous sûr de vouloir supprimer la ressource ?");
     if (confirmation) {
         console.log("La suppression de la ressource est confirmée.");

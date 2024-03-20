@@ -2,10 +2,25 @@
 
 Response::Response() {}
 
+// Response::Response(Request request, Launcher* launch) {
+
+//     _request = request;
+//     _server = request.getServer();
+//     _launch = launch;
+//     setMessages();
+//     setBackupPages();
+//     setTypes();
+//     _status = 200;
+//     _ctype = "text/html";
+//     setPathFile();
+//     processRequest();
+// }
+
 Response::Response(Request request) {
 
     _request = request;
     _server = request.getServer();
+    // _launch = launch;
     setMessages();
     setBackupPages();
     setTypes();
@@ -34,6 +49,7 @@ Response& Response::operator=(const Response& rhs) {
         _filePath = rhs._filePath;
         _ctype = rhs._ctype;
         _finalRes = rhs._finalRes;
+        // _launch = rhs._launch;
     }
     return *this;
 }
