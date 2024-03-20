@@ -10,6 +10,27 @@ Location::~Location(void)
     return ;
 }
 
+Location::Location(const Location& cpy) {
+    *this = cpy;
+}
+
+Location& Location::operator=(const Location& rhs) {
+    if (this != &rhs) {
+        path = rhs.path;
+        root = rhs.root;
+        index = rhs.index;
+        method = rhs.method;
+        cgi_extension = rhs.cgi_extension;
+        cgi_path = rhs.cgi_path;
+        redirectionPath = rhs.redirectionPath;
+        upload_dir = rhs.upload_dir;
+        redirectionCode = rhs.redirectionCode;
+        autoindex = rhs.autoindex;
+        client_max_body_size = rhs.client_max_body_size;
+    }
+    return *this;
+}
+
 int Location::setAutoindex(std::string autoindex)
 {
     if (autoindex == "on")

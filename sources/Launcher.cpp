@@ -2,6 +2,7 @@
 
 Launcher::Launcher(void)
 {
+	totalBytes = 0;
 	FD_ZERO(&writefds);
 	FD_ZERO(&readfds);
 	return ;
@@ -10,6 +11,28 @@ Launcher::Launcher(void)
 Launcher::~Launcher(void)
 {
 	return ;
+}
+
+Launcher::Launcher(const Launcher& cpy) {
+    *this = cpy;
+}
+
+Launcher& Launcher::operator=(const Launcher& rhs) {
+	if (this != &rhs) {
+    	timeout = rhs.timeout;
+    	readfds = rhs.readfds;
+    	writefds = rhs.writefds;
+    	tmp_readfds = rhs.tmp_readfds;
+    	tmp_writefds = rhs.tmp_writefds;
+    	rc = rhs.rc;
+    	max_sd = rhs.max_sd;
+		new_sd = rhs.new_sd;
+		end_server = rhs.end_server;
+		totalBytes = rhs.totalBytes;
+		Users = rhs.Users;
+		Servers = rhs.Servers;
+	}
+	return *this;
 }
 
 // int Launcher::initConfig(std::string &filename)
@@ -104,105 +127,74 @@ void    Launcher::closeConnection(int fd)
 //     }
 // }
 
+int Launcher::readbuf(User &user, Request& request, char *bf) {
+
+	memset(bf, 0, sizeof(*bf));
+	rc = recv(user.getFd(), bf, BUFFER_SIZE, 0);
+	if (rc == 0)
+	{
+		closeConnection(user.getFd());
+		return (rc);
+	}
+	else if (rc < 0)
+	{
+		closeConnection(user.getFd());
+		return (rc);
+	}
+	else
+		user.updateTime();
+	bf[rc] = 0;
+	totalBytes += rc;
+	request.setAllRequest(bf);
+	return rc;
+}
+
+std::string Launcher::extractBody(Request& request) {
+
+	std::string body;
+    std::string req = request.getAllRequest();
+    size_t header_end = req.find("\r\n\r\n");
+	header_end = req.find("\r\n\r\n");
+	if (header_end != std::string::npos)
+		body = req.substr(header_end + 4, req.size() - header_end - 4);
+	else
+		body = "";
+	return body;
+}
+
 int Launcher::readServer(User &user)
 {
     int rc = BUFFER_SIZE;
 	char bf[BUFFER_SIZE + 1];
 	Request request;
-	totalBytes = 0;
+	
 
-	// premiere lecture
     while (rc == BUFFER_SIZE) {
-		memset(bf, 0, sizeof(bf));
-		rc = recv(user.getFd(), bf, BUFFER_SIZE, 0);
-		if (rc == 0)
-		{
-			closeConnection(user.getFd());
-			return (rc);
-		}
-		else if (rc < 0)
-		{
-			closeConnection(user.getFd());
-			return (rc);
-		}
-		else
-			user.updateTime();
-		bf[rc] = 0;
-		totalBytes += rc;
-		request.setAllRequest(bf);
+		rc = readbuf(user, request, bf);
+		if (rc <= 0)
+			return rc;
 	}
-	// calculer le body
-	std::string body;
-    std::string req = request.getAllRequest();
-    size_t header_end = req.find("\r\n\r\n");
-    if (header_end != std::string::npos) {
-        body = req.substr(header_end + 4, req.size() - header_end - 4);
-		request.setBody(body);
-	} else {
-        body = "";
-		request.setBody(body);
-	}
-	// std::cout << "body size : " << body.size() << std::endl;
+	request.setBody(extractBody(request));
 
-	// std::cout << "**************BODY***************" << std::endl;
-	// std::cout << body << std::endl;
-	// std::cout << "************************************" << std::endl;
-	// parsing
-	if (request.parseRequest())
-	{
+	if (request.parseRequest()) {
 		closeConnection(user.getFd());
 		return (0);
 	}
-	// si y'a un content 
-	if (request.getContentLength() > 0 && body.length() < request.getContentLength()) {
-		// std::cout << "body a lire" << std::endl;
+	
+	while (request.getContentLength() > 0 && extractBody(request).length() < request.getContentLength()) {
 		rc = BUFFER_SIZE;
 		while (rc == BUFFER_SIZE) {
-			memset(bf, 0, sizeof(bf));
-			rc = recv(user.getFd(), bf, BUFFER_SIZE, 0);
-			if (rc == 0)
-			{
-				closeConnection(user.getFd());
-				return (rc);
-			}
-			else if (rc < 0)
-			{
-				closeConnection(user.getFd());
-				return (rc);
-			}
-			else
-				user.updateTime();
-			bf[rc] = 0;
-			totalBytes += rc;
-			request.setAllRequest(bf);
+			rc = readbuf(user, request, bf);
+			if (rc <= 0)
+				return rc;
 		}
-		// recalculer le body :
-		req = request.getAllRequest();
-		header_end = req.find("\r\n\r\n");
-		if (header_end != std::string::npos) {
-			body = req.substr(header_end + 4, req.size() - header_end - 4);
-			request.setBody(body);
-		}
-		else {
-			body = "";
-			request.setBody(body);
-		}
-		// std::cout << "body size2 : " << body.size() << std::endl;
+		request.setBody(extractBody(request));
 	}
 
 	user.setRequest(request);
 	user.setServer(Servers);
-
 	FD_CLR(user.getFd(), &readfds);
 	FD_SET(user.getFd(), &writefds);
-
-	// std::cout << "SIZE = " << request.getAllRequest().size() << std::endl;
-	// std::cout << "URI = " << request.getUri() << std::endl;
-	// std::cout << "URI = " << request.getUri() << std::endl;
-	std::cout << "**************REQUEST***************" << std::endl;
-	std::cout << request.getAllRequest() << std::endl;
-	std::cout << "************************************" << std::endl;
-
 	return (1);
 }
 

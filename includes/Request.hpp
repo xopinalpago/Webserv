@@ -30,6 +30,8 @@ class Request
 	public:
 		Request();
 		~Request();
+		Request(const Request& cpy);
+        Request& operator=(const Request& rhs);
 
 		std::string		getAllRequest(void);
 		std::string		getBody(void);

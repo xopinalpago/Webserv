@@ -38,6 +38,8 @@ class Server
     public:
         Server(void);
         ~Server(void);
+        Server(const Server& cpy);
+        Server& operator=(const Server& rhs);
 
         struct sockaddr_in address;
 

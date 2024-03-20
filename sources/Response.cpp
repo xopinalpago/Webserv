@@ -178,9 +178,9 @@ void Response::setPathFile()
     if (isDirectory(_filePath) && _request.getLocation().getIndex() != "") {
         _filePath = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndex();
     }
-    std::cout << "location : " << _request.getLocation().getPath() << std::endl;
-    std::cout << "root : " << _request.getLocation().getRoot() << std::endl;
-    std::cout << "_filePath : " << _filePath << std::endl;
+    // std::cout << "location : " << _request.getLocation().getPath() << std::endl;
+    // std::cout << "root : " << _request.getLocation().getRoot() << std::endl;
+    // std::cout << "_filePath : " << _filePath << std::endl;
 }
 
 
@@ -221,7 +221,7 @@ std::string Response::makeHeader() {
     std::string ext = _filePath.substr(_filePath.rfind(".") + 1);
 
     _clength = _body.str().length();
-    std::cout << "_status : " << _status << std::endl;
+    // std::cout << "_status : " << _status << std::endl;
     if (_status != 200)
         _ctype = types["html"];
     else

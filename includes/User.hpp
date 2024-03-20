@@ -23,6 +23,8 @@ class User
 		User(void);
 		User(Server &server);
 		~User(void);
+		User(const User& cpy);
+        User& operator=(const User& rhs);
 		
 		Location		loc;
 

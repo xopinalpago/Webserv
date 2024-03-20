@@ -26,6 +26,8 @@ class Cgi {
         Cgi(void);
         Cgi(std::string filePath);
         ~Cgi(void);
+        Cgi(const Cgi& cpy);
+        Cgi& operator=(const Cgi& rhs);
 
         int execCGI(Request request);
         int create_env(Request request);
@@ -38,9 +40,9 @@ class Cgi {
         std::map<std::string, std::string> getEnv() const { return this->_env; }
         char **getCenv() const { return this->_cenv; }
         int getCgiFd() const { return this->_cgiFd; }
+        void findArgs(Request& request);
         int execScript(int *fd_in, int *fd_out);
         int writePipe(int *fd_in, int *fd_out, std::string body);
-        static void handleAlarm(int signal); //??
 
     private :
         std::map<std::string, std::string> _env;

@@ -7,6 +7,23 @@
 
 Cgi::Cgi(void) {}
 
+Cgi::Cgi(const Cgi& cpy) {
+    *this = cpy;
+}
+
+Cgi& Cgi::operator=(const Cgi& rhs) {
+    if (this != &rhs) {
+        _env = rhs._env;
+        _cenv = rhs._cenv;
+        _cgiFd = rhs._cgiFd;
+        _cgiFile = rhs._cgiFile;
+        _filePath = rhs._filePath;
+        _args = rhs._args;
+        exec = rhs.exec;
+    }
+    return *this;
+}
+
 Cgi::Cgi(std::string filePath) {
     
     _filePath = filePath;
@@ -130,7 +147,6 @@ int Cgi::execScript(int *fd_in, int *fd_out) {
         return 500;
     }
     if (pid == 0) {
-        signal(SIGALRM, handleAlarm);
         alarm(3);
         dup2(*fd_in, STDIN_FILENO);
         close(*fd_in);
@@ -138,11 +154,9 @@ int Cgi::execScript(int *fd_in, int *fd_out) {
         close(_cgiFd);
         if (execve(exec, _args, _cenv) == -1) {
             close(*fd_out);
-            free(_args[0]);
-            free(_args[1]);
-            free(_args);
-            free(exec);
-            freeEnv();
+            delete [] _args;
+            delete [] exec;
+            delete [] _cenv;
             close(_cgiFd);
             std::exit(500);
         }
@@ -154,38 +168,37 @@ int Cgi::execScript(int *fd_in, int *fd_out) {
 int Cgi::writePipe(int *fd_in, int *fd_out, std::string body) {
 
     pid_t pid;
+    char * info;
+    info = new char[body.size() + 1];
+    strcpy(info, body.c_str());
     pid = fork();
     if (pid == -1) {
         return 500;
     }
     if (pid == 0) {
-        signal(SIGALRM, handleAlarm);
         alarm(3);
         dup2(*fd_out, STDOUT_FILENO);
         close(*fd_out);
         close(*fd_in);
-        char * info = new char[body.size() + 1];
-        strcpy(info, body.c_str());
         char *const args[] = { (char*)"/usr/bin/echo", info, NULL };
         if (execve("/usr/bin/echo", args, NULL) == -1) {
-            free(_args[0]);
-            free(_args[1]);
-            free(_args);
-            free(exec);
-            freeEnv();
+            delete [] _args[0];
+            delete [] _args[1];
+            delete [] _args;
+            delete [] exec;
+            delete [] _cenv;
+            delete [] info;
             close(*fd_in);
             std::exit(500);
         }
     }
+    delete [] info;
     close(*fd_out);
     return pid;
 }
 
-int Cgi::execCGI(Request request) {
+void Cgi::findArgs(Request& request) {
 
-    if (create_env(request) || _cgiFd == -1)
-        return 500;
-    
     std::map<std::string, std::string> paths = request.getLocation().getCgiPath();
     std::map<std::string, std::string>::iterator it = paths.begin();
     std::map<std::string, std::string>::iterator ite = paths.end();
@@ -206,41 +219,36 @@ int Cgi::execCGI(Request request) {
         }
         ++it;
     }
-    if (!exec)
-        return 501;
+}
 
-    std::string body;
-    std::string req = request.getAllRequest();
-    size_t header_end = req.find("\r\n\r\n");
-    if (header_end != std::string::npos)
-        body = req.substr(header_end + 4, req.size() - header_end - 4);
-    else
-        body = "";
-    int fd[2];
-    if (pipe(fd) == -1)
-        return 500;
+int Cgi::execCGI(Request request) {
+
     int scriptStatus;
     int writeStatus;
+    int fd[2];
+
+    if (create_env(request) || _cgiFd == -1)
+        return 500;
+    
+    findArgs(request);
+    if (!exec)
+        return 501;
+    
+    if (pipe(fd) == -1)
+        return 500;
     waitpid(execScript(&fd[0], &fd[1]), &scriptStatus, 0);
-    waitpid(writePipe(&fd[0], &fd[1], body), &writeStatus, 0);
+    waitpid(writePipe(&fd[0], &fd[1], request.getBody()), &writeStatus, 0);
     if (WIFSIGNALED(scriptStatus))
         return 408;
     if (WEXITSTATUS(scriptStatus) == 500)
         return 500;
-
-    free(_args[0]);
-    free(_args[1]);
-    free(_args);
-    free(exec);
-    freeEnv();
+    delete [] _args[0];
+    delete [] _args[1];
+    delete [] _args;
+    delete [] exec;
+    delete [] _cenv;
     close(_cgiFd);
     close(fd[1]);
     close(fd[0]);
     return 200;
-}
-
-void Cgi::handleAlarm(int signal) {
-    (void)signal;
-    std::cout << "fct handle alarm called !!" << std::endl;
-    exit(1);
 }

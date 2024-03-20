@@ -17,6 +17,22 @@ User::~User(void)
     return ;
 }
 
+User::User(const User& cpy) {
+    *this = cpy;
+}
+
+User& User::operator=(const User& rhs) {
+
+    if (this != &rhs) {
+        server = rhs.server;
+        request = rhs.request;
+        response = rhs.response;
+        fd = rhs.fd;
+		lastTime = rhs.lastTime;
+    }
+    return *this;
+}
+
 Server User::getServer(void) const
 {
 	return (this->server);

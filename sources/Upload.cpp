@@ -21,6 +21,8 @@ Upload& Upload::operator=(const Upload& rhs) {
     if (this != &rhs) {
         _request = rhs._request;
         _server = rhs._server;
+        filename = rhs.filename;
+        fileBody = rhs.fileBody;
     }
     return *this;
 }
