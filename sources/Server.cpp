@@ -3,7 +3,7 @@
 Server::Server(void)
 {
 	this->fd = 0;
-	this->port = 0;
+	// this->port = 0;
 	this->client_max_body_size = 0;
     this->host = 0;
 	this->server_name = "";
@@ -13,6 +13,16 @@ Server::Server(void)
 Server::~Server(void)
 {
     return ;
+}
+
+int Server::setVecPort(int port)
+{
+    if (port > 65535 || port <= 0)
+    {
+        return (1);
+    }
+	this->vecPort.push_back(port);
+    return (0);
 }
 
 int Server::setPort(int port)
@@ -40,6 +50,16 @@ int Server::setHost(std::string host)
  	if (host == "localhost")
 		host = "127.0.0.1";   
 	this->host = inet_addr(host.data());
+    return (0);
+}
+
+int Server::setStrHost(std::string host)
+{
+    if (host.length() == 0)
+    {
+        return (1);
+    }
+	this->str_host = host;
     return (0);
 }
 
@@ -156,10 +176,25 @@ std::string Server::getErrorPagei(int i)
     return (this->error_page[i]);
 }
 
+std::vector<int> Server::getVecPort(void) const
+{
+    return (this->vecPort);
+}
+
 int Server::getPort(void) const
 {
     return (this->port);
 }
+
+int Server::getVecPorti(int i) 
+{
+    if (i >= 0 && i < (int)this->vecPort.size())
+    {
+        return (this->vecPort[i]);
+    }
+    return (0);
+}
+
 
 int Server::getFd(void) const
 {
@@ -169,6 +204,11 @@ int Server::getFd(void) const
 in_addr_t Server::getHost(void) const
 {
     return (this->host);
+}
+
+std::string Server::getStrHost(void) const
+{
+    return (this->str_host);
 }
 
 std::string Server::getServerName(void) const

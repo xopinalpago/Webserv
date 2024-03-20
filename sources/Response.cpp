@@ -217,7 +217,9 @@ void Response::setPathFile()
 {
     std::string str = _request.getUri();
     // std::cout << std::endl;
-    // std::cout << "_request.getUri() : " << _request.getUri() << std::endl;
+    std::cout << "_request.getUri() : " << _request.getUri() << std::endl;
+    std::cout << "_request.getLocation().getPath() : " << _request.getLocation().getPath() << std::endl;
+
     // std::cout << "_request.getLocation().getRoot() : " << _request.getLocation().getRoot() << std::endl;
     // std::cout << "_request.getLocation().getRedirectionCode() : " << _request.getLocation().getRoot() << std::endl;
     
@@ -236,6 +238,14 @@ void Response::setPathFile()
         //     _filePath = _request.getLocation().getRedirectionPath();
         // }
         // std::cout << "_filePath : " << _filePath << std::endl;
+        std::cout << "str : " << str << std::endl;
+        std::cout << "_filePathhhhhhh : " << _filePath << std::endl;
+        if (str.compare(0, _request.getLocation().getPath().length(), _request.getLocation().getPath()) == 0) {
+            _status = 404;
+            std::cout << "Le début de la chaîne str2 correspond à str1." << std::endl;
+        } else {
+            std::cout << "Le début de la chaîne str2 ne correspond pas à str1." << std::endl;
+        }
 		return ;
 	}
     if (str == "/") {
@@ -352,6 +362,7 @@ std::string Response::makeHeader() {
     return (header.str());
 }
 
+
 void Response::processRequest() {
 
     // std::cout << "_server.getClientMax() = " << _server.getClientMax() << std::endl;
@@ -359,20 +370,36 @@ void Response::processRequest() {
     if (_request.getContentLength() <= _server.getClientMax()) {
         if (_request.getVersion() != "HTTP/1.1")
             _status = 505;
-        else if (_request.getLocation().getRedirectionPath() != "") {
-
-            // _status = _request.getLocation().getRedirectionCode();
-            // _content << "HTTP/1.1 " << _status << " " << messages[_status] << std::endl;
-            // _content << "Location: " << _request.getLocation().getRedirectionPath() << std::endl;
-			// _content << "Content-Length: " << 0 << std::endl << std::endl;
+        else if (_request.getLocation().getRedirectionPath() != "")
+        {
+            std::cout << "_request.getLocation().getRedirectionPath() : " << _request.getLocation().getRedirectionPath() << std::endl;
+            std::cout << "_request.getUri() : " << _request.getUri() << std::endl;
+            std::cout << "_request.getLocation().getPath() : " << _request.getLocation().getPath() << std::endl;
+            // if ( _request.getUri().compare(0, _request.getLocation().getPath().length(), _request.getLocation().getPath()) == 0) {
+            //     _status = 404;
+            //     errorData(); 
+            //     _content << makeHeader();
+            //     _content << _body.str();
+            //     _finalRes = _content.str();
+            //     return ;
+            //     std::cout << "Le début de la chaîne str2 correspond à str1." << std::endl;
+            // } else {
+            //     std::cout << "Le début de la chaîne str2 ne correspond pas à str1." << std::endl;
+            // }
 
             _status = _request.getLocation().getRedirectionCode();
             _content << "HTTP/1.1 " << _status << " " << messages[_status] << std::endl;
-            _body << "<!doctype html>\n<html>\n<head>\n<title>" << _status << " : " << messages[_status] << "</title>\n<meta http-equiv=\"refresh\" content=\"3; URL=" << _request.getLocation().getRedirectionPath() << "\">\n</head>";
-            _body << "<body>" << _status << " : " << messages[_status] << "\n<br>\nRedirection to " << _request.getLocation().getRedirectionPath() <<  " in 3 seconds.\n</body>\n</html>\n";
-			_content << "Content-Length: " << _body.str().length() << std::endl << std::endl;
-            _content << _body.str();
+            _content << "Location: " << _request.getLocation().getRedirectionPath() << std::endl;
+			_content << "Content-Length: " << 0 << std::endl << std::endl;
             _finalRes = _content.str();
+
+            // _status = _request.getLocation().getRedirectionCode();
+            // _content << "HTTP/1.1 " << _status << " " << messages[_status] << std::endl;
+            // _body << "<!doctype html>\n<html>\n<head>\n<title>" << _status << " : " << messages[_status] << "</title>\n<meta http-equiv=\"refresh\" content=\"3; URL=" << _request.getLocation().getRedirectionPath() << "\">\n</head>";
+            // _body << "<body>" << _status << " : " << messages[_status] << "\n<br>\nRedirection to " << _request.getLocation().getRedirectionPath() <<  " in 3 seconds.\n</body>\n</html>\n";
+			// _content << "Content-Length: " << _body.str().length() << std::endl << std::endl;
+            // _content << _body.str();
+            // _finalRes = _content.str();
 
             // std::cout << "************FINAL RES************" << std::endl;
             // std::cout << _finalRes;

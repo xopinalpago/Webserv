@@ -46,7 +46,7 @@ class Config {
         int         cleanError(Server &server);
         // void        setNbConfig(std::string &filename, std::string to_find);
 		// int         getNbConfig(void);
-        int         makePort(Server &server, std::string str, int &nbPort);
+        int         makePort(Server &server, std::string str);
         int         makeHost(Server &server, std::string str, int &nbHost);
         int         makeServerName(Server &server, std::string str, int &nbServerName);
         int         makeRoot(Location &loc, std::string str, int &nbRoot);

@@ -44,6 +44,7 @@ class Launcher
 		~Launcher(void);
 
 		int 	initServer(Server &server);
+		int 	initServer(Server &server, int port);
 		int 	initConfig(std::string &filename);
 		int 	runServer(void);
 		void	closeAllConnection(void);

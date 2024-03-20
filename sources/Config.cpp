@@ -82,6 +82,13 @@ int Config::getLineFile(std::string &filename, Launcher &launcher)
 					fillServer(server);
 					missElement(server);
 					launcher.initServer(server);
+					for (size_t i = 1; i < server.getVecPort().size(); i++)
+					{
+						Server serv = server;
+						// std::cout << "serv = " << serv.getRoot() << std::endl;
+						// std::cout << "server.getVecPorti(i) = " << server.getVecPorti(i) << std::endl;
+						launcher.initServer(serv, server.getVecPorti(i));
+					}
 					serverConfig.clear();
 					location.clear();
 					error_page.clear();
@@ -118,6 +125,8 @@ int Config::cleanError(Server &server)
 		{
 			if (error_page[i].find("error_page {"))
 			{
+				if (error_page[i][error_page[i].length() - 1] != ';')
+					throw ConfigException("Invalid Error Page");
 				if (!std::isdigit(error_page[i][0]))
 					throw ConfigException("No Digit Number in Error Page");
 				int first_sp = error_page[i].find(' ');
@@ -146,7 +155,7 @@ std::string Config::getValue(std::string line)
 
 int Config::missElement(Server &server)
 {
-	if (server.getPort() <= 0)
+	if (server.getVecPort().size() <= 0)
 		throw ConfigException("No Port");
 	if (server.getClientMax() <= 0)
 		throw ConfigException("No Client Max Body Size");
@@ -155,29 +164,31 @@ int Config::missElement(Server &server)
 	return (0);
 }
 
-int Config::makePort(Server &server, std::string str, int &nbPort)
+int Config::makePort(Server &server, std::string str)
 {
+	if (str[str.length() - 1] != ';')
+		throw ConfigException("Invalid Port");
 	std::string port_str = getValue(str);
 	if (port_str.empty())
 		throw ConfigException("Invalid Port");
 	int port = Utils::stringToInt(port_str);
 	if (port <= 0)
 		throw ConfigException("Invalid Port");
-	if (server.setPort(port))
+	if (server.setVecPort(port))
 		throw ConfigException("Invalid Port");
-	nbPort++;
-	if (nbPort > 1)
-		throw ConfigException("Too many Port");
 	return (0);
 }
 
 int Config::makeHost(Server &server, std::string str, int &nbHost)
 {
+	if (str[str.length() - 1] != ';')
+		throw ConfigException("Invalid Host");
 	std::string host = getValue(str);
 	if (host.length() == 0)
 		throw ConfigException("Invalid Host");
 	if (server.setHost(host))
 		throw ConfigException("Invalid Host");
+	server.setStrHost(host);
 	nbHost++;
 	if (nbHost > 1)
 		throw ConfigException("Too many Host");
@@ -186,6 +197,8 @@ int Config::makeHost(Server &server, std::string str, int &nbHost)
 
 int Config::makeServerName(Server &server, std::string str, int &nbServerName)
 {
+	if (str[str.length() - 1] != ';')
+		throw ConfigException("Invalid Server Name");
 	std::string server_name = getValue(str);
 	if (server_name.length() == 0)
 		throw ConfigException("Invalid Server Name");
@@ -199,6 +212,8 @@ int Config::makeServerName(Server &server, std::string str, int &nbServerName)
 
 int Config::makeRoot(Location &loc, std::string str, int &nbRoot)
 {
+	if (str[str.length() - 1] != ';')
+		throw ConfigException("Invalid Root");
 	std::string root = getValue(str);
 	if (root.length() == 0)
 		throw ConfigException("Invalid Root");
@@ -212,6 +227,8 @@ int Config::makeRoot(Location &loc, std::string str, int &nbRoot)
 
 int Config::makeIndex(Location &loc, std::string str, int &nbIndex)
 {
+	if (str[str.length() - 1] != ';')
+		throw ConfigException("Invalid Index");
 	std::string index = getValue(str);
 	if (index.length() == 0)
 		throw ConfigException("Invalid Index");
@@ -225,6 +242,8 @@ int Config::makeIndex(Location &loc, std::string str, int &nbIndex)
 
 int Config::makeUploadDir(Location &loc, std::string str, int &nbUploadDir)
 {
+	if (str[str.length() - 1] != ';')
+		throw ConfigException("Invalid Upload Dir");
 	std::string uploadDir = getValue(str);
 	if (uploadDir.length() == 0)
 		throw ConfigException("Invalid Upload Dir");
@@ -238,6 +257,8 @@ int Config::makeUploadDir(Location &loc, std::string str, int &nbUploadDir)
 
 int Config::makeClientMax(Server &server, std::string str, int &nbClientMax)
 {
+	if (str[str.length() - 1] != ';')
+		throw ConfigException("Invalid Client Max Body Size");
 	std::string client_max_body_size_str = getValue(str);
 	if (client_max_body_size_str.empty())
 		throw ConfigException("Invalid Client Max Body Size");
@@ -254,6 +275,8 @@ int Config::makeClientMax(Server &server, std::string str, int &nbClientMax)
 
 int Config::makeRoot(Server &server, std::string str, int &nbRoot)
 {
+	if (str[str.length() - 1] != ';')
+		throw ConfigException("Invalid Root");
 	std::string root = getValue(str);
 	if (root.length() == 0)
 		throw ConfigException("Invalid Root");
@@ -267,6 +290,8 @@ int Config::makeRoot(Server &server, std::string str, int &nbRoot)
 
 int Config::makeIndex(Server &server, std::string str, int &nbIndex)
 {
+	if (str[str.length() - 1] != ';')
+		throw ConfigException("Invalid Index");
 	std::string index = getValue(str);
 	if (index.length() == 0)
 		throw ConfigException("Invalid Index");
@@ -280,6 +305,8 @@ int Config::makeIndex(Server &server, std::string str, int &nbIndex)
 
 int Config::makeAutoIndex(Location &loc, std::string str, int &nbAutoIndex)
 {
+	if (str[str.length() - 1] != ';')
+		throw ConfigException("Invalid Auto Index");
 	std::string autoIndex = getValue(str);
 	if (autoIndex.length() == 0)
 		throw ConfigException("Invalid Auto Index");
@@ -293,6 +320,8 @@ int Config::makeAutoIndex(Location &loc, std::string str, int &nbAutoIndex)
 
 int Config::makeMethod(Location &loc, std::string str, int &nbAllowMethods)
 {
+	if (str[str.length() - 1] != ';')
+		throw ConfigException("Invalid Method");
 	int pos = 0;
 	while (str.find(' ', pos) != str.npos)
 	{
@@ -314,6 +343,8 @@ int Config::makeMethod(Location &loc, std::string str, int &nbAllowMethods)
 
 int Config::makeCgiEx(Location &loc, std::string str, int &nbCgiEx)
 {
+	if (str[str.length() - 1] != ';')
+		throw ConfigException("Invalid Cgi");
 	int pos = 0;
 	while (str.find(' ', pos) != str.npos)
 	{
@@ -330,6 +361,8 @@ int Config::makeCgiEx(Location &loc, std::string str, int &nbCgiEx)
 
 int Config::makeCgiPath(Location &loc, std::string str, int &nbCgiPath)
 {
+	if (str[str.length() - 1] != ';')
+		throw ConfigException("Invalid Cgi Path");
 	int pos = 0;
 	if (str.find(' ', pos) == str.npos)
 		throw ConfigException("Invalid Cgi Path");
@@ -355,6 +388,8 @@ int Config::makeCgiPath(Location &loc, std::string str, int &nbCgiPath)
 
 int Config::makeRedirection(Location &loc, std::string str, int &nbRedirection)
 {
+	if (str[str.length() - 1] != ';')
+		throw ConfigException("Invalid Redirection");
 	if (str.find(' ', 0) == str.npos)
 		throw ConfigException("Invalid Redirection");
 	int	fpos = str.find(' ', 0);
@@ -368,8 +403,38 @@ int Config::makeRedirection(Location &loc, std::string str, int &nbRedirection)
 		throw ConfigException("Invalid Redirection");
 	if (key != 300 && key != 301 && key != 302 && key != 303 && key != 304 && key != 307 && key != 308)
 		throw ConfigException("Invalid Redirection");
-	// if (Utils::fileExists(path))
-	// 	throw ConfigException("Invalid Path Redirection");
+	if (path.substr(0, 2) == "./")
+		throw ConfigException("Redirection can not call itself");
+	
+    // std::ostringstream oss;
+    // oss << server.getHost();
+	// if (path.find("http://") == 0)
+	// {
+	// 	std::ostringstream oss2;
+	// 	oss2 << server.getPorti(8080);
+	// 	std::string str_post= oss2.str();
+	// 	std::string url_tmp = "http://" + server.getStrHost() + ":" + str_post + "/";
+	// 	if (path.find(url_tmp) != 0 && server.getStrHost() != "localhost" && server.getStrHost() != "127.0.0.1")
+	// 	{
+	// 		throw ConfigException("Invalid Redirection");
+	// 		std::cout << "FAUUUUX" << std::endl;
+	// 	}
+	// 	else
+	// 	{
+	// 		url_tmp = "http://127.0.0.1:" + str_post + "/";
+	// 		std::string url_tmp2 = "http://localhost:" + str_post + "/";
+	// 		if (path.find(url_tmp) != 0 && path.find(url_tmp2) != 0)
+	// 		{
+	// 			std::cout << "FAUUUUX" << std::endl;
+	// 			throw ConfigException("Invalid Redirection");
+	// 		}
+	// 	}
+	// }
+	// else
+	// {
+	// 	if (path.find("//") != path.npos)
+	// 		throw ConfigException("Invalid Redirection");
+	// }
 	loc.setRedirectionPath(path);
 	loc.setRedirectionCode(key);
 	nbRedirection++;
@@ -380,7 +445,6 @@ int Config::makeRedirection(Location &loc, std::string str, int &nbRedirection)
 
 int Config::fillServer(Server &server)
 {
-	int nbPort = 0;
 	int nbHost = 0;
 	int nbServerName = 0;
 	int nbClientMax = 0;
@@ -390,7 +454,7 @@ int Config::fillServer(Server &server)
     for (size_t i = 0; i < serverConfig.size(); i++)
 	{
 		if (serverConfig[i].find("listen") == 0)
-			makePort(server, serverConfig[i], nbPort);
+			makePort(server, serverConfig[i]);
 		else if (serverConfig[i].find("host") == 0)
 			makeHost(server, serverConfig[i], nbHost);
 		else if (serverConfig[i].find("server_name") == 0)
@@ -449,6 +513,27 @@ int Config::setDefaultMethods(Location &loc)
 		loc.setMethod("DELETE");
 	}
 	return (0);
+}
+
+void changeRedirectionLoc(std::map<std::string, Location> &locations)
+{
+	for (std::map<std::string, Location>::iterator it = locations.begin(); it != locations.end(); ++it)
+	{
+		if (it->second.getRedirectionPath().size() > 0)
+		{
+			for (std::map<std::string, Location>::iterator it2 = locations.begin(); it2 != locations.end(); ++it2)
+			{
+				if (it != it2)
+				{
+					if (it->second.getRedirectionPath() == it2->first && it->second.getRedirectionPath()[it->second.getRedirectionPath().length() - 1] != '/')
+					{
+						std::string tmp = it->second.getRedirectionPath() + "/";
+						it->second.setRedirectionPath(tmp); 
+					}
+				}
+			}
+		}
+	}
 }
 
 int	Config::fillLocation(Server &server)
@@ -518,5 +603,6 @@ int	Config::fillLocation(Server &server)
 		}
 		i++;
 	}
+	changeRedirectionLoc(server.getLoc());
 	return (0);
 }

@@ -259,13 +259,46 @@ int Launcher::initServer(Server &server)
 	std::memset(&server.address, 0, sizeof(server.address));
     server.address.sin_family = AF_INET;
 	server.address.sin_addr.s_addr = server.getHost();
-	server.address.sin_port = htons(server.getPort());
+	// std::cout << "server.getPorti(0) = " << server.getPorti(0) << std::endl;
+	server.address.sin_port = htons(server.getVecPorti(0));
+	server.setPort(server.getVecPorti(0));
     if (bind(server.getFd(), (struct sockaddr *)&server.address, sizeof(server.address)) < 0)
 	{
         close(server.getFd());
         throw LauncherInitException("bind failed");
     }
 	Servers[server.getFd()] = server;
+	// std::cout << "server.getFd() = " << server.getFd() << std::endl;
+	max_sd = server.getFd();
+    return (0);
+}
+
+int Launcher::initServer(Server &server, int port)
+{
+    int on = 1;
+	FD_ZERO(&writefds);
+	if (server.setFd(socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	{
+		close(server.getFd());
+        throw LauncherInitException("socket failed");
+	}
+	if ((rc = setsockopt(server.getFd(), SOL_SOCKET,  SO_REUSEADDR, (char *)&on, sizeof(on)) < 0))
+	{
+		close(server.getFd());
+		throw LauncherInitException("setsockopt failed");
+	}
+	std::memset(&server.address, 0, sizeof(server.address));
+    server.address.sin_family = AF_INET;
+	server.address.sin_addr.s_addr = server.getHost();
+	server.address.sin_port = htons(port);
+	server.setPort(port);
+    if (bind(server.getFd(), (struct sockaddr *)&server.address, sizeof(server.address)) < 0)
+	{
+        close(server.getFd());
+        throw LauncherInitException("bind failed");
+    }
+	Servers[server.getFd()] = server;
+	// std::cout << "server.getFd() = " << server.getFd() << std::endl;
 	max_sd = server.getFd();
     return (0);
 }
@@ -302,7 +335,7 @@ int Launcher::runServer(void)
 	end_server = false;
 
 	checkServers();
-	checkServerName();
+	// checkServerName();
 	initSets();
     while (end_server == false)
 	{

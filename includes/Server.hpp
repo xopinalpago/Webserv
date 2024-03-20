@@ -26,9 +26,11 @@ class Server
 {
     private:
         int                         fd;
-        int                         port;
+        std::vector<int>            vecPort;
+		int							port;
         unsigned int                client_max_body_size;
         in_addr_t                   host;
+        std::string                 str_host;
         std::string                 server_name;
         std::string                 root;
         std::string					index;
@@ -42,8 +44,10 @@ class Server
         struct sockaddr_in address;
 
         int 	                    setPort(int port);
+		int 	                    setVecPort(int port);
         int 	                    setFd(int fd);
         int 	                    setHost(std::string host);
+		int                         setStrHost(std::string host);
         int 	                    setServerName(std::string server_name);
         unsigned int                setClientMax(unsigned int client_max_body_size);
         void 	                    setMethod(std::string tmp);
@@ -52,10 +56,13 @@ class Server
         int                         setRoot(std::string root);
         int                         setIndex(std::string index);
 
-        int         				getPort(void) const;
+        std::vector<int>         	getVecPort(void) const;
+		int				         	getVecPorti(int i);
+		int 						getPort(void) const;
         int         				getFd(void) const;
         unsigned int        		getClientMax(void) const;
         in_addr_t    				getHost(void) const;
+		std::string                 getStrHost(void) const;
         std::string                 getRoot(void) const;
         std::string 				getServerName(void) const;
         std::string 				getIndex(void) const;
