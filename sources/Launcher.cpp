@@ -12,31 +12,6 @@ Launcher::~Launcher(void)
 	return ;
 }
 
-// int Launcher::initConfig(std::string &filename)
-// {
-// 	Config	config;
-
-// 	// config.setNbConfig(filename, "server ");
-// 	// if (config.getNbConfig() == 0)
-// 	// 	return (1);
-// 	if (config.getLineFile(filename))
-// 		return (1); 
-// 	// for (int i = 1; i <= config.getNbConfig(); i++)
-// 	// {
-// 		// Server server;
-// 		if (config.parseFile(i, server))
-// 			return (1);
-// 		if (config.missElement(server))
-// 			return (1);
-// 		if (initServer(server))
-// 			return (1);
-// 	}
-// 	if (config.getNbConfig() > 1)
-// 		if (checkServers())
-// 			return (1);
-// 	return (0);
-// }
-
 void Launcher::listenServer(Server &server)
 {
 	int addrlen = sizeof(server.address);
@@ -85,25 +60,6 @@ void    Launcher::closeConnection(int fd)
 		Servers.erase(fd);
 }
 
-// void    Launcher::closeAllConnectionExcep(void)
-// {
-//     for (int fd = 0; fd <= max_sd; ++fd)
-//     {
-// 		if (FD_ISSET(fd, &writefds))
-// 			FD_CLR(fd, &writefds);
-// 		if (fd == max_sd)
-// 		{
-// 			max_sd--;
-// 		}
-// 		std::cout << "Connection: " << fd << " closed..." << std::endl;
-// 		close(fd);
-// 		if (Users.find(fd) != Users.end())
-// 			Users.erase(fd);
-// 		if (Servers.find(fd) != Servers.end())
-// 			Servers.erase(fd);
-//     }
-// }
-
 int Launcher::readServer(User &user)
 {
     int rc = BUFFER_SIZE;
@@ -130,10 +86,6 @@ int Launcher::readServer(User &user)
 		bf[rc] = 0;
 		totalBytes += rc;
 		request.setAllRequest(bf);
-		// std::cout << std::endl;
-		// std::cout << "**************BUFFER***************" << std::endl;
-		// std::cout << bf << std::endl;
-		// std::cout << "************************************" << std::endl;
 	}
 	// calculer le body
 	std::string body;
@@ -146,11 +98,7 @@ int Launcher::readServer(User &user)
         body = "";
 		request.setBody(body);
 	}
-	// std::cout << "body size : " << body.size() << std::endl;
 
-	// std::cout << "**************BODY***************" << std::endl;
-	// std::cout << body << std::endl;
-	// std::cout << "************************************" << std::endl;
 	// parsing
 	if (request.parseRequest())
 	{
@@ -259,7 +207,6 @@ int Launcher::initServer(Server &server)
 	std::memset(&server.address, 0, sizeof(server.address));
     server.address.sin_family = AF_INET;
 	server.address.sin_addr.s_addr = server.getHost();
-	// std::cout << "server.getPorti(0) = " << server.getPorti(0) << std::endl;
 	server.address.sin_port = htons(server.getVecPorti(0));
 	server.setPort(server.getVecPorti(0));
     if (bind(server.getFd(), (struct sockaddr *)&server.address, sizeof(server.address)) < 0)
@@ -268,7 +215,6 @@ int Launcher::initServer(Server &server)
         throw LauncherInitException("bind failed");
     }
 	Servers[server.getFd()] = server;
-	// std::cout << "server.getFd() = " << server.getFd() << std::endl;
 	max_sd = server.getFd();
     return (0);
 }
@@ -298,7 +244,6 @@ int Launcher::initServer(Server &server, int port)
         throw LauncherInitException("bind failed");
     }
 	Servers[server.getFd()] = server;
-	// std::cout << "server.getFd() = " << server.getFd() << std::endl;
 	max_sd = server.getFd();
     return (0);
 }
@@ -335,7 +280,7 @@ int Launcher::runServer(void)
 	end_server = false;
 
 	checkServers();
-	// checkServerName();
+	checkServerName();
 	initSets();
     while (end_server == false)
 	{

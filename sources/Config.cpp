@@ -4,45 +4,9 @@ Config::Config(void) {}
 
 Config::~Config(void) {}
 
-// int Config::getNbConfig(void)
-// {
-// 	return (this->nb_config);
-// }
-
-// void Config::setNbConfig(std::string &filename, std::string to_find)
-// {
-//     std::ifstream file(filename.c_str());
-//     std::string line;
-//     int count = 0;
-
-//     if (file.is_open())
-// 	{
-//         while (getline(file, line))
-// 		{
-//             size_t pos = 0;
-//             while ((pos = line.find(to_find, pos)) != std::string::npos)
-// 			{
-//                 count++;
-//                 pos += to_find.length();
-//             }
-//         }
-//         file.close();
-//     }
-// 	else
-// 	{
-// 		this->nb_config = 0;
-// 		return ;
-//     }
-// 	this->nb_config = count;
-//     return ;
-// }
-
-
-
 int Config::getLineFile(std::string &filename, Launcher &launcher)
 {
     std::ifstream infile(filename.c_str());
-	// int nbMethod = 0;
 	int nbErrorPage = 0;
 	
 
@@ -55,7 +19,6 @@ int Config::getLineFile(std::string &filename, Launcher &launcher)
 		{
             line = Utils::trim(line);
 			line = Utils::trimTab(line);
-			// std::cout << line << std::endl; 
             if (!line.empty())
 			{
 				if (line.find("server {") == 0)
@@ -85,8 +48,6 @@ int Config::getLineFile(std::string &filename, Launcher &launcher)
 					for (size_t i = 1; i < server.getVecPort().size(); i++)
 					{
 						Server serv = server;
-						// std::cout << "serv = " << serv.getRoot() << std::endl;
-						// std::cout << "server.getVecPorti(i) = " << server.getVecPorti(i) << std::endl;
 						launcher.initServer(serv, server.getVecPorti(i));
 					}
 					serverConfig.clear();
@@ -107,12 +68,6 @@ int Config::getLineFile(std::string &filename, Launcher &launcher)
 	{
         throw ConfigException("No Such File");
     }
-
-    // Affichage du contenu du vecteur
-    // for (size_t i = 0; i < location.size(); ++i) {
-    //     std::cout << location[i] << std::endl;
-    // }
-
     return (0);
 }
 
@@ -386,7 +341,7 @@ int Config::makeCgiPath(Location &loc, std::string str, int &nbCgiPath)
 	return (0);
 }
 
-int Config::makeRedirection(Location &loc, std::string str, int &nbRedirection)
+int Config::makeRedirection(Location &loc, std::string str, int &nbRedirection, Server server)
 {
 	if (str[str.length() - 1] != ';')
 		throw ConfigException("Invalid Redirection");
@@ -406,37 +361,40 @@ int Config::makeRedirection(Location &loc, std::string str, int &nbRedirection)
 	if (path.substr(0, 2) == "./")
 		throw ConfigException("Redirection can not call itself");
 	
-    // std::ostringstream oss;
-    // oss << server.getHost();
-	// if (path.find("http://") == 0)
-	// {
-	// 	std::ostringstream oss2;
-	// 	oss2 << server.getPorti(8080);
-	// 	std::string str_post= oss2.str();
-	// 	std::string url_tmp = "http://" + server.getStrHost() + ":" + str_post + "/";
-	// 	if (path.find(url_tmp) != 0 && server.getStrHost() != "localhost" && server.getStrHost() != "127.0.0.1")
-	// 	{
-	// 		throw ConfigException("Invalid Redirection");
-	// 		std::cout << "FAUUUUX" << std::endl;
-	// 	}
-	// 	else
-	// 	{
-	// 		url_tmp = "http://127.0.0.1:" + str_post + "/";
-	// 		std::string url_tmp2 = "http://localhost:" + str_post + "/";
-	// 		if (path.find(url_tmp) != 0 && path.find(url_tmp2) != 0)
-	// 		{
-	// 			std::cout << "FAUUUUX" << std::endl;
-	// 			throw ConfigException("Invalid Redirection");
-	// 		}
-	// 	}
-	// }
-	// else
-	// {
-	// 	if (path.find("//") != path.npos)
-	// 		throw ConfigException("Invalid Redirection");
-	// }
+	int isValid = 0;
+	if (path.find("http://") == 0)
+	{
+		for (size_t i = 0; i < server.getVecPort().size(); i++)
+		{
+			std::ostringstream oss2;
+			oss2 << server.getVecPorti(i);
+			std::string str_post= oss2.str();
+			std::string url_tmp = "http://" + server.getStrHost() + ":" + str_post + "/";
+			if (path.find(url_tmp) == 0 && server.getStrHost() != "localhost" && server.getStrHost() != "127.0.0.1")
+			{
+				isValid = 1;
+			}
+			else if (server.getStrHost() == "localhost" || server.getStrHost() == "127.0.0.1")
+			{
+				url_tmp = "http://127.0.0.1:" + str_post + "/";
+				std::string url_tmp2 = "http://localhost:" + str_post + "/";
+				if (path.find(url_tmp) == 0 || path.find(url_tmp2) == 0)
+				{
+					isValid = 1;
+				}
+			}
+		}
+		if (!isValid)
+			throw ConfigException("Invalid Redirection");
+	}
+	else
+	{
+		if (path.find("//") != path.npos)
+			throw ConfigException("Invalid Redirection");
+	}
 	loc.setRedirectionPath(path);
 	loc.setRedirectionCode(key);
+	std::cout << "loc.getRedirectionPath() = " << loc.getRedirectionPath() << std::endl;
 	nbRedirection++;
 	if (nbRedirection > 1)
 		throw ConfigException("Too many Redirection");
@@ -468,7 +426,6 @@ int Config::fillServer(Server &server)
     }
 	fillLocation(server);
 	cleanError(server);
-	// std::cout << server.getLoci("/test").getMethodi(0) << std::endl;
 
 	return (0);
 }
@@ -585,7 +542,7 @@ int	Config::fillLocation(Server &server)
 				else if (location[i].find("cgi_path") == 0)
 					makeCgiPath(loc, location[i], nbCgiPath);
 				else if (location[i].find("return") == 0)
-					makeRedirection(loc, location[i], nbRedirection);
+					makeRedirection(loc, location[i], nbRedirection, server);
 				else if (location[i].find("upload_dir") == 0)
 					makeUploadDir(loc, location[i], nbUploadDir);
 				i++;
@@ -599,7 +556,6 @@ int	Config::fillLocation(Server &server)
 				missElementCgi(loc);
 			if (server.setLoc(loc.getPath(), loc))
 				throw ConfigException("Duplicate Location");
-			// std::cout << "loc.getRedirectionPath() = " << loc.getRedirectionPath() << std::endl; 
 		}
 		i++;
 	}
