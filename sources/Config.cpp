@@ -125,6 +125,13 @@ int Config::missElement(Server &server)
 {
 	if (server.getVecPort().size() <= 0)
 		throw ConfigException("No Port");
+	for (size_t i = 0; i < server.getVecPort().size(); i++)	{
+		for (size_t j = i + 1; j < server.getVecPort().size(); j++) {
+			if (server.getVecPorti(i) == server.getVecPorti(j))
+				throw ConfigException("Duplicates Port");
+		}
+	}
+	
 	if (server.getClientMax() <= 0)
 		throw ConfigException("No Client Max Body Size");
 	if (server.getHost() <= 0)
@@ -480,8 +487,9 @@ int Config::missElementLoc(Location &loc, Server &server)
 		throw ConfigException("Missing Root");
 	if (loc.getMethod().size() == 0)
 		throw ConfigException("Missing Method");
-	if (loc.getIndex().size() == 0 && server.getIndex().size() == 0 && loc.getAutoindex() != 1)
-		throw ConfigException("Missing Index");
+	if (!loc.getIndex().empty())
+		if (loc.getIndex().size() == 0 && server.getIndex().size() == 0 && loc.getAutoindex() != 1 && loc.getPath() != "/cgi-bin")
+			throw ConfigException("Missing Index");
 	return (0);
 }
 
@@ -588,16 +596,19 @@ int	Config::fillLocation(Server &server)
 				setDefaultMethods(loc);
 			if (loc.getRoot().size() == 0 && server.getRoot().size() != 0 && loc.getRedirectionPath().size() == 0)
 				loc.setRoot(server.getRoot());
-			if (loc.getIndex().size() == 0 && loc.getAutoindex() != 1)	{
-				for (size_t i = 0; i < server.getIndex().size(); i++)	{
-					loc.setIndex(server.getIndexi(i));
-				}		
+			if (!loc.getIndex().empty())	{
+				if (loc.getIndex().size() == 0 && loc.getAutoindex() != 1)	{
+					for (size_t i = 0; i < server.getIndex().size(); i++)	{
+						loc.setIndex(server.getIndexi(i));
+					}		
+				}
 			}
 			missElementLoc(loc, server);
 			if (loc.getPath() == "/cgi-bin")
 				missElementCgi(loc);
 			if (server.setLoc(loc.getPath(), loc))
 				throw ConfigException("Duplicate Location");
+			// std::cout << loc.getIndexi(0) << std::endl;
 		}
 		i++;
 	}

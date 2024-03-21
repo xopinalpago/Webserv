@@ -42,11 +42,7 @@ void Launcher::listenServer(Server &server)
 
 	new_sd = accept(server.getFd(), (struct sockaddr *)&server.address, (socklen_t*)&addrlen);
 	if (new_sd < 0)
-	{
-		strerror(errno);
-		end_server = true;
-		return ;
-	}
+		throw LauncherException("accept failed");
 	
 	std::cout << "New incoming connection: " << new_sd << std::endl;
 	new_client.setFd(new_sd);

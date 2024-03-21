@@ -143,7 +143,6 @@ bool Response::isDirectory(std::string filePath) {
             return true;
         }
     }
-    // std::cout << "PATH2 : " << path2 << std::endl;
     return false;
 }
 
@@ -158,12 +157,19 @@ void Response::setPathFile()
 		return ;
 	}
     if (str == "/") {
-        for (size_t i = 0; i < _request.getLocation().getIndex().size(); i++)   {
-            str = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndexi(i);
-            if (access(str.c_str(), R_OK) == 0)
-                break;
+        if (_request.getLocation().getIndex().size() > 1)   {
+            for (size_t i = 0; i < _request.getLocation().getIndex().size(); i++)   {
+                std::string tmp = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndexi(i);
+                if (access(str.c_str(), R_OK) == 0) {
+                    str = tmp; 
+                    break;
+                }
+            }
         }
-        
+        else {
+            str = _request.getLocation().getRoot() + "/";
+        }
+
     } else {
         std::string uri = _request.getUri();
         if (uri.find('?') != std::string::npos) {
@@ -205,7 +211,6 @@ void Response::setPathFile()
     }
     std::cout << "_filePath : " << _filePath << std::endl;
 }
-
 
 void Response::errorData() {
 
