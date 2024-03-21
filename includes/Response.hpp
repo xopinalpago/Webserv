@@ -10,14 +10,12 @@
 
 #include "Cgi.hpp"
 #include "Upload.hpp"
-// #include "Launcher.hpp"
 
-class 
-Response {
+class Response {
 
     public :
         Response();
-        Response(Request request);
+        Response(Request request, s_socketInfo* infos);
         // Response(Request request, Launcher* launch);
         ~Response();
         Response(const Response& cpy);
@@ -52,7 +50,6 @@ Response {
     private :
         Request                     _request;
         Server                      _server;
-        // Launcher*                   _launch;
 
         std::map<int, std::string>          messages;
         std::map<int, std::string>          backup;
@@ -66,6 +63,7 @@ Response {
         std::stringstream           _content;
 
         std::string                 _finalRes;
+        s_socketInfo*               _infos;
 };
 
 #endif

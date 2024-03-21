@@ -16,11 +16,11 @@ Response::Response() {}
 //     processRequest();
 // }
 
-Response::Response(Request request) {
+Response::Response(Request request, s_socketInfo* infos) {
 
+    _infos = infos;
     _request = request;
     _server = request.getServer();
-    // _launch = launch;
     setMessages();
     setBackupPages();
     setTypes();
@@ -49,7 +49,6 @@ Response& Response::operator=(const Response& rhs) {
         _filePath = rhs._filePath;
         _ctype = rhs._ctype;
         _finalRes = rhs._finalRes;
-        // _launch = rhs._launch;
     }
     return *this;
 }
@@ -275,7 +274,7 @@ void Response::processRequest() {
                 //     return;
                 // }
                 if (IsCgiExtension(_filePath)) {
-                    Cgi *cgi = new Cgi(_filePath);
+                    Cgi *cgi = new Cgi(_filePath, _infos);
                     _status = cgi->execCGI(_request);
                     if (_status == 200) {
                         std::ifstream file(".cgi.txt");

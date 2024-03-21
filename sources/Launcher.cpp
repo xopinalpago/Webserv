@@ -200,7 +200,14 @@ int Launcher::readServer(User &user)
 
 void	Launcher::sendServer(User &user)
 {
-	Response *res = new Response(user.getRequest());
+	s_socketInfo info;
+	info.max_sd = max_sd;
+	info.readfds = readfds;
+	info.writefds = writefds;
+	// info.Users = Users;
+	// info.Servers = Servers;
+
+	Response *res = new Response(user.getRequest(), &info);
 
 	int rc3 = send(user.getFd(), res->getFinalRes().c_str(), res->getFinalRes().size(), 0);
 	if (rc3 < 0)

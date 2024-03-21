@@ -4,15 +4,10 @@
 #include <map>
 #include <vector>
 
-// #include "Config.hpp"
 #include "Server.hpp"
 #include "User.hpp"
 #include "Request.hpp"
 
-// struct RequestInfo {
-//     std::string requestString;
-//     time_t timestamp;
-// };
 
 class Launcher
 {

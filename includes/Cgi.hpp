@@ -17,14 +17,23 @@
 #include <fstream>
 #include <sys/stat.h> // chmod
 
-
 #include "Request.hpp"
+// #include "User.hpp"
+// class User;
+
+typedef struct socketInfo {
+	fd_set					readfds;
+    fd_set					writefds;
+	int						max_sd;
+	// std::map<int, User>		Users;
+	// std::map<int, Server>	Servers;
+} s_socketInfo;
 
 class Cgi {
 
     public :
         Cgi(void);
-        Cgi(std::string filePath);
+        Cgi(std::string filePath, s_socketInfo* infos);
         ~Cgi(void);
         Cgi(const Cgi& cpy);
         Cgi& operator=(const Cgi& rhs);
@@ -44,6 +53,8 @@ class Cgi {
         void findArgs(Request& request);
         int execScript(int *fd_in, int *fd_out);
         int writePipe(int *fd_in, int *fd_out, std::string body);
+        void    closeConnection(int i);
+        void	closeAllConnection(void);
 
     private :
         std::map<std::string, std::string> _env;
@@ -53,6 +64,7 @@ class Cgi {
         std::string         _filePath;
         char **_args;
         char *exec;
+        s_socketInfo *_infos;
 };
 
 #endif

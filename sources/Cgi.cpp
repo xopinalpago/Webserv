@@ -24,8 +24,10 @@ Cgi& Cgi::operator=(const Cgi& rhs) {
     return *this;
 }
 
-Cgi::Cgi(std::string filePath) {
+Cgi::Cgi(std::string filePath, s_socketInfo* infos) {
     
+    _infos = infos;
+    std::cerr << "TEST : socket maxsd = " << infos->max_sd << std::endl; 
     _filePath = filePath;
     _cgiFile = ".cgi.txt";
     _cgiFd = open(_cgiFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
@@ -44,6 +46,34 @@ Cgi::~Cgi(void) {
     if (fcntl(_cgiFd, F_GETFL) == -1)
         close(_cgiFd);
     // remove(_cgiFile.c_str());
+}
+
+void    Cgi::closeAllConnection(void)
+{
+    // std::cout << "LAAAAAAAAAAAAAAAAAAAAAAAAA" << std::endl;
+    std::cerr << "max_sd : " << _infos->max_sd << std::endl;
+    for (int i = 3; i <= _infos->max_sd; ++i)
+    {
+		closeConnection(i);
+    }
+}
+
+void    Cgi::closeConnection(int fd)
+{
+	if (FD_ISSET(fd, &_infos->writefds))
+		FD_CLR(fd, &_infos->writefds);
+	if (FD_ISSET(fd, &_infos->readfds))
+		FD_CLR(fd, &_infos->readfds);
+    if (fd == _infos->max_sd)
+	{
+        _infos->max_sd--;
+	}
+	// std::cout << "Connection: " << fd << " closed..." << std::endl;
+    close(fd);
+	// if (_infos->Users.find(fd) != _infos->Users.end())
+		// _infos->Users.erase(fd);
+	// if (_infos->Servers.find(fd) != _infos->Servers.end())
+	// 	_infos->Servers.erase(fd);
 }
 
 std::string Cgi::decodeQuery(std::string query) {
@@ -132,10 +162,6 @@ int Cgi::create_env(Request request) {
     _env["SCRIPT_FILENAME"] = _filePath;
     // _env["QUERY_STRING"] = decodeQuery(_env["QUERY_STRING"]);
     _env["REQUEST_URI"] = request.getUri();
-
-    // std::cout << "CONTENT_TYPE : " << _env["CONTENT_TYPE"] << std::endl;
-    // std::cout << "SCRIPT_FILENAME : " << _env["SCRIPT_FILENAME"] << std::endl;
-
     return (mapToChar());
 }
 
@@ -150,8 +176,10 @@ int Cgi::execScript(int *fd_in, int *fd_out) {
         alarm(3);
         dup2(*fd_in, STDIN_FILENO);
         close(*fd_in);
+        close(*fd_out);
         dup2(_cgiFd, STDOUT_FILENO);
         close(_cgiFd);
+        closeAllConnection();
         if (execve(exec, _args, _cenv) == -1) {
             close(*fd_out);
             free_tabs();
@@ -196,7 +224,9 @@ int Cgi::writePipe(int *fd_in, int *fd_out, std::string body) {
         dup2(*fd_out, STDOUT_FILENO);
         close(*fd_out);
         close(*fd_in);
+        close(_cgiFd);
         char *const args[] = { (char*)"/usr/bin/echo", info, NULL };
+        closeAllConnection();
         if (execve("/usr/bin/echo", args, NULL) == -1) {
             free_tabs();
             delete [] info;
