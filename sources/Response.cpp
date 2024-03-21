@@ -137,13 +137,13 @@ bool Response::isDirectory(std::string filePath) {
         path2 = filePath;
     if (path2[0] == '/')
         path2 = path2.substr(1, path2.size() - 1);
+    // std::cout << "PATH2 : " << path2 << std::endl;
     struct stat path_stat;
     if (stat(path2.c_str(), &path_stat) == 0) {
         if (S_ISDIR(path_stat.st_mode) != 0) {
             return true;
         }
     }
-    // std::cout << "PATH2 : " << path2 << std::endl;
     return false;
 }
 

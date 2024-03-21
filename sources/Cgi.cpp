@@ -50,7 +50,7 @@ Cgi::~Cgi(void) {
 
 void    Cgi::closeAllConnection(void)
 {
-    std::cerr << "max_sd : " << _infos->max_sd << std::endl;
+    // std::cerr << "max_sd : " << _infos->max_sd << std::endl;
     for (int i = 3; i <= _infos->max_sd; ++i)
     {
 		closeConnection(i);
@@ -160,30 +160,10 @@ int Cgi::create_env(Request request) {
     return (mapToChar());
 }
 
-int Cgi::execScript(int *fd_in, int *fd_out) {
+// #include <csignal>
 
-    pid_t pid;
-    pid = fork();
-    if (pid == -1) {
-        return 500;
-    }
-    if (pid == 0) {
-        alarm(3);
-        dup2(*fd_in, STDIN_FILENO);
-        close(*fd_in);
-        close(*fd_out);
-        dup2(_cgiFd, STDOUT_FILENO);
-        close(_cgiFd);
-        closeAllConnection();
-        if (execve(exec, _args, _cenv) == -1) {
-            close(*fd_out);
-            free_tabs();
-            close(_cgiFd);
-            std::exit(500);
-        }
-    }
-    close(*fd_out);
-    return pid;
+void myCustomFunction() {
+    std::cout << "Fonction appelée après 3 secondes." << std::endl;
 }
 
 void Cgi::free_tabs() {
@@ -215,7 +195,7 @@ int Cgi::writePipe(int *fd_in, int *fd_out, std::string body) {
         return 500;
     }
     if (pid == 0) {
-        alarm(3);
+        // alarm(3);
         dup2(*fd_out, STDOUT_FILENO);
         close(*fd_out);
         close(*fd_in);
@@ -258,9 +238,54 @@ void Cgi::findArgs(Request& request) {
     }
 }
 
+void handleSignal(int signal) {
+    if (signal == SIGTERM) {
+        std::cerr << "Reçu SIGALRM. Nettoyage de la mémoire..." << std::endl;
+        // Faites ici tout nettoyage de mémoire nécessaire
+        std::cerr << "Mémoire nettoyée. Terminaison du processus." << std::endl;
+        exit(500);
+    }
+}
+
+int Cgi::execScript(int *fd_in, int *fd_out) {
+
+    pid_t pid;
+    if (signal(SIGALRM, handleSignal) == SIG_ERR) {
+        std::cerr << "Erreur lors de la définition du gestionnaire de signal pour SIGALRM." << std::endl;
+        return 1;
+    }
+    pid = fork();
+    if (pid == -1) {
+        return 500;
+    }
+    if (pid == 0) {
+        signal(SIGALRM, handleSignal);
+        // alarm(3);
+        dup2(*fd_in, STDIN_FILENO);
+        close(*fd_in);
+        close(*fd_out);
+        dup2(_cgiFd, STDOUT_FILENO);
+        close(_cgiFd);
+        closeAllConnection();
+        if (execve(exec, _args, _cenv) == -1) {
+            close(*fd_out);
+            free_tabs();
+            close(_cgiFd);
+            std::cout << "exit-------\n";
+            std::exit(500);
+        }
+    }
+    if (signal(SIGALRM, handleSignal) == SIG_ERR) {
+        std::cerr << "Erreur lors de la définition du gestionnaire de signal pour SIGALRM." << std::endl;
+        std::exit(1);
+    }
+    close(*fd_out);
+    return pid;
+}
+
 int Cgi::execCGI(Request request) {
 
-    int scriptStatus;
+    // int scriptStatus;
     int writeStatus;
     int fd[2];
 
@@ -270,18 +295,70 @@ int Cgi::execCGI(Request request) {
     findArgs(request);
     if (!exec)
         return 501;
-    
     if (pipe(fd) == -1)
         return 500;
-    waitpid(execScript(&fd[0], &fd[1]), &scriptStatus, 0);
+    // if (signal(SIGALRM, handleSignal) == SIG_ERR) {
+    //     std::cerr << "Erreur lors de la définition du gestionnaire de signal pour SIGALRM." << std::endl;
+    //     return 1;
+    // }
+    // alarm(3);
+    signal(SIGTERM, handleSignal);
     waitpid(writePipe(&fd[0], &fd[1], request.getBody()), &writeStatus, 0);
-    if (WIFSIGNALED(scriptStatus))
-        return 408;
-    if (WEXITSTATUS(scriptStatus) == 500)
-        return 500;
+    // while (true) {
+    //     // waitpid(execScript(&fd[0], &fd[1]), &scriptStatus, 0);
+    //     time_t startTime = time(NULL);
+    //     std::cout << "starTime = " << startTime << std::endl;
+    //     int res = waitpid(execScript(&fd[0], &fd[1]), &scriptStatus, 0);
+    //     std::cout << "res = " << res << std::endl;
+    //     time_t endTime = time(NULL);
+    //     std::cout << "endTime = " << endTime << std::endl;
+    //     if (endTime - startTime >= 3) {
+    //         std::cout << "TIMEOUUUUUUUT" << std::endl;
+    //         if (kill(res, SIGTERM) == -1)
+    //             std::cout << "echec kill" << std::endl;
+    //     }
+    //     break;
+    //     // if (res > 0)
+    //     // sleep(1);
+    //         // return 408;
+    // }
+    // int timeout = 3;
+    pid_t wr = writePipe(&fd[0], &fd[1], request.getBody());
+    waitpid(wr, &writeStatus, 0);
+    time_t startTime = time(NULL);
+    pid_t pid = execScript(&fd[0], &fd[1]);
+    int state = 200;
+    while (true) {
+        int status;
+        pid_t result = waitpid(pid, &status, WNOHANG);
+        if (result == -1) {
+            std::cerr << "Erreur lors de l'attente du processus fils." << std::endl;
+            break;
+        } else if (result > 0) {
+            std::cout << "Le processus fils avec PID " << result << " s'est terminé." << std::endl;
+            break;
+        } else {
+            // Le processus fils est toujours en cours d'exécution
+            // std::cout << "Le processus fils est toujours en cours d'exécution." << std::endl;
+            time_t endTime = time(NULL);
+            if (endTime - startTime >= 4) {
+                std::cout << "TIMEOUUUUUUUT" << std::endl;
+                state = 408;
+                if (kill(pid, SIGTERM) == -1)
+                    std::cout << "echec kill" << std::endl;
+                break;
+            }
+        }
+    }
+    // if (WIFSIGNALED(scriptStatus))
+    //     return 408;
+    // if (WEXITSTATUS(scriptStatus) == 500)
+    //     return 500;
     free_tabs();
     close(_cgiFd);
     close(fd[1]);
     close(fd[0]);
+    if (state == 408)
+        return 500;
     return 200;
 }
