@@ -154,12 +154,16 @@ void Response::setPathFile()
     // std::cout << "_request.getUri() : " << _request.getUri() << std::endl;
     // std::cout << "_request.getLocation().getPath() : " << _request.getLocation().getPath() << std::endl;
 
-    if (_request.getLocation().getRedirectionPath().size() > 0)
-	{
+    if (_request.getLocation().getRedirectionPath().size() > 0) {
 		return ;
 	}
     if (str == "/") {
-        str = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndex();
+        for (size_t i = 0; i < _request.getLocation().getIndex().size(); i++)   {
+            str = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndexi(i);
+            if (access(str.c_str(), R_OK) == 0)
+                break;
+        }
+        
     } else {
         std::string uri = _request.getUri();
         if (uri.find('?') != std::string::npos) {
@@ -171,32 +175,33 @@ void Response::setPathFile()
         if (IsCgiExtension(str) == true && !(_request.getContentType() == "multipart/form-data")) {
             str = str.substr(1, str.length() - 1);
         } 
-        else if (str.compare(0, str2.length(), str2) == 0)
-        {
+        else if (str.compare(0, str2.length(), str2) == 0)  {
             str = str.substr(str2.size(), str.size() - str2.size());
             str = _request.getLocation().getRoot() + str;
         }
-        else if (_request.getLocation().getRoot() == _server.getRoot())
-        {
+        else if (_request.getLocation().getRoot() == _server.getRoot()) {
             str = _server.getRoot() + str;
         }
-        else
-        {
+        else    {
             std::string tempPath2;
-            if (_request.getLocation().getPath() == "/")
-            {
+            if (_request.getLocation().getPath() == "/")    {
                 tempPath2 = str;
             }
-            else
-            {
+            else    {
                 tempPath2 = str.substr(_request.getLocation().getPath().length(), str.length() - _request.getLocation().getPath().length());
             }
             str = _request.getLocation().getRoot() + tempPath2;
         }
     }
     _filePath = str;
-    if (isDirectory(_filePath) && _request.getLocation().getIndex() != "") {
-        _filePath = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndex();
+    for (size_t i = 0; i < _request.getLocation().getIndex().size(); i++)   {
+        if (isDirectory(_filePath) && _request.getLocation().getIndexi(i) != "") {
+            std::string tmp = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndexi(i);
+            if (access(tmp.c_str(), R_OK) == 0) {
+                _filePath = tmp;
+                break;
+            }
+        }
     }
     std::cout << "_filePath : " << _filePath << std::endl;
 }

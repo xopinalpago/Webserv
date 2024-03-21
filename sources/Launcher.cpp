@@ -230,7 +230,6 @@ int Launcher::initServer(Server &server)
 	server.address.sin_addr.s_addr = server.getHost();
 	server.address.sin_port = htons(server.getVecPorti(0));
 	server.setPort(server.getVecPorti(0));
-	std::cout << "FD : " << server.getFd() << std::endl;
     if (bind(server.getFd(), (struct sockaddr *)&server.address, sizeof(server.address)) < 0)
 	{
         close(server.getFd());
@@ -260,7 +259,6 @@ int Launcher::initServer(Server &server, int port)
 	server.address.sin_addr.s_addr = server.getHost();
 	server.address.sin_port = htons(port);
 	server.setPort(port);
-	std::cout << "FD : " << server.getFd() << std::endl;
     if (bind(server.getFd(), (struct sockaddr *)&server.address, sizeof(server.address)) < 0)
 	{
         close(server.getFd());

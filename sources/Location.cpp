@@ -111,7 +111,7 @@ int Location::setIndex(std::string index)
     {
         return (1);
     }
-	this->index = index;
+	this->index.push_back(index);
     return (0);
 }
 
@@ -166,9 +166,16 @@ std::vector<std::string> Location::getCgiEx(void) const
     return (this->cgi_extension);
 }
 
-std::string Location::getIndex(void) const
+std::vector<std::string> Location::getIndex(void) const
 {
     return (this->index);
+}
+
+std::string Location::getIndexi(int i) const
+{
+    if (i < 0 || i >= (int)this->index.size())
+        return ("");
+    return (this->index[i]);
 }
 
 std::string Location::getCgiExi(int i) const

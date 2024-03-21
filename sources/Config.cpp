@@ -193,15 +193,33 @@ int Config::makeRoot(Location &loc, std::string str, int &nbRoot)
 	return (0);
 }
 
+// int Config::makeIndex(Location &loc, std::string str, int &nbIndex)
+// {
+// 	if (str[str.length() - 1] != ';')
+// 		throw ConfigException("Invalid Index");
+// 	std::string index = getValue(str);
+// 	if (index.length() == 0)
+// 		throw ConfigException("Invalid Index");
+// 	if (loc.setIndex(index))
+// 		throw ConfigException("Invalid Index");
+// 	nbIndex++;
+// 	if (nbIndex > 1)
+// 		throw ConfigException("Too many Index");
+// 	return (0);
+// }
+
 int Config::makeIndex(Location &loc, std::string str, int &nbIndex)
 {
 	if (str[str.length() - 1] != ';')
 		throw ConfigException("Invalid Index");
-	std::string index = getValue(str);
-	if (index.length() == 0)
-		throw ConfigException("Invalid Index");
-	if (loc.setIndex(index))
-		throw ConfigException("Invalid Index");
+	int pos = 0;
+	while (str.find(' ', pos) != str.npos)
+	{
+		std::string index = getValueLoc(str, pos);
+		if (index.length() == 0)
+			throw ConfigException("Invalid Index");
+		loc.setIndex(index);
+	}
 	nbIndex++;
 	if (nbIndex > 1)
 		throw ConfigException("Too many Index");
@@ -260,11 +278,14 @@ int Config::makeIndex(Server &server, std::string str, int &nbIndex)
 {
 	if (str[str.length() - 1] != ';')
 		throw ConfigException("Invalid Index");
-	std::string index = getValue(str);
-	if (index.length() == 0)
-		throw ConfigException("Invalid Index");
-	if (server.setIndex(index))
-		throw ConfigException("Invalid Index");
+	int pos = 0;
+	while (str.find(' ', pos) != str.npos)
+	{
+		std::string index = getValueLoc(str, pos);
+		if (index.length() == 0)
+			throw ConfigException("Invalid Index");
+		server.setIndex(index);
+	}
 	nbIndex++;
 	if (nbIndex > 1)
 		throw ConfigException("Too many Index");
@@ -354,7 +375,7 @@ int Config::makeCgiPath(Location &loc, std::string str, int &nbCgiPath)
 	return (0);
 }
 
-int Config::makeRedirection(Location &loc, std::string str, int &nbRedirection, Server server)
+int Config::makeRedirection(Location &loc, std::string str, int &nbRedirection, Server &server)
 {
 	if (str[str.length() - 1] != ';')
 		throw ConfigException("Invalid Redirection");
@@ -407,7 +428,6 @@ int Config::makeRedirection(Location &loc, std::string str, int &nbRedirection, 
 	}
 	loc.setRedirectionPath(path);
 	loc.setRedirectionCode(key);
-	std::cout << "loc.getRedirectionPath() = " << loc.getRedirectionPath() << std::endl;
 	nbRedirection++;
 	if (nbRedirection > 1)
 		throw ConfigException("Too many Redirection");
@@ -454,12 +474,14 @@ std::string Config::getValueLoc(std::string line, int &pos)
 	return (str);
 }
 
-int Config::missElementLoc(Location &loc)
+int Config::missElementLoc(Location &loc, Server &server)
 {
 	if (loc.getRoot().length() == 0 && loc.getRedirectionPath().size() == 0)
 		throw ConfigException("Missing Root");
 	if (loc.getMethod().size() == 0)
 		throw ConfigException("Missing Method");
+	if (loc.getIndex().size() == 0 && server.getIndex().size() == 0 && loc.getAutoindex() != 1)
+		throw ConfigException("Missing Index");
 	return (0);
 }
 
@@ -513,11 +535,13 @@ int	Config::fillLocation(Server &server)
 	if (location.size() == 0)
 	{
 		Location loc;
-		if (server.getRoot().length() == 0 || server.getIndex().length() == 0)
+		if (server.getRoot().length() == 0 || server.getIndexi(0).length() == 0)
 			throw ConfigException("Missing Root or Index");
 		loc.setPath("/");
 		loc.setRoot(server.getRoot());
-		loc.setIndex(server.getIndex());
+		for (size_t i = 0; i < server.getIndex().size(); i++)	{
+			loc.setIndex(server.getIndexi(i));
+		}		
 		setDefaultMethods(loc);
 		if (server.setLoc(loc.getPath(), loc))
 			throw ConfigException("Duplicate Location");
@@ -564,7 +588,12 @@ int	Config::fillLocation(Server &server)
 				setDefaultMethods(loc);
 			if (loc.getRoot().size() == 0 && server.getRoot().size() != 0 && loc.getRedirectionPath().size() == 0)
 				loc.setRoot(server.getRoot());
-			missElementLoc(loc);
+			if (loc.getIndex().size() == 0 && loc.getAutoindex() != 1)	{
+				for (size_t i = 0; i < server.getIndex().size(); i++)	{
+					loc.setIndex(server.getIndexi(i));
+				}		
+			}
+			missElementLoc(loc, server);
 			if (loc.getPath() == "/cgi-bin")
 				missElementCgi(loc);
 			if (server.setLoc(loc.getPath(), loc))

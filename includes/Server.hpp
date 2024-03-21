@@ -33,7 +33,7 @@ class Server
         std::string                 str_host;
         std::string                 server_name;
         std::string                 root;
-        std::string					index;
+        std::vector<std::string>	index;
         std::map<int, std::string>  error_page;
         std::map<std::string, Location> locations;
         
@@ -67,7 +67,8 @@ class Server
 		std::string                 getStrHost(void) const;
         std::string                 getRoot(void) const;
         std::string 				getServerName(void) const;
-        std::string 				getIndex(void) const;
+		std::vector<std::string>	getIndex(void) const;
+		std::string					getIndexi(int i) const;
         std::vector<std::string> 	getMethod(void) const;
         std::string 				getMethodi(int i) const;
         std::vector<std::string>    getCgiEx(void) const;

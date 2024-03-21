@@ -99,7 +99,7 @@ int Server::setIndex(std::string index)
     {
         return (1);
     }
-	this->index = index;
+	this->index.push_back(index);
     return (0);
 }
 
@@ -236,9 +236,16 @@ std::string Server::getServerName(void) const
     return (this->server_name);
 }
 
-std::string Server::getIndex(void) const
+std::vector<std::string> Server::getIndex(void) const
 {
     return (this->index);
+}
+
+std::string Server::getIndexi(int i) const
+{
+    if (i < 0 || i >= (int)this->index.size())
+        return ("");
+    return (this->index[i]);
 }
 
 unsigned int Server::getClientMax(void) const

@@ -22,7 +22,7 @@ class Location
 	private:
 		std::string								path;
 		std::string								root;
-		std::string								index;
+		std::vector<std::string>				index;
       	std::vector<std::string>    			method;
 		std::vector<std::string>    			cgi_extension;
         std::map<std::string, std::string>	    cgi_path;
@@ -52,7 +52,8 @@ class Location
 
 		std::string getPath(void) const;
 		std::string getRoot(void) const;
-		std::string 				getIndex(void) const;
+		std::vector<std::string>	getIndex(void) const;
+		std::string					getIndexi(int i) const;
 		std::vector<std::string> 	getMethod(void) const;
         std::string 				getMethodi(int i) const;
 		std::string 				getCgiExi(int i) const;
