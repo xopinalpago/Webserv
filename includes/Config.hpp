@@ -16,6 +16,9 @@ class Config {
     public :
         Config(void);
         ~Config(void);
+        Config(const Config& cpy);
+        Config& operator=(const Config& rhs);
+
         int         getLineFile(std::string &filename, Launcher &launcher);
 
 		class ConfigException : public std::exception {

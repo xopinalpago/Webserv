@@ -4,6 +4,19 @@ Config::Config(void) {}
 
 Config::~Config(void) {}
 
+Config::Config(const Config& cpy) {
+    *this = cpy;
+}
+
+Config& Config::operator=(const Config& rhs) {
+	if (this != &rhs) {
+    	serverConfig = rhs.serverConfig;
+    	location = rhs.location;
+    	error_page = rhs.error_page;
+	}
+	return *this;
+}
+
 int Config::getLineFile(std::string &filename, Launcher &launcher)
 {
     std::ifstream infile(filename.c_str());

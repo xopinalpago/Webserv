@@ -7,8 +7,27 @@
 
 Cgi::Cgi(void) {}
 
-Cgi::Cgi(std::string filePath) {
+Cgi::Cgi(const Cgi& cpy) {
+    *this = cpy;
+}
+
+Cgi& Cgi::operator=(const Cgi& rhs) {
+    if (this != &rhs) {
+        _env = rhs._env;
+        _cenv = rhs._cenv;
+        _cgiFd = rhs._cgiFd;
+        _cgiFile = rhs._cgiFile;
+        _filePath = rhs._filePath;
+        _args = rhs._args;
+        exec = rhs.exec;
+    }
+    return *this;
+}
+
+Cgi::Cgi(std::string filePath, s_socketInfo* infos) {
     
+    _infos = infos;
+    std::cerr << "TEST : socket maxsd = " << infos->max_sd << std::endl; 
     _filePath = filePath;
     _cgiFile = ".cgi.txt";
     _cgiFd = open(_cgiFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
@@ -27,6 +46,29 @@ Cgi::~Cgi(void) {
     if (fcntl(_cgiFd, F_GETFL) == -1)
         close(_cgiFd);
     // remove(_cgiFile.c_str());
+}
+
+void    Cgi::closeAllConnection(void)
+{
+    std::cerr << "max_sd : " << _infos->max_sd << std::endl;
+    for (int i = 3; i <= _infos->max_sd; ++i)
+    {
+		closeConnection(i);
+    }
+}
+
+void    Cgi::closeConnection(int fd)
+{
+	if (FD_ISSET(fd, &_infos->writefds))
+		FD_CLR(fd, &_infos->writefds);
+	if (FD_ISSET(fd, &_infos->readfds))
+		FD_CLR(fd, &_infos->readfds);
+    if (fd == _infos->max_sd)
+	{
+        _infos->max_sd--;
+	}
+	// std::cout << "Connection: " << fd << " closed..." << std::endl;
+    close(fd);
 }
 
 std::string Cgi::decodeQuery(std::string query) {
@@ -115,10 +157,6 @@ int Cgi::create_env(Request request) {
     _env["SCRIPT_FILENAME"] = _filePath;
     // _env["QUERY_STRING"] = decodeQuery(_env["QUERY_STRING"]);
     _env["REQUEST_URI"] = request.getUri();
-
-    // std::cout << "CONTENT_TYPE : " << _env["CONTENT_TYPE"] << std::endl;
-    // std::cout << "SCRIPT_FILENAME : " << _env["SCRIPT_FILENAME"] << std::endl;
-
     return (mapToChar());
 }
 
@@ -130,19 +168,16 @@ int Cgi::execScript(int *fd_in, int *fd_out) {
         return 500;
     }
     if (pid == 0) {
-        signal(SIGALRM, handleAlarm);
         alarm(3);
         dup2(*fd_in, STDIN_FILENO);
         close(*fd_in);
+        close(*fd_out);
         dup2(_cgiFd, STDOUT_FILENO);
         close(_cgiFd);
+        closeAllConnection();
         if (execve(exec, _args, _cenv) == -1) {
             close(*fd_out);
-            free(_args[0]);
-            free(_args[1]);
-            free(_args);
-            free(exec);
-            freeEnv();
+            free_tabs();
             close(_cgiFd);
             std::exit(500);
         }
@@ -151,41 +186,56 @@ int Cgi::execScript(int *fd_in, int *fd_out) {
     return pid;
 }
 
+void Cgi::free_tabs() {
+    int i = 0;
+    while (_args[i]) {
+        delete [] _args[i];
+        i++;
+    }
+    delete [] _args;
+
+    i = 0;
+    while (_cenv[i]) {
+        delete [] _cenv[i];
+        i++;
+    }
+    delete [] _cenv;
+
+    delete [] exec;
+}
+
 int Cgi::writePipe(int *fd_in, int *fd_out, std::string body) {
 
     pid_t pid;
+    char * info;
+    info = new char[body.size() + 1];
+    strcpy(info, body.c_str());
     pid = fork();
     if (pid == -1) {
         return 500;
     }
     if (pid == 0) {
-        signal(SIGALRM, handleAlarm);
         alarm(3);
         dup2(*fd_out, STDOUT_FILENO);
         close(*fd_out);
         close(*fd_in);
-        char * info = new char[body.size() + 1];
-        strcpy(info, body.c_str());
+        close(_cgiFd);
         char *const args[] = { (char*)"/usr/bin/echo", info, NULL };
+        closeAllConnection();
         if (execve("/usr/bin/echo", args, NULL) == -1) {
-            free(_args[0]);
-            free(_args[1]);
-            free(_args);
-            free(exec);
-            freeEnv();
+            free_tabs();
+            delete [] info;
             close(*fd_in);
             std::exit(500);
         }
     }
+    delete [] info;
     close(*fd_out);
     return pid;
 }
 
-int Cgi::execCGI(Request request) {
+void Cgi::findArgs(Request& request) {
 
-    if (create_env(request) || _cgiFd == -1)
-        return 500;
-    
     std::map<std::string, std::string> paths = request.getLocation().getCgiPath();
     std::map<std::string, std::string>::iterator it = paths.begin();
     std::map<std::string, std::string>::iterator ite = paths.end();
@@ -206,41 +256,32 @@ int Cgi::execCGI(Request request) {
         }
         ++it;
     }
-    if (!exec)
-        return 501;
+}
 
-    std::string body;
-    std::string req = request.getAllRequest();
-    size_t header_end = req.find("\r\n\r\n");
-    if (header_end != std::string::npos)
-        body = req.substr(header_end + 4, req.size() - header_end - 4);
-    else
-        body = "";
-    int fd[2];
-    if (pipe(fd) == -1)
-        return 500;
+int Cgi::execCGI(Request request) {
+
     int scriptStatus;
     int writeStatus;
+    int fd[2];
+
+    if (create_env(request) || _cgiFd == -1)
+        return 500;
+    
+    findArgs(request);
+    if (!exec)
+        return 501;
+    
+    if (pipe(fd) == -1)
+        return 500;
     waitpid(execScript(&fd[0], &fd[1]), &scriptStatus, 0);
-    waitpid(writePipe(&fd[0], &fd[1], body), &writeStatus, 0);
+    waitpid(writePipe(&fd[0], &fd[1], request.getBody()), &writeStatus, 0);
     if (WIFSIGNALED(scriptStatus))
         return 408;
     if (WEXITSTATUS(scriptStatus) == 500)
         return 500;
-
-    free(_args[0]);
-    free(_args[1]);
-    free(_args);
-    free(exec);
-    freeEnv();
+    free_tabs();
     close(_cgiFd);
     close(fd[1]);
     close(fd[0]);
     return 200;
-}
-
-void Cgi::handleAlarm(int signal) {
-    (void)signal;
-    std::cout << "fct handle alarm called !!" << std::endl;
-    exit(1);
 }

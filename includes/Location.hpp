@@ -35,6 +35,8 @@ class Location
 	public:
 		Location();
 		~Location();
+		Location(const Location& cpy);
+        Location& operator=(const Location& rhs);
 
 		int setAutoindex(std::string autoindex);
 		int setClientMax(int client_max_body_size);

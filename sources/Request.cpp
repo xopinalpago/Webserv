@@ -18,6 +18,31 @@ Request::~Request(void)
 	return ;
 }
 
+Request::Request(const Request& cpy) {
+    *this = cpy;
+}
+
+Request& Request::operator=(const Request& rhs) {
+    if (this != &rhs) {
+        allRequest = rhs.allRequest;
+        body = rhs.body;
+        method = rhs.method;
+        uri = rhs.uri;
+        version = rhs.version;
+        host = rhs.host;
+        contentType = rhs.contentType;
+        contentId = rhs.contentId;
+        referer = rhs.referer;
+        accept = rhs.accept;
+        contentLength = rhs.contentLength;
+		keepAlive = rhs.keepAlive;
+		vAllRequest = rhs.vAllRequest;
+		server = rhs.server;
+		loc = rhs.loc;
+    }
+    return *this;
+}
+
 std::string		Request::getAllRequest(void)
 {
 	return (this->allRequest);

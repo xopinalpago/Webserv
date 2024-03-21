@@ -21,6 +21,8 @@ Upload& Upload::operator=(const Upload& rhs) {
     if (this != &rhs) {
         _request = rhs._request;
         _server = rhs._server;
+        filename = rhs.filename;
+        fileBody = rhs.fileBody;
     }
     return *this;
 }
@@ -56,12 +58,19 @@ void Upload::parseUpload() {
     fileBody = res.str();
 }
 
+#include <sys/stat.h>
+
 int Upload::doUpload() {
 
-    std::string folder_name = "uploads"; // config
-    if (std::system(("test -d " + std::string(folder_name)).c_str()) != 0)
-        if (std::system(("mkdir " + std::string(folder_name)).c_str()) < 0)
+    std::string folder_name;
+    if (_request.getLocation().getUploadDir() != "")
+        folder_name = _request.getLocation().getUploadDir();
+    else
+        folder_name = "uploads";
+    if (access(folder_name.c_str(), F_OK | R_OK | X_OK) != 0) {
+        if (mkdir(folder_name.c_str(), S_IRWXU | S_IRWXG | S_IRWXO))
             return 2;
+    }
     parseUpload();
     std::stringstream path;
     path << folder_name << "/" << filename;

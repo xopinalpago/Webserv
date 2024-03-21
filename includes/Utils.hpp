@@ -11,6 +11,8 @@ class Utils {
     public :
         Utils(void);
         ~Utils(void);
+		Utils(const Utils& cpy);
+        Utils& operator=(const Utils& rhs);
 		static int 			fileExists(std::string filename);
 		static int 			stringToInt(std::string str);
 		static int			inVector(std::vector<std::string> vec, std::string elem);

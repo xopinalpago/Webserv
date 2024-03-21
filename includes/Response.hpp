@@ -11,12 +11,12 @@
 #include "Cgi.hpp"
 #include "Upload.hpp"
 
-class 
-Response {
+class Response {
 
     public :
         Response();
-        Response(Request request);
+        Response(Request request, s_socketInfo* infos);
+        // Response(Request request, Launcher* launch);
         ~Response();
         Response(const Response& cpy);
         Response& operator=(const Response& rhs);
@@ -69,6 +69,7 @@ Response {
         std::stringstream           _content;
 
         std::string                 _finalRes;
+        s_socketInfo*               _infos;
 };
 
 #endif

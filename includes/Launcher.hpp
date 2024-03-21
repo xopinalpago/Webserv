@@ -4,15 +4,10 @@
 #include <map>
 #include <vector>
 
-// #include "Config.hpp"
 #include "Server.hpp"
 #include "User.hpp"
 #include "Request.hpp"
 
-// struct RequestInfo {
-//     std::string requestString;
-//     time_t timestamp;
-// };
 
 class Launcher
 {
@@ -31,10 +26,12 @@ class Launcher
 		// std::map<int, std::vector<RequestInfo> > requestMap;
 
 		int		readServer(User &user);
+		int		readbuf(User &user, Request& request, char *bf);
+		std::string	extractBody(Request& request);
         void	sendServer(User &user);
         void    listenServer(Server &server);
 		int 	initSets(void);
-		void 	getUserServer(User &user);
+		// void 	getUserServer(User &user);
 		int		checkServers(void);
 		void 	checkServerName(void);
 		void    closeConnection(int i);
@@ -42,6 +39,8 @@ class Launcher
 	public:
 		Launcher(void);
 		~Launcher(void);
+		Launcher(const Launcher& cpy);
+        Launcher& operator=(const Launcher& rhs);
 
 		int 	initServer(Server &server);
 		int 	initServer(Server &server, int port);

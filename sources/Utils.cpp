@@ -4,6 +4,16 @@ Utils::Utils(void) {}
 
 Utils::~Utils(void) {}
 
+Utils::Utils(const Utils& cpy) {
+    *this = cpy;
+}
+
+Utils& Utils::operator=(const Utils& rhs) {
+
+    (void)rhs;
+    return *this;
+}
+
 int Utils::fileExists(std::string filename)
 {
     std::ifstream file(filename.c_str());

@@ -17,30 +17,42 @@
 #include <fstream>
 #include <sys/stat.h> // chmod
 
-
 #include "Request.hpp"
+// #include "User.hpp"
+// class User;
+
+typedef struct socketInfo {
+	fd_set					readfds;
+    fd_set					writefds;
+	int						max_sd;
+} s_socketInfo;
 
 class Cgi {
 
     public :
         Cgi(void);
-        Cgi(std::string filePath);
+        Cgi(std::string filePath, s_socketInfo* infos);
         ~Cgi(void);
+        Cgi(const Cgi& cpy);
+        Cgi& operator=(const Cgi& rhs);
 
         int execCGI(Request request);
         int create_env(Request request);
         int mapToChar();
         void displayEnv();
         void freeEnv();
+        void free_tabs();
         std::string decodeQuery(std::string query);
         std::string extractQuery(Request request);
 
         std::map<std::string, std::string> getEnv() const { return this->_env; }
         char **getCenv() const { return this->_cenv; }
         int getCgiFd() const { return this->_cgiFd; }
+        void findArgs(Request& request);
         int execScript(int *fd_in, int *fd_out);
         int writePipe(int *fd_in, int *fd_out, std::string body);
-        static void handleAlarm(int signal); //??
+        void    closeConnection(int i);
+        void	closeAllConnection(void);
 
     private :
         std::map<std::string, std::string> _env;
@@ -50,6 +62,7 @@ class Cgi {
         std::string         _filePath;
         char **_args;
         char *exec;
+        s_socketInfo *_infos;
 };
 
 #endif

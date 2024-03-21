@@ -15,6 +15,26 @@ Server::~Server(void)
     return ;
 }
 
+Server::Server(const Server& cpy) {
+    *this = cpy;
+}
+
+Server& Server::operator=(const Server& rhs) {
+	if (this != &rhs) {
+    	fd = rhs.fd;
+    	port = rhs.port;
+    	client_max_body_size = rhs.client_max_body_size;
+        host = rhs.host;
+        server_name = rhs.server_name;
+        root = rhs.root;
+        index = rhs.index;
+        error_page = rhs.error_page;
+        locations = rhs.locations;
+        address = rhs.address;
+	}
+	return *this;
+}
+
 int Server::setVecPort(int port)
 {
     if (port > 65535 || port <= 0)
