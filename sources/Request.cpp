@@ -283,7 +283,6 @@ int	Request::parseRequest(void)
 			size_t start = vAllRequest[i].find(':') + 2;
 			std::istringstream iss(vAllRequest[i].substr(start));
 			iss >> contentLength;
-			// std::cout << "contentLength : " << contentLength << std::endl;
 		}
 		else if (this->getMethod() == "POST" && vAllRequest[i].find("Content-Type") == 0 && contentType.size() == 0)
 		{
@@ -292,6 +291,7 @@ int	Request::parseRequest(void)
 			if (contentType == "multipart/form-data") {
 				pos = vAllRequest[i].find("boundary=");
 				contentId = vAllRequest[i].substr(pos + 9, vAllRequest[i].size() - (pos + 9) - 1);
+				// std::cout << "contentId : " << contentId << std::endl;
 			}
 		}
 	}

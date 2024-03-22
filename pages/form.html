@@ -23,15 +23,16 @@
                     <label for="login">Login</label>
                     <input type="text" name="login" id="login" value="aducobu" required/>
                 </div>
+                <button id="erase" type="button" onclick="cleanForm()">Erase</button>
             </div>
-            <div>
-                <input id="submit" type="submit" value="Send"/>
-            </div>
+            <input id="sendButton" type="submit" value="Send"/>
+            <!-- <div> -->
+            <!-- </div> -->
         </form>
-
-        <button type="button" onclick="cleanForm()">Erase</button>
-        <a href="/site_index.html"><button>Index</button></a>
-        <button id="deleteButton" data-source="source1">Supprimer la ressource</button>
-        <script src="delete.js"></script>
+        <div class="index">
+            <a class="indexButton" href="/site_index.html">Index</a>
+        </div>
+        <!-- <button id="deleteButton" data-source="source1">Supprimer la ressource</button>
+        <script src="delete.js"></script> -->
 	</body>
 </html>

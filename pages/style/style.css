@@ -16,17 +16,6 @@ html, body {
     margin-top: 0;
 }
 
-/* .title {
-    display: flex;
-    justify-content: center;
-    margin-top: 0;
-    font-size:5em;
-    color: #4b4b4b;
-    font-weight: bold;
-    text-transform: uppercase;
-    text-align: center;
-} */
-
 .pagesTitle {
     display: flex;
     justify-content: center;
@@ -44,13 +33,30 @@ html, body {
     font-weight: normal;
 }
 
-.indexButton {
+.indexButton { /* style du bouton index */
+    text-decoration: none;
+    text-align: center;
+    color: black;
     font-size: larger;
     text-transform: uppercase;
-    width: 200px;
     font-family: 'Times';
     background-color: #BF8282;
     border-radius: 10px;
     border: 4px double #BF8282;
-    padding: 20px;
+    width: 170px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+
+}
+
+.index { /* position du bouton index */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-bottom: -40px;
+    z-index: 999;
 }
