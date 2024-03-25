@@ -169,9 +169,9 @@ int Launcher::readServer(User &user)
 		// std::cout << "extractBody(request).length() = " << extractBody(request).length() << std::endl;
 	}
 
-	std::cout << "******* request *******" << std::endl;
-	std::cout << request.getAllRequest() << std::endl;
-	std::cout << "***************************************" << std::endl;
+	// std::cout << "******* request *******" << std::endl;
+	// std::cout << request.getAllRequest() << std::endl;
+	// std::cout << "***************************************" << std::endl;
 
 	user.setRequest(request);
 	// user.setServer(Servers);
