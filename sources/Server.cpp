@@ -107,7 +107,7 @@ int Server::setIndex(std::string index)
 
 unsigned int Server::setClientMax(unsigned int client_max_body_size)
 {
-    if (client_max_body_size > 10000)
+    if (client_max_body_size > 1000000)
     {
         return (1);
     }

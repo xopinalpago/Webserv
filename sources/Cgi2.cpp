@@ -50,7 +50,7 @@ Cgi::~Cgi(void) {
 
 void    Cgi::closeAllConnection(void)
 {
-    // std::cerr << "max_sd : " << _infos->max_sd << std::endl;
+    std::cerr << "max_sd : " << _infos->max_sd << std::endl;
     for (int i = 3; i <= _infos->max_sd; ++i)
     {
 		closeConnection(i);
@@ -160,10 +160,30 @@ int Cgi::create_env(Request request) {
     return (mapToChar());
 }
 
-// #include <csignal>
+int Cgi::execScript(int *fd_in, int *fd_out) {
 
-void myCustomFunction() {
-    std::cout << "Fonction appelée après 3 secondes." << std::endl;
+    pid_t pid;
+    pid = fork();
+    if (pid == -1) {
+        return 500;
+    }
+    if (pid == 0) {
+        alarm(3);
+        dup2(*fd_in, STDIN_FILENO);
+        close(*fd_in);
+        close(*fd_out);
+        dup2(_cgiFd, STDOUT_FILENO);
+        close(_cgiFd);
+        closeAllConnection();
+        if (execve(exec, _args, _cenv) == -1) {
+            close(*fd_out);
+            free_tabs();
+            close(_cgiFd);
+            std::exit(500);
+        }
+    }
+    close(*fd_out);
+    return pid;
 }
 
 void Cgi::free_tabs() {
@@ -238,33 +258,9 @@ void Cgi::findArgs(Request& request) {
     }
 }
 
-int Cgi::execScript(int *fd_in, int *fd_out) {
-
-    pid_t pid;
-    pid = fork();
-    if (pid == -1) {
-        return 500;
-    }
-    if (pid == 0) {
-        dup2(*fd_in, STDIN_FILENO);
-        close(*fd_in);
-        close(*fd_out);
-        dup2(_cgiFd, STDOUT_FILENO);
-        close(_cgiFd);
-        closeAllConnection();
-        if (execve(exec, _args, _cenv) == -1) {
-            close(*fd_out);
-            free_tabs();
-            close(_cgiFd);
-            std::exit(500);
-        }
-    }
-    close(*fd_out);
-    return pid;
-}
-
 int Cgi::execCGI(Request request) {
 
+    int scriptStatus;
     int writeStatus;
     int fd[2];
 
@@ -274,35 +270,18 @@ int Cgi::execCGI(Request request) {
     findArgs(request);
     if (!exec)
         return 501;
+    
     if (pipe(fd) == -1)
         return 500;
+    waitpid(execScript(&fd[0], &fd[1]), &scriptStatus, 0);
     waitpid(writePipe(&fd[0], &fd[1], request.getBody()), &writeStatus, 0);
-    pid_t wr = writePipe(&fd[0], &fd[1], request.getBody());
-    waitpid(wr, &writeStatus, 0);
-    time_t startTime = time(NULL);
-    pid_t pid = execScript(&fd[0], &fd[1]);
-    int state = 200;
-    
-    while (true) {
-        int status;
-        pid_t result = waitpid(pid, &status, WNOHANG);
-        if (result > 0)
-            break;
-        if (result == 0) {
-            time_t endTime = time(NULL);
-            if (endTime - startTime >= 3) {
-                std::cout << "TIMEOUUUUUUUT" << std::endl;
-                state = 408;
-                kill(pid, SIGQUIT);
-                break;
-            }
-        }
-    }
+    if (WIFSIGNALED(scriptStatus))
+        return 408;
+    if (WEXITSTATUS(scriptStatus) == 500)
+        return 500;
     free_tabs();
     close(_cgiFd);
-    close(fd[0]);
     close(fd[1]);
-    if (state == 408)
-        return 408;
+    close(fd[0]);
     return 200;
 }

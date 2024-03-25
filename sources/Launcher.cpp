@@ -95,7 +95,8 @@ void    Launcher::closeConnection(int fd)
 int Launcher::readbuf(User &user, Request& request, char *bf) {
 
 	memset(bf, 0, sizeof(*bf));
-	rc = recv(user.getFd(), bf, BUFFER_SIZE, 0);
+	// std::cout << "ok" << std::endl;
+	rc = recv(user.getFd(), bf, BUFFER_SIZE, MSG_DONTWAIT);
 	if (rc == 0)
 	{
 		closeConnection(user.getFd());
@@ -139,6 +140,10 @@ int Launcher::readServer(User &user)
 		if (rc <= 0)
 			return rc;
 	}
+	// std::cout << "**************** REQUEST ****************" << std::endl;
+	// std::cout << request.getAllRequest() << std::endl;
+	// std::cout << "************************ ****************" << std::endl;
+
 	request.setBody(extractBody(request));
 
 	if (request.parseRequest(user.getServerVec())) {
@@ -147,13 +152,21 @@ int Launcher::readServer(User &user)
 	}
 	
 	while (request.getContentLength() > 0 && extractBody(request).length() < request.getContentLength()) {
+		// std::cout << "DEBUT :" << std::endl;
+		// std::cout << "content length = " << request.getContentLength() << std::endl;
+		// std::cout << "extractBody(request).length() = " << extractBody(request).length() << std::endl;
 		rc = BUFFER_SIZE;
 		while (rc == BUFFER_SIZE) {
+			// std::cout << "ok" << std::endl;
 			rc = readbuf(user, request, bf);
+			// std::cout << "RC =========== " << rc << std::endl;
 			if (rc <= 0)
 				return rc;
 		}
 		request.setBody(extractBody(request));
+		// std::cout << "FIN :" << std::endl;
+		// std::cout << "content length = " << request.getContentLength() << std::endl;
+		// std::cout << "extractBody(request).length() = " << extractBody(request).length() << std::endl;
 	}
 
 	std::cout << "******* request *******" << std::endl;
@@ -164,6 +177,12 @@ int Launcher::readServer(User &user)
 	// user.setServer(Servers);
 	FD_CLR(user.getFd(), &readfds);
 	FD_SET(user.getFd(), &writefds);
+
+	// std::cout << request.getContentType() << std::endl;
+	std::cout << "**************** REQUEST ****************" << std::endl;
+	std::cout << request.getAllRequest() << std::endl;
+	std::cout << "************************ ****************" << std::endl;
+
 	return (1);
 }
 

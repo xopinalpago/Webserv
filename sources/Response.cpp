@@ -210,7 +210,7 @@ void Response::setPathFile()
             }
         }
     }
-    std::cout << "_filePath : " << _filePath << std::endl;
+    // std::cout << "_filePath : " << _filePath << std::endl;
 }
 
 void Response::errorData() {
@@ -250,7 +250,7 @@ std::string Response::makeHeader() {
     std::string ext = _filePath.substr(_filePath.rfind(".") + 1);
 
     _clength = _body.str().length();
-    // std::cout << "_status : " << _status << std::endl;
+    std::cout << "_status : " << _status << std::endl;
     if (_status != 200)
         _ctype = types["html"];
     else
@@ -258,10 +258,6 @@ std::string Response::makeHeader() {
     if (_ctype == "")
         _ctype = types["html"];
     header << "HTTP/1.1 " << _status << " " << messages[_status] << std::endl;
-    // if (_request.getLocation().getRedirectionPath() != "") {
-    //     _status = _request.getLocation().getRedirectionCode();
-    //     header << "Location: " << _request.getLocation().getRedirectionPath() << std::endl;
-    // }
     header << "Content-Type: " << _ctype << std::endl;
     header << "Content-Length: " << _clength << std::endl << std::endl;
     return (header.str());
@@ -271,6 +267,7 @@ std::string Response::makeHeader() {
 void Response::processRequest() {
 
     // std::cout << "taille : " << _request.getAllRequest().size() << std::endl;
+    // std::cout << "UPLOAD" << std::endl;
     if (_request.getAllRequest().size() <= _server.getClientMax()) {
         if (_request.getVersion() != "HTTP/1.1")
             _status = 505;
@@ -281,10 +278,6 @@ void Response::processRequest() {
             _content << "Location: " << _request.getLocation().getRedirectionPath() << std::endl;
 			_content << "Content-Length: " << 0 << std::endl << std::endl;
             _finalRes = _content.str();
-
-            // std::cout << "************FINAL RES************" << std::endl;
-            // std::cout << _finalRes;
-            // std::cout << "******************************" << std::endl;
             return;
         }
         else if (authorizedMethod()) {
@@ -307,12 +300,15 @@ void Response::processRequest() {
                     delete cgi;
                 } else {
                     if (_request.getContentType() == "multipart/form-data") {
+                        std::cout << "UPLOAD" << std::endl;
                         Upload *upload = new Upload(_request);
                         _status = upload->doUpload();
-                        if (_status == 1 || _status == 2) {
+                        if (_status == 1) {
                             _body << backup[_status];
                             _status = 200;
-                        } else
+                        } else if (_status == 2)
+                            _status = 400;
+                        else
                             _status = 500;
                         delete upload;
                     }
@@ -360,9 +356,6 @@ void Response::processRequest() {
             _content << makeHeader();
 			_content << _body.str();
 			_finalRes = _content.str();
-            // std::cout << "************FINAL RES************" << std::endl;
-            // std::cout << _finalRes << std::endl;
-            // std::cout << "******************************" << std::endl;
             return;
         }
     } else
