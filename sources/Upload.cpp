@@ -56,6 +56,7 @@ void Upload::parseUpload() {
         line = next;
     }
     fileBody = res.str();
+    std::cout << "fileBody = " << fileBody << std::endl;
 }
 
 #include <sys/stat.h>
@@ -72,6 +73,8 @@ int Upload::doUpload() {
             return 2;
     }
     parseUpload();
+    if (fileBody == "")
+        return 2;
     std::stringstream path;
     path << folder_name << "/" << filename;
     if (access(path.str().c_str(), F_OK) == 0) {

@@ -181,9 +181,9 @@ int Launcher::readServer(User &user)
 	FD_SET(user.getFd(), &writefds);
 
 	// std::cout << request.getContentType() << std::endl;
-	// std::cout << "**************** REQUEST ****************" << std::endl;
-	// std::cout << request.getUri() << std::endl;
-	// std::cout << "************************ ****************" << std::endl;
+	std::cout << "**************** REQUEST ****************" << std::endl;
+	std::cout << request.getAllRequest() << std::endl;
+	std::cout << "************************ ****************" << std::endl;
 
 	return (1);
 }

@@ -26,13 +26,15 @@
                 <button id="erase" type="button" onclick="cleanForm()">Erase</button>
             </div>
             <input id="sendButton" type="submit" value="Send"/>
-            <!-- <div> -->
-            <!-- </div> -->
         </form>
         <div class="index">
             <a class="indexButton" href="/site_index.html">Index</a>
         </div>
-        <!-- <button id="deleteButton" data-source="source1">Supprimer la ressource</button>
-        <script src="delete.js"></script> -->
+        <h2>Choisissez la ressource à supprimer :</h2>
+        <select id="resourceList">
+            <!-- Les options seront ajoutées dynamiquement par JavaScript -->
+        </select>
+        <button id="deleteButton" data-source="source1">Supprimer la ressource</button>
+        <script src="delete.js"></script>
 	</body>
 </html>
