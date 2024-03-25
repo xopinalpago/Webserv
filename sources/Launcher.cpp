@@ -35,6 +35,18 @@ Launcher& Launcher::operator=(const Launcher& rhs) {
 	return *this;
 }
 
+void 	Launcher::addServerOfClient(int listen_sock, User *client)
+{
+	for (std::map<int, Server>::iterator it = Servers.begin(); it != Servers.end(); ++it)
+	{
+		if (listen_sock == it->second.getFd())
+		{
+			std::cout << "test" << std::endl;
+			client->AddServerPtr(it->second);
+		}
+	}
+}
+
 void Launcher::listenServer(Server &server)
 {
 	int addrlen = sizeof(server.address);
@@ -46,6 +58,7 @@ void Launcher::listenServer(Server &server)
 	
 	std::cout << "New incoming connection: " << new_sd << std::endl;
 	new_client.setFd(new_sd);
+	addServerOfClient(server.getFd(), &new_client);
 	Users[new_sd] = new_client;
 	FD_SET(new_sd, &readfds);
 	if (new_sd > max_sd)
@@ -78,25 +91,6 @@ void    Launcher::closeConnection(int fd)
 	if (Servers.find(fd) != Servers.end())
 		Servers.erase(fd);
 }
-
-// void    Launcher::closeAllConnectionExcep(void)
-// {
-//     for (int fd = 0; fd <= max_sd; ++fd)
-//     {
-// 		if (FD_ISSET(fd, &writefds))
-// 			FD_CLR(fd, &writefds);
-// 		if (fd == max_sd)
-// 		{
-// 			max_sd--;
-// 		}
-// 		std::cout << "Connection: " << fd << " closed..." << std::endl;
-// 		close(fd);
-// 		if (Users.find(fd) != Users.end())
-// 			Users.erase(fd);
-// 		if (Servers.find(fd) != Servers.end())
-// 			Servers.erase(fd);
-//     }
-// }
 
 int Launcher::readbuf(User &user, Request& request, char *bf) {
 
@@ -147,7 +141,7 @@ int Launcher::readServer(User &user)
 	}
 	request.setBody(extractBody(request));
 
-	if (request.parseRequest()) {
+	if (request.parseRequest(user.getServerVec())) {
 		closeConnection(user.getFd());
 		return (0);
 	}
@@ -162,8 +156,12 @@ int Launcher::readServer(User &user)
 		request.setBody(extractBody(request));
 	}
 
+	std::cout << "******* request *******" << std::endl;
+	std::cout << request.getAllRequest() << std::endl;
+	std::cout << "***************************************" << std::endl;
+
 	user.setRequest(request);
-	user.setServer(Servers);
+	// user.setServer(Servers);
 	FD_CLR(user.getFd(), &readfds);
 	FD_SET(user.getFd(), &writefds);
 	return (1);

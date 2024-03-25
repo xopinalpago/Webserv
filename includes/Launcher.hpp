@@ -22,8 +22,6 @@ class Launcher
         int                 new_sd;
         int                 end_server;
 		int					totalBytes;
-		
-		// std::map<int, std::vector<RequestInfo> > requestMap;
 
 		int		readServer(User &user);
 		int		readbuf(User &user, Request& request, char *bf);
@@ -31,11 +29,11 @@ class Launcher
         void	sendServer(User &user);
         void    listenServer(Server &server);
 		int 	initSets(void);
-		// void 	getUserServer(User &user);
 		int		checkServers(void);
 		void 	checkServerName(void);
 		void    closeConnection(int i);
 		void	checkTimeout(void);
+		void 	addServerOfClient(int listen_sock, User *client);
 	public:
 		Launcher(void);
 		~Launcher(void);
@@ -47,7 +45,6 @@ class Launcher
 		int 	initConfig(std::string &filename);
 		int 	runServer(void);
 		void	closeAllConnection(void);
-		// void    closeAllConnectionExcep(void);
 
 		std::map<int, User> 	Users;
 		std::map<int, Server> 	Servers;

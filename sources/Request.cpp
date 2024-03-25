@@ -224,13 +224,40 @@ Location	Request::getLocation(void)
 	return (this->loc);
 }
 
-void	Request::setServer(Server server)
+
+int Request::setServer(std::vector<Server> servers)
 {
-	this->server = server;
-	return ;
+	if (servers.size() == 1)
+	{
+		this->server = servers[0]; 
+		this->setLocation(this->getServer().getLoc());
+		return (0);
+	}
+	
+	std::string hostname;
+	if (this->getHost().find(':') != std::string::npos) {
+		hostname = this->getHost().substr(0, this->getHost().length() - (this->getHost().length() - this->getHost().find(':')));
+	}
+	else {
+		hostname = this->getHost().substr(0, this->getHost().size() - 1);
+	}
+
+	for (std::vector<Server>::iterator it = servers.begin(); it != servers.end(); it++)
+	{
+		if (it->getServerName() == hostname)
+		{
+			server = *it;
+			this->setLocation(this->getServer().getLoc());
+			return (0);
+		}
+	}
+	server = servers[0];
+	this->setLocation(this->getServer().getLoc());
+	return (0);
 }
 
-int	Request::parseRequest(void)
+
+int	Request::parseRequest(std::vector<Server> servers)
 {
     splitString();
 	int	fpos = vAllRequest[0].find(' ', 0);
@@ -295,6 +322,7 @@ int	Request::parseRequest(void)
 			}
 		}
 	}
+	setServer(servers);
 	// contentLength = allRequest.size();
 	return (0);
 }

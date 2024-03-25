@@ -608,7 +608,6 @@ int	Config::fillLocation(Server &server)
 				missElementCgi(loc);
 			if (server.setLoc(loc.getPath(), loc))
 				throw ConfigException("Duplicate Location");
-			// std::cout << loc.getIndexi(0) << std::endl;
 		}
 		i++;
 	}

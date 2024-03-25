@@ -6,12 +6,6 @@ User::User(void)
     return ;
 }
 
-User::User(Server &server)
-{
-	this->server = server;
-	return ;
-}
-
 User::~User(void)
 {
     return ;
@@ -24,18 +18,18 @@ User::User(const User& cpy) {
 User& User::operator=(const User& rhs) {
 
     if (this != &rhs) {
-        server = rhs.server;
         request = rhs.request;
         response = rhs.response;
         fd = rhs.fd;
 		lastTime = rhs.lastTime;
+		ServerVec = rhs.ServerVec;
     }
     return *this;
 }
 
-Server User::getServer(void) const
+void	User::AddServerPtr(Server newServerVec)
 {
-	return (this->server);
+	this->ServerVec.push_back(newServerVec);
 }
 
 void User::setFd(int fd)
@@ -44,36 +38,9 @@ void User::setFd(int fd)
 	return ;
 }
 
-int User::setServer(std::map<int, Server> Servers)
+std::vector< Server> User::getServerVec(void) const
 {
-	std::string hostname;
-	if (request.getHost().find(':') != std::string::npos)
-	{
-		hostname = request.getHost().substr(0, request.getHost().length() - (request.getHost().length() - request.getHost().find(':')));
-	}
-	else
-	{
-		hostname = request.getHost().substr(0, request.getHost().size() - 1);
-	}
-
-    for (std::map<int, Server>::iterator it = Servers.begin(); it != Servers.end(); ++it)
-	{
-		if (it->second.getServerName() == hostname)
-		{
-			server = it->second;
-			request.setServer(it->second);
-			request.setLocation(request.getServer().getLoc());
-			return (0);
-		}
-	}
-	std::map<int, Server>::iterator itemp = Servers.begin();
-	if (itemp != Servers.end())
-	{
-		server = itemp->second;
-		request.setServer(itemp->second);
-	}
-	request.setLocation(request.getServer().getLoc());
-	return (1);
+	return (this->ServerVec);
 }
 
 int User::getFd(void) const

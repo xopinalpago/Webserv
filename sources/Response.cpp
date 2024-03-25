@@ -318,17 +318,31 @@ void Response::processRequest() {
                     }
                     else if (isDirectory(_filePath)) {
                         std::cout << "DIRECTORY" << std::endl;
-                        if (_request.getLocation().getAutoindex() == 1) {
+						if (access(_filePath.c_str(), R_OK) == -1) {
+							_status = 403;
+						}
+                        else if (_request.getLocation().getAutoindex() == 1) {
                             _status = directoryListing(_filePath);
                         } else
                             _status = 403;
                     }
                     else {
-                        std::ifstream file(_filePath.c_str());
-					    if (file.fail()) {
-					    	_status = 404;
-					    } else
-					    	_body << file.rdbuf();
+                        std::cout << "FILE" << std::endl;
+						struct stat fileStat;
+						if (stat(_filePath.c_str(), &fileStat) != 0) {
+							_status = 404;
+						}
+                        else if (access(_filePath.c_str(), R_OK) == -1) {
+                        	std::cout << "access" << std::endl;
+                            _status = 403;
+                        }
+						else	{
+							std::ifstream file(_filePath.c_str());
+							if (file.fail()) {
+								_status = 404;
+							} else
+								_body << file.rdbuf();
+						}
                     }
                 }
             } else if (_request.getMethod() == "DELETE") {
@@ -357,7 +371,9 @@ void Response::processRequest() {
     _content << makeHeader();
 	_content << _body.str();
 	_finalRes = _content.str();
-
+	// std::cout << "************FINAL RES************" << std::endl;
+	// std::cout << _finalRes << std::endl;
+	// std::cout << "******************************" << std::endl;
 }
 
 int Response::directoryListing(const std::string& directoryPath) {

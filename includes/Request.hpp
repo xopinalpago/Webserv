@@ -58,8 +58,8 @@ class Request
 		// int		setPathFile(std::string str);
 		unsigned int		setContentLength(unsigned int cLength);
 		int		setKeepAlive(int alive);
-		void	setServer(Server server);
-		int		parseRequest(void);
+		int		setServer(std::vector<Server> servers);
+		int		parseRequest(std::vector<Server> servers);
 		void 	splitString(void);
 
 

@@ -11,11 +11,11 @@
 class User
 {
 	private:
-		Server 		server;
 		Request 	request;
 		Response 	response;
 		int 		fd;
 		time_t      lastTime;
+		std::vector< Server> 	ServerVec;
 	
 	public:
 		User(void);
@@ -28,14 +28,13 @@ class User
 
 		int			getFd(void) const;
 		Request 	getRequest(void) const;
-		Server 		getServer(void) const;
 		Response	getResponse(void) const;
 		time_t     	getLastTime(void) const;
-
+		std::vector< Server> 		getServerVec(void) const;
+		void		AddServerPtr(Server newServerVec);
 		void        updateTime();
 
 		void 		setFd(int fd);
-		int 		setServer(std::map<int, Server> Servers);
 		void 		setRequest(Request request);
 };
 

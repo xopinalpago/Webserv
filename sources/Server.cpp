@@ -22,9 +22,11 @@ Server::Server(const Server& cpy) {
 Server& Server::operator=(const Server& rhs) {
 	if (this != &rhs) {
     	fd = rhs.fd;
+        vecPort = rhs.vecPort;
     	port = rhs.port;
     	client_max_body_size = rhs.client_max_body_size;
         host = rhs.host;
+        str_host = rhs.str_host;
         server_name = rhs.server_name;
         root = rhs.root;
         index = rhs.index;
@@ -73,13 +75,13 @@ int Server::setHost(std::string host)
     return (0);
 }
 
-int Server::setStrHost(std::string host)
+int Server::setStrHost(std::string str_host)
 {
-    if (host.length() == 0)
+    if (str_host.length() == 0)
     {
         return (1);
     }
-	this->str_host = host;
+	this->str_host = str_host;
     return (0);
 }
 
@@ -214,7 +216,6 @@ int Server::getVecPorti(int i)
     }
     return (0);
 }
-
 
 int Server::getFd(void) const
 {
