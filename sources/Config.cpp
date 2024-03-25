@@ -194,7 +194,6 @@ int Config::makeRoot(Location &loc, std::string str, int &nbRoot)
 		throw ConfigException("Invalid Root");
 	if (root.length() > 1 && root[0] == '/')
 		root = root.substr(1);
-	std::cout << "root = " << root << std::endl;
 	if (loc.setRoot(root))
 		throw ConfigException("Invalid Root");
 	nbRoot++;
@@ -202,21 +201,6 @@ int Config::makeRoot(Location &loc, std::string str, int &nbRoot)
 		throw ConfigException("Too many Root");
 	return (0);
 }
-
-// int Config::makeIndex(Location &loc, std::string str, int &nbIndex)
-// {
-// 	if (str[str.length() - 1] != ';')
-// 		throw ConfigException("Invalid Index");
-// 	std::string index = getValue(str);
-// 	if (index.length() == 0)
-// 		throw ConfigException("Invalid Index");
-// 	if (loc.setIndex(index))
-// 		throw ConfigException("Invalid Index");
-// 	nbIndex++;
-// 	if (nbIndex > 1)
-// 		throw ConfigException("Too many Index");
-// 	return (0);
-// }
 
 int Config::makeIndex(Location &loc, std::string str, int &nbIndex)
 {
@@ -406,7 +390,8 @@ int Config::makeRedirection(Location &loc, std::string str, int &nbRedirection, 
 		throw ConfigException("Invalid Redirection");
 	if (path.substr(0, 2) == "./")
 		throw ConfigException("Redirection can not call itself");
-	
+	if (path.size() > 1 && path[0] != '/')
+		path = "/" + path;
 	int isValid = 0;
 	if (path.find("http://") == 0)
 	{
@@ -430,14 +415,14 @@ int Config::makeRedirection(Location &loc, std::string str, int &nbRedirection, 
 				}
 			}
 		}
-		if (!isValid)
-			throw ConfigException("Invalid Redirection");
+		// if (!isValid)
+		// 	throw ConfigException("Invalid Redirection");
 	}
-	else
-	{
-		if (path.find("//") != path.npos)
-			throw ConfigException("Invalid Redirection");
-	}
+	// else
+	// {
+	// 	if (path.find("//") != path.npos)
+	// 		throw ConfigException("Invalid Redirection");
+	// }
 	loc.setRedirectionPath(path);
 	loc.setRedirectionCode(key);
 	nbRedirection++;

@@ -72,6 +72,9 @@ int Server::setHost(std::string host)
  	if (host == "localhost")
 		host = "127.0.0.1";   
 	this->host = inet_addr(host.data());
+    if (this->host == INADDR_NONE) {
+        return (1);
+    }
     return (0);
 }
 

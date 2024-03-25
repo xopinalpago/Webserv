@@ -216,7 +216,7 @@ void Response::setPathFile()
             }
         }
     }
-    std::cout << "_filePath : " << _filePath << std::endl;
+    // std::cout << "_filePath : " << _filePath << std::endl;
 }
 
 void Response::errorData() {
@@ -308,7 +308,7 @@ void Response::processRequest() {
 
     // std::cout << "taille : " << _request.getAllRequest().size() << std::endl;
     // std::cout << "UPLOAD" << std::endl;
-    std::cout << "LOCATION = " << _request.getLocation().getPath() << std::endl;
+    // std::cout << "LOCATION = " << _request.getLocation().getPath() << std::endl;
     // std::cout << "_filePath : " << _filePath << std::endl;
     if (_request.getAllRequest().size() <= _server.getClientMax()) {
         if (_request.getVersion() != "HTTP/1.1")
