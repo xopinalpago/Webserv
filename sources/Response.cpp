@@ -210,7 +210,7 @@ void Response::setPathFile()
             }
         }
     }
-    // std::cout << "_filePath : " << _filePath << std::endl;
+    std::cout << "_filePath : " << _filePath << std::endl;
 }
 
 void Response::errorData() {
@@ -379,7 +379,10 @@ int Response::directoryListing(const std::string& directoryPath) {
     if (dir != NULL) {
         while ((ent = readdir(dir)) != NULL) {
             if (std::string(ent->d_name) != "." && std::string(ent->d_name) != "..") {
-                lstFiles.push_back(ent->d_name);
+                std::string name(ent->d_name);
+            	if (ent->d_type == DT_DIR)
+			        name += "/";
+                lstFiles.push_back(name);
             }
         }
         closedir(dir);
@@ -390,6 +393,7 @@ int Response::directoryListing(const std::string& directoryPath) {
     std::string response = "<!DOCTYPE html>\n<html>\n<head>\n<title>Index of /</title>\n</head>\n<body>\n";
     response += "<h1>Index of /</h1>\n<hr>\n<ul>\n";
     for (std::vector<std::string>::const_iterator it = lstFiles.begin(); it != lstFiles.end(); ++it) {
+        std::cout << "NAME = " << *it << std::endl;
         response += "<li><a href=\"" + *it + "\">" + *it + "</a></li>\n";
     }
     response += "</ul>\n<hr>\n</body>\n</html>\n";

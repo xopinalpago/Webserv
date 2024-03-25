@@ -366,5 +366,6 @@ int Request::setLocation(std::map<std::string, Location> locations)
 	}
 	else
 		return (1);
+	// std::cout << "tempLoc.getPath() = " << tempLoc.getPath() << std::endl;
 	return (0);
 }

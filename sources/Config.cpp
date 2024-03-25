@@ -192,6 +192,9 @@ int Config::makeRoot(Location &loc, std::string str, int &nbRoot)
 	std::string root = getValue(str);
 	if (root.length() == 0)
 		throw ConfigException("Invalid Root");
+	if (root.length() > 1 && root[0] == '/')
+		root = root.substr(1);
+	std::cout << "root = " << root << std::endl;
 	if (loc.setRoot(root))
 		throw ConfigException("Invalid Root");
 	nbRoot++;
@@ -372,6 +375,8 @@ int Config::makeCgiPath(Location &loc, std::string str, int &nbCgiPath)
 		if (!path.empty() && path[path.length() - 1] == ';')
 			path.erase(path.length() - 1);
 		if (key.empty() || path.empty() || lpos < 0)
+			throw ConfigException("Invalid Cgi Path");
+		if (Utils::fileExists(path))
 			throw ConfigException("Invalid Cgi Path");
 		loc.setCgiPath(key, path);
 		pos = llpos;
