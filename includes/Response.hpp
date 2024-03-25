@@ -46,6 +46,7 @@ class Response {
         bool        authorizedMethod();
         bool        isDirectory(std::string path);
         int         directoryListing(const std::string& directoryPath);
+        std::string getListJson();
 
     private :
         Request                     _request;

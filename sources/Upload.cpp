@@ -56,7 +56,7 @@ void Upload::parseUpload() {
         line = next;
     }
     fileBody = res.str();
-    std::cout << "fileBody = " << fileBody << std::endl;
+    // std::cout << "fileBody = " << fileBody << std::endl;
 }
 
 #include <sys/stat.h>
