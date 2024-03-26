@@ -160,12 +160,6 @@ int Cgi::create_env(Request request) {
     return (mapToChar());
 }
 
-// #include <csignal>
-
-void myCustomFunction() {
-    std::cout << "Fonction appelée après 3 secondes." << std::endl;
-}
-
 void Cgi::free_tabs() {
     int i = 0;
     while (_args[i]) {
@@ -206,7 +200,7 @@ int Cgi::writePipe(int *fd_in, int *fd_out, std::string body) {
             free_tabs();
             delete [] info;
             close(*fd_in);
-            std::exit(500);
+            std::exit(EXIT_FAILURE);
         }
     }
     delete [] info;
@@ -256,7 +250,7 @@ int Cgi::execScript(int *fd_in, int *fd_out) {
             close(*fd_out);
             free_tabs();
             close(_cgiFd);
-            std::exit(500);
+            std::exit(EXIT_FAILURE);
         }
     }
     close(*fd_out);
@@ -283,15 +277,14 @@ int Cgi::execCGI(Request request) {
     pid_t pid = execScript(&fd[0], &fd[1]);
     int state = 200;
     
+    int status;
     while (true) {
-        int status;
         pid_t result = waitpid(pid, &status, WNOHANG);
         if (result > 0)
             break;
         if (result == 0) {
             time_t endTime = time(NULL);
             if (endTime - startTime >= 3) {
-                std::cout << "TIMEOUUUUUUUT" << std::endl;
                 state = 408;
                 kill(pid, SIGQUIT);
                 break;
@@ -304,5 +297,7 @@ int Cgi::execCGI(Request request) {
     close(fd[1]);
     if (state == 408)
         return 408;
+    if (status == 256)
+        return 400;
     return 200;
 }

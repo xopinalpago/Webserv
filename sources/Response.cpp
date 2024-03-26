@@ -310,7 +310,7 @@ void Response::processRequest() {
     // std::cout << "UPLOAD" << std::endl;
     std::cout << "LOCATION = " << _request.getLocation().getPath() << std::endl;
     // std::cout << "_filePath : " << _filePath << std::endl;
-    if (_request.getAllRequest().size() <= _server.getClientMax()) {
+    if (_request.getAllRequest().size() <= _server.getClientMax() && _request.getContentLength() < 10000) {
         if (_request.getVersion() != "HTTP/1.1")
             _status = 505;
         else if (_request.getLocation().getRedirectionPath() != "")
