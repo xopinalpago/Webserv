@@ -68,7 +68,7 @@ void Launcher::listenServer(Server &server)
 
 void    Launcher::closeAllConnection(void)
 {
-    for (int i = 0; i <= max_sd; ++i)
+    for (int i = 3; i <= max_sd; ++i)
     {
 		closeConnection(i);
     }
@@ -197,7 +197,15 @@ void	Launcher::sendServer(User &user)
 
 	int rc3 = send(user.getFd(), res->getFinalRes().c_str(), res->getFinalRes().size(), 0);
 	if (rc3 < 0)
-		throw LauncherException("send failed");
+	{
+		closeConnection(user.getFd());
+		return ;
+	}
+	else if (rc3 == 0)
+	{
+		closeConnection(user.getFd());
+		return ;
+	}
 	else
 		user.updateTime();
 	

@@ -363,11 +363,12 @@ void Response::processRequest() {
 						}
                         else if (_request.getLocation().getAutoindex() == 1) {
                             _status = directoryListing(_filePath);
-                        } else
+                        } else {
                             _status = 403;
+                        }
                     }
                     else {
-                        // std::cout << "FILE" << std::endl;
+                        std::cout << "FILE" << std::endl;
 						struct stat fileStat;
 						if (stat(_filePath.c_str(), &fileStat) != 0) {
 							_status = 404;
@@ -441,7 +442,6 @@ int Response::directoryListing(const std::string& directoryPath) {
     std::string response = "<!DOCTYPE html>\n<html>\n<head>\n<title>Index of /</title>\n</head>\n<body>\n";
     response += "<h1>Index of /</h1>\n<hr>\n<ul>\n";
     for (std::vector<std::string>::const_iterator it = lstFiles.begin(); it != lstFiles.end(); ++it) {
-        std::cout << "NAME = " << *it << std::endl;
         response += "<li><a href=\"" + *it + "\">" + *it + "</a></li>\n";
     }
     response += "</ul>\n<hr>\n</body>\n</html>\n";
