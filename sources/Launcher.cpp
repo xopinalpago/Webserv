@@ -211,6 +211,7 @@ void	Launcher::sendServer(User &user)
 	
 	std::cout << std::endl << CYAN;
 	std::cout << "**************** RESPONSE HEADER ****************" << std::endl;
+	// std::cout << res->getFinalRes() << std::endl;
 	std::cout << res->getFinalRes().substr(0, res->getFinalRes().find('\n')) << std::endl;
 	std::cout << "*************************************************" << std::endl;
 	std::cout << RESET << std::endl;
