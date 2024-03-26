@@ -3,6 +3,7 @@
 Launcher::Launcher(void)
 {
 	totalBytes = 0;
+	max_sd = 0;
 	FD_ZERO(&writefds);
 	FD_ZERO(&readfds);
 	return ;
@@ -41,7 +42,6 @@ void 	Launcher::addServerOfClient(int listen_sock, User *client)
 	{
 		if (listen_sock == it->second.getFd())
 		{
-			std::cout << "test" << std::endl;
 			client->AddServerPtr(it->second);
 		}
 	}
@@ -68,7 +68,7 @@ void Launcher::listenServer(Server &server)
 
 void    Launcher::closeAllConnection(void)
 {
-    for (int i = 0; i <= max_sd; ++i)
+    for (int i = 3; i <= max_sd; ++i)
     {
 		closeConnection(i);
     }
@@ -95,7 +95,6 @@ void    Launcher::closeConnection(int fd)
 int Launcher::readbuf(User &user, Request& request, char *bf) {
 
 	memset(bf, 0, sizeof(*bf));
-	// std::cout << "ok" << std::endl;
 	rc = recv(user.getFd(), bf, BUFFER_SIZE, MSG_DONTWAIT);
 	if (rc == 0)
 	{
@@ -178,10 +177,11 @@ int Launcher::readServer(User &user)
 	FD_CLR(user.getFd(), &readfds);
 	FD_SET(user.getFd(), &writefds);
 
-	// std::cout << request.getContentType() << std::endl;
-	std::cout << "**************** REQUEST ****************" << std::endl;
-	std::cout << request.getAllRequest() << std::endl;
-	std::cout << "************************ ****************" << std::endl;
+	std::cout << std::endl << LIGHT_RED;
+	std::cout << "**************** REQUEST HEADER ****************" << std::endl;
+	std::cout << request.getAllRequest().substr(0, request.getAllRequest().find('\n')) << std::endl;
+	std::cout << "************************************************" << std::endl;
+	std::cout << RESET << std::endl;
 
 	return (1);
 }
@@ -197,13 +197,24 @@ void	Launcher::sendServer(User &user)
 
 	int rc3 = send(user.getFd(), res->getFinalRes().c_str(), res->getFinalRes().size(), 0);
 	if (rc3 < 0)
-		throw LauncherException("send failed");
+	{
+		closeConnection(user.getFd());
+		return ;
+	}
+	else if (rc3 == 0)
+	{
+		closeConnection(user.getFd());
+		return ;
+	}
 	else
 		user.updateTime();
-	// std::cout << "******* content dans sendServer *******" << std::endl;
-	// std::cout << res->getFinalRes().c_str() << std::endl;
-	// std::cout << "***************************************" << std::endl;
-
+	
+	std::cout << std::endl << CYAN;
+	std::cout << "**************** RESPONSE HEADER ****************" << std::endl;
+	std::cout << res->getFinalRes().substr(0, res->getFinalRes().find('\n')) << std::endl;
+	std::cout << "*************************************************" << std::endl;
+	std::cout << RESET << std::endl;
+	
 	FD_CLR(user.getFd(), &writefds);
 	FD_SET(user.getFd(), &readfds);
 
@@ -230,13 +241,15 @@ int Launcher::initServer(Server &server)
 	FD_ZERO(&writefds);
 	if (server.setFd(socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
-		close(server.getFd());
-        throw LauncherInitException("socket failed");
+		// close(server.getFd());
+        throw LauncherException("socket failed");
 	}
+	if (server.getFd() > max_sd)
+		max_sd = server.getFd();
 	if ((rc = setsockopt(server.getFd(), SOL_SOCKET,  SO_REUSEADDR, (char *)&on, sizeof(on)) < 0))
 	{
-		close(server.getFd());
-		throw LauncherInitException("setsockopt failed");
+		// close(server.getFd());
+		throw LauncherException("setsockopt failed");
 	}
 	std::memset(&server.address, 0, sizeof(server.address));
     server.address.sin_family = AF_INET;
@@ -245,11 +258,10 @@ int Launcher::initServer(Server &server)
 	server.setPort(server.getVecPorti(0));
     if (bind(server.getFd(), (struct sockaddr *)&server.address, sizeof(server.address)) < 0)
 	{
-        close(server.getFd());
-        throw LauncherInitException("bind failed");
+        // close(server.getFd());
+        throw LauncherException("bind failed");
     }
 	Servers[server.getFd()] = server;
-	max_sd = server.getFd();
     return (0);
 }
 
@@ -258,14 +270,13 @@ int Launcher::initServer(Server &server, int port)
     int on = 1;
 	FD_ZERO(&writefds);
 	if (server.setFd(socket(AF_INET, SOCK_STREAM, 0)) < 0)
-	{
-		close(server.getFd());
-        throw LauncherInitException("socket failed");
-	}
+        throw LauncherException("socket failed");
+	if (server.getFd() > max_sd)
+		max_sd = server.getFd();
 	if ((rc = setsockopt(server.getFd(), SOL_SOCKET,  SO_REUSEADDR, (char *)&on, sizeof(on)) < 0))
 	{
-		close(server.getFd());
-		throw LauncherInitException("setsockopt failed");
+		// close(server.getFd());
+		throw LauncherException("setsockopt failed");
 	}
 	std::memset(&server.address, 0, sizeof(server.address));
     server.address.sin_family = AF_INET;
@@ -274,11 +285,11 @@ int Launcher::initServer(Server &server, int port)
 	server.setPort(port);
     if (bind(server.getFd(), (struct sockaddr *)&server.address, sizeof(server.address)) < 0)
 	{
-        close(server.getFd());
-        throw LauncherInitException("bind failed");
+        // close(server.getFd());
+        throw LauncherException("bind failed");
     }
 	Servers[server.getFd()] = server;
-	max_sd = server.getFd();
+	// max_sd = server.getFd();
     return (0);
 }
 

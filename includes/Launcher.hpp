@@ -8,6 +8,9 @@
 #include "User.hpp"
 #include "Request.hpp"
 
+#define RESET          "\x1B[0m"
+#define LIGHT_RED      "\x1B[91m"
+#define CYAN           "\x1B[36m"
 
 class Launcher
 {
@@ -23,17 +26,17 @@ class Launcher
         int                 end_server;
 		int					totalBytes;
 
-		int		readServer(User &user);
-		int		readbuf(User &user, Request& request, char *bf);
 		std::string	extractBody(Request& request);
-        void	sendServer(User &user);
-        void    listenServer(Server &server);
-		int 	initSets(void);
-		int		checkServers(void);
-		void 	checkServerName(void);
-		void    closeConnection(int i);
-		void	checkTimeout(void);
-		void 	addServerOfClient(int listen_sock, User *client);
+		int			readServer(User &user);
+		int			readbuf(User &user, Request& request, char *bf);
+        void		sendServer(User &user);
+        void    	listenServer(Server &server);
+		int 		initSets(void);
+		int			checkServers(void);
+		void 		checkServerName(void);
+		void    	closeConnection(int i);
+		void		checkTimeout(void);
+		void 		addServerOfClient(int listen_sock, User *client);
 	public:
 		Launcher(void);
 		~Launcher(void);
@@ -58,19 +61,6 @@ class Launcher
 				return (_err.c_str());
 			}
 			~LauncherException() throw() {}
-		
-		private:
-			std::string _err;
-		};
-		class LauncherInitException : public std::exception {
-		public :
-			LauncherInitException(std::string err) throw() {
-				_err = "Launcher Error: " + err;
-			}
-			virtual const char* what() const throw() {
-				return (_err.c_str());
-			}
-			~LauncherInitException() throw() {}
 		
 		private:
 			std::string _err;

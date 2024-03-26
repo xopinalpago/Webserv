@@ -8,6 +8,11 @@ void	handle_sigint(int sig)
 	(void)sig;
 }
 
+void	handle_sigpipe(int sig)
+{
+	(void)sig;
+}
+
 int main(int argc, char **argv)
 {
 	Launcher 	run;
@@ -22,6 +27,7 @@ int main(int argc, char **argv)
 			filename = argv[1];
 		try {
 			signal(SIGINT, &handle_sigint);
+			signal(SIGPIPE, &handle_sigpipe);
 			config.getLineFile(filename, run);
 			run.runServer();
 		}
@@ -30,16 +36,13 @@ int main(int argc, char **argv)
 			return (0);
 		}
 		catch (Config::ConfigException &e) {
+			run.closeAllConnection();
 			std::cerr << e.what() << std::endl;
 			return (0);
 		}
 		catch (Launcher::LauncherException &e) {
 			std::cerr << e.what() << std::endl;
 			run.closeAllConnection();
-			return (0);
-		}
-		catch (Launcher::LauncherInitException &e) {
-			std::cerr << e.what() << std::endl;
 			return (0);
 		}
 	}
