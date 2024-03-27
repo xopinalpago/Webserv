@@ -2,6 +2,7 @@
 
 Location::Location(void)
 {
+    autoindex = 0;
     return ;
 }
 

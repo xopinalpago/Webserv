@@ -33,6 +33,7 @@ class Config {
         int         makeRedirection(Location &loc, std::string str, int &nbRedirection, Server &server);
         int	        fillLocation(Server &server);
         int         makeMethod(Location &loc, std::string str, int &nbAllowMethods);
+        int         missElementListFiles(Location &loc);
         int         makeCgiEx(Location &loc, std::string str, int &nbCgiEx);
         int         makeCgiPath(Location &loc, std::string str, int &nbCgiPath);
         int         missElementLoc(Location &loc, Server &server);
