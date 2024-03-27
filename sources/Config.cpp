@@ -497,6 +497,13 @@ int Config::missElementCgi(Location &loc)
 	return (0);
 }
 
+int Config::missElementListFiles(Location &loc)
+{
+	if (loc.getAutoindex() == 1)
+		throw ConfigException("No Autoindex in ListFiles");
+	return (0);
+}
+
 int Config::setDefaultMethods(Location &loc)
 {
 	if (loc.getMethod().size() == 0)
@@ -599,6 +606,8 @@ int	Config::fillLocation(Server &server)
 			missElementLoc(loc, server);
 			if (loc.getPath() == "/cgi-bin")
 				missElementCgi(loc);
+			if (loc.getPath() == "/listFiles")
+				missElementListFiles(loc);
 			if (server.setLoc(loc.getPath(), loc))
 				throw ConfigException("Duplicate Location");
 		}

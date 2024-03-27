@@ -157,7 +157,8 @@ void Response::setPathFile()
         if (_request.getLocation().getIndex().size() > 1)   {
             for (size_t i = 0; i < _request.getLocation().getIndex().size(); i++)   {
                 std::string tmp = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndexi(i);
-                if (access(str.c_str(), R_OK) == 0) {
+                std::cout << "tmp = " << tmp << std::endl;
+                if (access(str.c_str(), R_OK) == 0 && !Utils::fileExists(tmp)) {
                     str = tmp; 
                     break;
                 }
@@ -216,12 +217,13 @@ void Response::setPathFile()
             
             if (tmp[0] == '/')
                 tmp = tmp.substr(1, tmp.size() - 1);
-            if (access(tmp.c_str(), R_OK) == 0) {
+            if (access(tmp.c_str(), R_OK) == 0 && !Utils::fileExists(tmp)) {
                 _filePath = tmp;
                 break;
             }
         }
     }
+    std::cout << "_filePath = " << _filePath << std::endl;
 }
 
 void Response::errorData() {
