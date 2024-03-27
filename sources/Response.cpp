@@ -223,7 +223,6 @@ void Response::setPathFile()
             }
         }
     }
-    std::cout << "_filePath = " << _filePath << std::endl;
 }
 
 void Response::errorData() {

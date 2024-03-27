@@ -137,11 +137,11 @@ void Cgi::freeEnv() {
 
 int Cgi::create_env(Request request) {
 
-    _env["SERVER_NAME"] = request.getServer().getServerName(); // conf
+    _env["SERVER_NAME"] = request.getServer().getServerName();
     _env["SERVER_PROTOCOL"] = "HTTP/1.1";
     _env["GATEWAY_INTERFACE"] = "CGI/1.1";
     _env["REQUEST_METHOD"] = request.getMethod();
-    _env["CONTENT_TYPE"] = request.getContentType(); // user
+    _env["CONTENT_TYPE"] = request.getContentType();
     _env["CONTENT_LENGTH"] = request.getContentLength();
 
     if (request.getMethod() == "GET") {
@@ -155,8 +155,8 @@ int Cgi::create_env(Request request) {
     } else
         _env["QUERY_STRING"] = "";
     _env["SCRIPT_FILENAME"] = _filePath;
-    // _env["QUERY_STRING"] = decodeQuery(_env["QUERY_STRING"]);
     _env["REQUEST_URI"] = request.getUri();
+    // _env["QUERY_STRING"] = decodeQuery(_env["QUERY_STRING"]);
     return (mapToChar());
 }
 
@@ -189,7 +189,6 @@ int Cgi::writePipe(int *fd_in, int *fd_out, std::string body) {
         return 500;
     }
     if (pid == 0) {
-        // alarm(3);
         dup2(*fd_out, STDOUT_FILENO);
         close(*fd_out);
         close(*fd_in);
