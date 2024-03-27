@@ -1,2 +1,2 @@
 while True:
-    printjhbm("Boucle infinie en cours...")
+    print("Boucle infinie en cours...")

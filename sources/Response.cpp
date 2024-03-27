@@ -372,7 +372,7 @@ void Response::processRequest() {
                     else {
 						struct stat fileStat;
 						if (stat(_filePath.c_str(), &fileStat) != 0) {
-							_status = 404;
+                            _status = 404;
 						}
                         else if (access(_filePath.c_str(), R_OK) == -1) {
                             _status = 403;

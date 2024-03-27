@@ -114,6 +114,7 @@ int Launcher::readbuf(User &user, Request& request, char *bf) {
 	return rc;
 }
 
+
 std::string Launcher::extractBody(Request& request) {
 
 	std::string body;
@@ -132,7 +133,6 @@ int Launcher::readServer(User &user)
     int rc = BUFFER_SIZE;
 	char bf[BUFFER_SIZE + 1];
 	Request request;
-	
 
     while (rc == BUFFER_SIZE) {
 		rc = readbuf(user, request, bf);
