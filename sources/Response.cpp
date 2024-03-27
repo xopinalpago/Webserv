@@ -344,7 +344,7 @@ void Response::processRequest() {
                     delete cgi;
                 } else {
                     if (_request.getContentType() == "multipart/form-data") {
-                        std::cout << "UPLOAD" << std::endl;
+                        // std::cout << "UPLOAD" << std::endl;
                         Upload *upload = new Upload(_request);
                         _status = upload->doUpload();
                         if (_status == 1) {
@@ -357,7 +357,7 @@ void Response::processRequest() {
                         delete upload;
                     }
                     else if (isDirectory(_filePath)) {
-                        std::cout << "DIRECTORY" << std::endl;
+                        // std::cout << "DIRECTORY" << std::endl;
 						if (access(_filePath.c_str(), R_OK) == -1) {
 							_status = 403;
 						}
@@ -368,10 +368,10 @@ void Response::processRequest() {
                         }
                     }
                     else {
-                        std::cout << "FILE" << std::endl;
+                        // std::cout << "FILE" << std::endl;
 						struct stat fileStat;
 						if (stat(_filePath.c_str(), &fileStat) != 0) {
-							_status = 404;
+                            _status = 404;
 						}
                         else if (access(_filePath.c_str(), R_OK) == -1) {
                         	std::cout << "access" << std::endl;
@@ -387,8 +387,6 @@ void Response::processRequest() {
                     }
                 }
             } else if (_request.getMethod() == "DELETE") {
-                std::cout << "LAAAAAAA" << std::endl;
-                std::cout << "_filePath : " << _filePath << std::endl;
                 if (_filePath[0] == '/')
                     _filePath = _filePath.substr(1, _filePath.size() - 1);
                 if (remove(_filePath.c_str()) != 0) {

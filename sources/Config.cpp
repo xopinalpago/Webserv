@@ -491,6 +491,9 @@ int Config::missElementCgi(Location &loc)
 		throw ConfigException("Missing Cgi Path");
 	if (loc.getRedirectionPath().size() != 0)
 		throw ConfigException("Param return not allow for CGI");
+	if (loc.getCgiEx().size() != loc.getCgiPath().size())
+		throw ConfigException("Error CGI");
+
 	return (0);
 }
 
