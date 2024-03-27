@@ -27,7 +27,7 @@ Cgi& Cgi::operator=(const Cgi& rhs) {
 Cgi::Cgi(std::string filePath, s_socketInfo* infos) {
     
     _infos = infos;
-    std::cerr << "TEST : socket maxsd = " << infos->max_sd << std::endl; 
+    // std::cerr << "TEST : socket maxsd = " << infos->max_sd << std::endl; 
     _filePath = filePath;
     _cgiFile = ".cgi.txt";
     _cgiFd = open(_cgiFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC);

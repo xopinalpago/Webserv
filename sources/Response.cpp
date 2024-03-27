@@ -261,12 +261,13 @@ std::string Response::makeHeader() {
 
     _clength = _body.str().length();
     if (_ctype == "") {
-        if (ext != "")
+        if (ext != "") {
             _ctype = types[ext];
-        else
+            if (_ctype == "")
+                _ctype = types["html"];
+        } else
             _ctype = types["html"];
     }
-    // std::cout << "_ctype : " << _ctype << std::endl;
     header << "HTTP/1.1 " << _status << " " << messages[_status] << std::endl;
     header << "Content-Type: " << _ctype << std::endl;
     header << "Content-Length: " << _clength << std::endl << std::endl;
