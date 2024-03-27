@@ -130,6 +130,7 @@ bool Response::IsCgiExtension(std::string file)
 
 bool Response::isDirectory(std::string filePath) {
 
+    // std::cout << "isdirctpr" << std::endl;
     std::string path2;
     if (filePath[filePath.size() - 1] == '/')
         path2 = filePath.substr(0, filePath.size() - 1);
@@ -201,9 +202,20 @@ void Response::setPathFile()
     }
     _filePath = str;
     for (size_t i = 0; i < _request.getLocation().getIndex().size(); i++)   {
-        if (isDirectory(_filePath) && _request.getLocation().getIndexi(i) != "") {
+        if ((isDirectory(_filePath) || _filePath == "/") && _request.getLocation().getIndexi(i) != "") {
+            if (_request.getLocation().getPath() == "/listFiles" && _request.getUri() != "/listFiles/")
+                return;
             std::string tmp = "";
+            if (_request.getLocation().getRoot()[_request.getLocation().getRoot().size() - 1] != '/' && _request.getLocation().getIndexi(i)[0] != '/') {
                 tmp = _request.getLocation().getRoot() + "/" + _request.getLocation().getIndexi(i);
+            } else if (_request.getLocation().getRoot()[_request.getLocation().getRoot().size() - 1] == '/' ^ _request.getLocation().getIndexi(i)[0] == '/') {
+                tmp = _request.getLocation().getRoot() + _request.getLocation().getIndexi(i);
+            } else if (_request.getLocation().getRoot()[_request.getLocation().getRoot().size() - 1] == '/' && _request.getLocation().getIndexi(i)[0] == '/'){
+                tmp = _request.getLocation().getRoot().substr(1, _request.getLocation().getRoot().size() - 1) + _request.getLocation().getIndexi(i);
+            }
+            
+            if (tmp[0] == '/')
+                tmp = tmp.substr(1, tmp.size() - 1);
             if (access(tmp.c_str(), R_OK) == 0) {
                 _filePath = tmp;
                 break;
@@ -248,14 +260,13 @@ std::string Response::makeHeader() {
     std::string ext = _filePath.substr(_filePath.rfind(".") + 1);
 
     _clength = _body.str().length();
-    std::cout << "_ctype : " << _ctype << std::endl;
     if (_ctype == "") {
         if (ext != "")
             _ctype = types[ext];
         else
             _ctype = types["html"];
     }
-    std::cout << "_ctype : " << _ctype << std::endl;
+    // std::cout << "_ctype : " << _ctype << std::endl;
     header << "HTTP/1.1 " << _status << " " << messages[_status] << std::endl;
     header << "Content-Type: " << _ctype << std::endl;
     header << "Content-Length: " << _clength << std::endl << std::endl;
@@ -270,7 +281,8 @@ std::string Response::getListJson() {
 
     if (_filePath[0] == '/')
         _filePath = _filePath.substr(1, _filePath.size() - 1);
-    // std::cout << "_filePath : " << _filePath << std::endl;
+    if (_filePath == "")
+        return "";
     dir = opendir(_filePath.c_str());
     if (dir != NULL) {
         while ((ent = readdir(dir)) != NULL) {
@@ -279,13 +291,9 @@ std::string Response::getListJson() {
             }
         }
         closedir(dir);
-    } else {
-        std::cout << "ERREUR DIR" << std::endl;
+    } else
         return "";
-    }
     std::sort(lstFiles.begin(), lstFiles.end());
-    // if (lstFiles.empty())
-    //     return "";
     std::stringstream json;
     json << "[";
     for (size_t i = 0; i < lstFiles.size(); i++) {
@@ -294,19 +302,16 @@ std::string Response::getListJson() {
             json << ", ";
     }
     json << "]";
-    std::cout << "json : " << json.str() << std::endl;
     return json.str();
 }
 
 void Response::processRequest() {
 
-    std::cout << "LOCATION : " << _request.getLocation().getPath() << std::endl;
     if (_request.getAllRequest().size() <= _server.getClientMax() && _request.getContentLength() < 10000) {
         if (_request.getVersion() != "HTTP/1.1")
             _status = 505;
         else if (_request.getLocation().getRedirectionPath() != "")
         {
-            std::cout << "REDIRECTION" << std::endl;
             _status = _request.getLocation().getRedirectionCode();
             _content << "HTTP/1.1 " << _status << " " << messages[_status] << std::endl;
             _content << "Location: " << _request.getLocation().getRedirectionPath() << std::endl;
@@ -316,12 +321,9 @@ void Response::processRequest() {
         }
         else if (authorizedMethod()) {
             if (_request.getMethod() == "GET" || _request.getMethod() == "POST") {
-                if (_request.getLocation().getPath() == "/listFiles") {
+                if (_request.getLocation().getPath() == "/listFiles" && _request.getUri() != "/listFiles/") {
                     std::string lst = getListJson();
                     if (lst == "") {
-                        std::cout << "_filePath : " << _filePath << std::endl;
-                        setPathFile();
-                        std::cout << "_filePath : " << _filePath << std::endl;
                         _status = 404;
                     }
                     else {
@@ -387,7 +389,6 @@ void Response::processRequest() {
             } else if (_request.getMethod() == "DELETE") {
                 if (_filePath[0] == '/')
                     _filePath = _filePath.substr(1, _filePath.size() - 1);
-                std::cout << "_filePath : " << _filePath << std::endl;
                 if (remove(_filePath.c_str()) != 0) {
                     _body << backup[4040];
                 } else {
@@ -402,6 +403,9 @@ void Response::processRequest() {
 			_content << _body.str();
 			_finalRes = _content.str();
             return;
+        }
+        if (_status == 200 && _body.str() == "") {
+            _status = 204;
         }
     } else
         _status = 413;

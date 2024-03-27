@@ -152,7 +152,7 @@ int Launcher::readServer(User &user)
 	
 	while (request.getContentLength() > 0 && extractBody(request).length() < request.getContentLength() && request.getContentLength() < 10000) {
 		// std::cout << "DEBUT :" << std::endl;
-		std::cout << "content length = " << request.getContentLength() << std::endl;
+		// std::cout << "content length = " << request.getContentLength() << std::endl;
 		// std::cout << "extractBody(request).length() = " << extractBody(request).length() << std::endl;
 		rc = BUFFER_SIZE;
 		while (rc == BUFFER_SIZE) {
