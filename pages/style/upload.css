@@ -1,11 +1,42 @@
 body {
-    color: white
+    color: white;
+    display: grid;
+    grid-template-rows: 1fr 2fr 0fr 1fr;
+    margin: 0;
 }
 
-h1 {
+form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+input {
+    background-color: #BF8282;
+    color: black;
+    text-decoration: none;
+    font-family: 'Times';
+    text-transform: uppercase;
+    border: none;
+    border-radius: 4px;
+}
+
+.res {
+    color: white;
+}
+
+.back {
     text-align: center;
-    padding: 40px;
-    margin-left: 30%;
-    margin-right: 30%;
-    border-bottom: 2px solid #4b4b4b;
+}
+
+p {
+    text-align: center;
+}
+
+input[type="submit"] {
+    width: 120px;
+    height: 30px;
+    margin-top: 40px;
 }

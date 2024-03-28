@@ -14,7 +14,7 @@
 #include <cstdio>
 #include <sstream>
 #include <fstream>
-#include <sys/stat.h> // chmod
+#include <sys/stat.h>
 
 #include "Request.hpp"
 

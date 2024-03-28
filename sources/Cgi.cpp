@@ -27,7 +27,6 @@ Cgi& Cgi::operator=(const Cgi& rhs) {
 Cgi::Cgi(std::string filePath, s_socketInfo* infos) {
     
     _infos = infos;
-    // std::cerr << "TEST : socket maxsd = " << infos->max_sd << std::endl; 
     _filePath = filePath;
     _cgiFile = ".cgi.txt";
     _cgiFd = open(_cgiFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
@@ -45,12 +44,10 @@ Cgi::~Cgi(void) {
 
     if (fcntl(_cgiFd, F_GETFL) == -1)
         close(_cgiFd);
-    // remove(_cgiFile.c_str());
 }
 
 void    Cgi::closeAllConnection(void)
 {
-    // std::cerr << "max_sd : " << _infos->max_sd << std::endl;
     for (int i = 3; i <= _infos->max_sd; ++i)
     {
 		closeConnection(i);
@@ -67,7 +64,6 @@ void    Cgi::closeConnection(int fd)
 	{
         _infos->max_sd--;
 	}
-	// std::cout << "Connection: " << fd << " closed..." << std::endl;
     close(fd);
 }
 
@@ -156,7 +152,6 @@ int Cgi::create_env(Request request) {
         _env["QUERY_STRING"] = "";
     _env["SCRIPT_FILENAME"] = _filePath;
     _env["REQUEST_URI"] = request.getUri();
-    // _env["QUERY_STRING"] = decodeQuery(_env["QUERY_STRING"]);
     return (mapToChar());
 }
 

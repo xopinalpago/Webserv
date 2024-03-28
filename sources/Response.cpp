@@ -2,20 +2,6 @@
 
 Response::Response() {}
 
-// Response::Response(Request request, Launcher* launch) {
-
-//     _request = request;
-//     _server = request.getServer();
-//     _launch = launch;
-//     setMessages();
-//     setBackupPages();
-//     setTypes();
-//     _status = 200;
-//     _ctype = "text/html";
-//     setPathFile();
-//     processRequest();
-// }
-
 Response::Response(Request request, s_socketInfo* infos) {
 
     _infos = infos;
@@ -93,8 +79,8 @@ void Response::setBackupPages() {
 	backup[505] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>505 - HTTP Version not supported</title></head><body><h1>505 - HTTP Version not supported</h1><p id=\"comment\">Oops! The HTTP version used is not managed by the server.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
     backup[2000] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>Ressource deleted</title></head><body><h1>Ressource deleted</h1><p id=\"comment\">The ressource was successfully deleted.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
     backup[4040] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/error_page.css\" rel=\"stylesheet\"><title>Ressource not deleted</title></head><body><h1>Ressource not deleted</h1><p id=\"comment\">The ressource you are trying to delete does not exist.</p><p><a href=\"site_index.html\"><button>Index</button></a></p></body></html>";
-    backup[1] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"../style/style.css\" rel=\"stylesheet\"><link href=\"../style/upload.css\" rel=\"stylesheet\"><title>Upload</title></head><body><h1 class=\"title\">Upload</h1><p>File successfullyyyyyyy uploaded</p><a href=\"site_index.html\"><button>Index</button></a></body></html>";
-    backup[2] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"./style/upload.css\" rel=\"stylesheet\"><title>Upload</title></head><body><h1 class=\"title\">Upload</h1><p>Could not upload the file</p><a href=\"site_index.html\"><button>Index</button></a></body></html>";
+    backup[1] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"../style/style.css\" rel=\"stylesheet\"><link href=\"../style/upload.css\" rel=\"stylesheet\"><title>Upload</title></head><body><h1 class=\"pagesTitle\">Upload</h1><p class=\"res\">File successfullyyyyyyy uploaded</p><a href=\"site_index.html\" class=\"back\"><button>Index</button></a></body></html>";
+    backup[2] = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"UTF-8\"><link href=\"./style/style.css\" rel=\"stylesheet\"><link href=\"../style/upload.css\" rel=\"stylesheet\"><title>Upload</title></head><body><h1 class=\"pagesTitle\">Upload</h1><p class=\"res\">Could not upload the file</p><a href=\"site_index.html\" class=\"back\"><button>Index</button></a></body></html>";
 }
 
 void Response::setTypes() {
@@ -353,7 +339,7 @@ void Response::processRequest() {
                         Upload *upload = new Upload(_request);
                         _status = upload->doUpload();
                         if (_status == 1) {
-                            _body << backup[_status];
+                                _body << backup[_status];
                             _status = 200;
                         } else if (_status == 2)
                             _status = 400;

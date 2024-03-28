@@ -1,0 +1,30 @@
+body {
+    color: white;
+    display: grid;
+    grid-template-rows: 1fr 0fr 2fr 1fr;
+    margin: 0;
+}
+
+p {
+    color: #BF8282
+}
+
+.list-suppr {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.list {
+    width: 200px;
+    height: 40px;
+}
+
+.suppr {
+    width: 200px;
+    height: 40px;
+    border: none;
+    cursor: pointer;
+}

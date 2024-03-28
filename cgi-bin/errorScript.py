@@ -1,2 +1,1 @@
-while True:
-    printfdgfa("Boucle infinie en cours...")
+printfgsdfg("Infinite loop ...")

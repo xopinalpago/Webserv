@@ -52,19 +52,16 @@ input {
 }
 
 #sendButton {
-    align-self:last  baseline;
-
     writing-mode: vertical-rl;
     text-orientation: upright;
     width: auto;
     height: 200px;
-    /* height: 100%; */
     font-size: larger;
     text-transform: uppercase;
     font-family: 'Times';
     background-color: #BF8282;
-    /* border-radius: 10px; */
+    border-radius: 5px;
     border: 4px double #BF8282;
-    /* position: relative;
-    bottom: 15px; */
+    position:relative;
+    bottom: 15px;
 }

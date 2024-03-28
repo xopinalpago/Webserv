@@ -5,7 +5,7 @@
 #include <iostream>
 #include <algorithm>
 #include <map>
-#include <sstream> // stringstream
+#include <sstream>
 #include <dirent.h>
 
 #include "Cgi.hpp"
@@ -16,7 +16,6 @@ class Response {
     public :
         Response();
         Response(Request request, s_socketInfo* infos);
-        // Response(Request request, Launcher* launch);
         ~Response();
         Response(const Response& cpy);
         Response& operator=(const Response& rhs);
@@ -59,11 +58,6 @@ class Response {
         int                         _status;
 		int                         _clength;
         std::string                 _filePath;
-
-        // std::string                 _uriPathInfo;
-        // std::string                 _uriQuery;
-        // std::string                 _scriptName;
-        // std::string                 _uriPath;
 
 		std::string                 _ctype;
         std::stringstream           _body;
