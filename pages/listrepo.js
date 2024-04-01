@@ -4,7 +4,6 @@ function fillResourceList() {
     var xhr = new XMLHttpRequest();
     xhr.open("GET", "/listFiles/upload", true);
     xhr.onreadystatechange = function() {
-        // console.log("laaaaaaaa");
         if (xhr.readyState === 4 && xhr.status === 200) {
             try {
                 var files = JSON.parse(xhr.responseText);
@@ -13,7 +12,6 @@ function fillResourceList() {
                     option.text = file;
                     selectElement.appendChild(option);
                 });
-                console.log("laaaasfdsfadfaaaa");
             } catch {
                 var option = document.createElement("option");
                 option.text = "No files available";

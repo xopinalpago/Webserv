@@ -84,7 +84,6 @@ int Config::getLineFile(std::string &filename, Launcher &launcher)
     return (0);
 }
 
-//A REVOIR
 int Config::cleanError(Server &server)
 {
     for (size_t i = 0; i < error_page.size(); i++)
@@ -101,7 +100,6 @@ int Config::cleanError(Server &server)
 				if (first_sp < 0)
 					throw ConfigException("No Space in Error Page");
 				int error_num = Utils::stringToInt(error_page[i].substr(0, first_sp));
-				//TESTER SI ERROR EST DANS LES ERREURS QU ON GERE
 				std::string tmp_trim = Utils::trim(error_page[i]);
 				std::string error_file = tmp_trim.substr(first_sp + 1, tmp_trim.size() - first_sp - 2);
 				if (Utils::fileExists(error_file))
@@ -371,7 +369,7 @@ int Config::makeCgiPath(Location &loc, std::string str, int &nbCgiPath)
 	return (0);
 }
 
-int Config::makeRedirection(Location &loc, std::string str, int &nbRedirection, Server &server)
+int Config::makeRedirection(Location &loc, std::string str, int &nbRedirection)
 {
 	if (str[str.length() - 1] != ';')
 		throw ConfigException("Invalid Redirection");
@@ -392,37 +390,6 @@ int Config::makeRedirection(Location &loc, std::string str, int &nbRedirection, 
 		throw ConfigException("Redirection can not call itself");
 	if (path.size() > 1 && path[0] != '/')
 		path = "/" + path;
-	int isValid = 0;
-	if (path.find("http://") == 0)
-	{
-		for (size_t i = 0; i < server.getVecPort().size(); i++)
-		{
-			std::ostringstream oss2;
-			oss2 << server.getVecPorti(i);
-			std::string str_post= oss2.str();
-			std::string url_tmp = "http://" + server.getStrHost() + ":" + str_post + "/";
-			if (path.find(url_tmp) == 0 && server.getStrHost() != "localhost" && server.getStrHost() != "127.0.0.1")
-			{
-				isValid = 1;
-			}
-			else if (server.getStrHost() == "localhost" || server.getStrHost() == "127.0.0.1")
-			{
-				url_tmp = "http://127.0.0.1:" + str_post + "/";
-				std::string url_tmp2 = "http://localhost:" + str_post + "/";
-				if (path.find(url_tmp) == 0 || path.find(url_tmp2) == 0)
-				{
-					isValid = 1;
-				}
-			}
-		}
-		// if (!isValid)
-		// 	throw ConfigException("Invalid Redirection");
-	}
-	// else
-	// {
-	// 	if (path.find("//") != path.npos)
-	// 		throw ConfigException("Invalid Redirection");
-	// }
 	loc.setRedirectionPath(path);
 	loc.setRedirectionCode(key);
 	nbRedirection++;
@@ -441,17 +408,17 @@ int Config::fillServer(Server &server)
 
     for (size_t i = 0; i < serverConfig.size(); i++)
 	{
-		if (serverConfig[i].find("listen") == 0)
+		if (serverConfig[i].find("listen ") == 0)
 			makePort(server, serverConfig[i]);
-		else if (serverConfig[i].find("host") == 0)
+		else if (serverConfig[i].find("host ") == 0)
 			makeHost(server, serverConfig[i], nbHost);
-		else if (serverConfig[i].find("server_name") == 0)
+		else if (serverConfig[i].find("server_name ") == 0)
 			makeServerName(server, serverConfig[i], nbServerName);
-		else if (serverConfig[i].find("client_max_body_size") == 0)
+		else if (serverConfig[i].find("client_max_body_size ") == 0)
 			makeClientMax(server, serverConfig[i], nbClientMax);
-		else if (serverConfig[i].find("root") == 0)
+		else if (serverConfig[i].find("root ") == 0)
 			makeRoot(server, serverConfig[i], nbRoot);
-		else if (serverConfig[i].find("index") == 0)
+		else if (serverConfig[i].find("index ") == 0)
 			makeIndex(server, serverConfig[i], nbIndex);
     }
 	fillLocation(server);
@@ -572,23 +539,23 @@ int	Config::fillLocation(Server &server)
 				throw ConfigException("Invalid Path");
 			while (location[i] != "}")
 			{
-				if (location[i].find("root") == 0)
+				if (location[i].find("root ") == 0)
 					makeRoot(loc, location[i], nbRoot);
-				else if (location[i].find("index") == 0)
+				else if (location[i].find("index ") == 0)
 					makeIndex(loc, location[i], nbIndex);
-				else if (location[i].find("autoindex") == 0 && loc.getPath() != "/cgi-bin")
+				else if (location[i].find("autoindex ") == 0 && loc.getPath() != "/cgi-bin")
 					makeAutoIndex(loc, location[i], nbAutoIndex);
-				else if (location[i].find("autoindex") == 0 && loc.getPath() == "/cgi-bin")
+				else if (location[i].find("autoindex ") == 0 && loc.getPath() == "/cgi-bin")
 					throw ConfigException("Parametr autoindex not allow for CGI");
-				else if (location[i].find("allow_methods") == 0)
+				else if (location[i].find("allow_methods ") == 0)
 					makeMethod(loc, location[i], nbAllowMethods);
-				else if (location[i].find("cgi_extension") == 0)
+				else if (location[i].find("cgi_extension ") == 0)
 					makeCgiEx(loc, location[i], nbCgiEx);
-				else if (location[i].find("cgi_path") == 0)
+				else if (location[i].find("cgi_path ") == 0)
 					makeCgiPath(loc, location[i], nbCgiPath);
-				else if (location[i].find("return") == 0)
-					makeRedirection(loc, location[i], nbRedirection, server);
-				else if (location[i].find("upload_dir") == 0)
+				else if (location[i].find("return ") == 0)
+					makeRedirection(loc, location[i], nbRedirection);
+				else if (location[i].find("upload_dir ") == 0)
 					makeUploadDir(loc, location[i], nbUploadDir);
 				i++;
 			}

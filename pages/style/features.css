@@ -1,0 +1,45 @@
+body {
+    color: white;
+    display: grid;
+    grid-template-rows: 1fr 0fr 2fr 1fr;
+    margin: 0;
+}
+
+p {
+    color: #BF8282
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 70px;
+    justify-content: center;
+}
+
+.feature:nth-child(odd) {
+    margin-top: 100px;
+}
+
+.feature:nth-child(even) {
+    margin-bottom: 150px;
+}
+
+.feature {
+    width: 170px;
+    height: 170px;
+    border: 2px solid #BF8282;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-family: 'Times';
+    color: white;
+    transition: background-color 0.5s, border-color 0.5s;
+}
+
+.feature:hover {
+    background-color: #BF8282;
+    border-color: white;
+}

@@ -151,35 +151,23 @@ int Launcher::readServer(User &user)
 	}
 	
 	while (request.getContentLength() > 0 && extractBody(request).length() < request.getContentLength() && request.getContentLength() < 10000) {
-		// std::cout << "DEBUT :" << std::endl;
-		// std::cout << "content length = " << request.getContentLength() << std::endl;
-		// std::cout << "extractBody(request).length() = " << extractBody(request).length() << std::endl;
 		rc = BUFFER_SIZE;
 		while (rc == BUFFER_SIZE) {
-			// std::cout << "ok" << std::endl;
 			rc = readbuf(user, request, bf);
-			// std::cout << "RC =========== " << rc << std::endl;
 			if (rc <= 0)
 				return rc;
 		}
 		request.setBody(extractBody(request));
-		// std::cout << "FIN :" << std::endl;
-		// std::cout << "content length = " << request.getContentLength() << std::endl;
-		// std::cout << "extractBody(request).length() = " << extractBody(request).length() << std::endl;
 	}
 
-	// std::cout << "******* request *******" << std::endl;
-	// std::cout << request.getAllRequest() << std::endl;
-	// std::cout << "***************************************" << std::endl;
-
 	user.setRequest(request);
-	// user.setServer(Servers);
 	FD_CLR(user.getFd(), &readfds);
 	FD_SET(user.getFd(), &writefds);
 
 	std::cout << std::endl << LIGHT_RED;
 	std::cout << "**************** REQUEST HEADER ****************" << std::endl;
 	std::cout << request.getAllRequest().substr(0, request.getAllRequest().find('\n')) << std::endl;
+	// std::cout << request.getAllRequest() << std::endl;
 	std::cout << "************************************************" << std::endl;
 	std::cout << RESET << std::endl;
 
@@ -242,14 +230,13 @@ int Launcher::initServer(Server &server)
 	FD_ZERO(&writefds);
 	if (server.setFd(socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
-		// close(server.getFd());
+		close(server.getFd());
         throw LauncherException("socket failed");
 	}
 	if (server.getFd() > max_sd)
 		max_sd = server.getFd();
 	if ((rc = setsockopt(server.getFd(), SOL_SOCKET,  SO_REUSEADDR, (char *)&on, sizeof(on)) < 0))
 	{
-		// close(server.getFd());
 		throw LauncherException("setsockopt failed");
 	}
 	std::memset(&server.address, 0, sizeof(server.address));
@@ -257,9 +244,9 @@ int Launcher::initServer(Server &server)
 	server.address.sin_addr.s_addr = server.getHost();
 	server.address.sin_port = htons(server.getVecPorti(0));
 	server.setPort(server.getVecPorti(0));
-    if (bind(server.getFd(), (struct sockaddr *)&server.address, sizeof(server.address)) < 0)
+    std::cout << "Listening on port: " << server.getPort() << std::endl;
+	if (bind(server.getFd(), (struct sockaddr *)&server.address, sizeof(server.address)) < 0)
 	{
-        // close(server.getFd());
         throw LauncherException("bind failed");
     }
 	Servers[server.getFd()] = server;
@@ -271,12 +258,14 @@ int Launcher::initServer(Server &server, int port)
     int on = 1;
 	FD_ZERO(&writefds);
 	if (server.setFd(socket(AF_INET, SOCK_STREAM, 0)) < 0)
+	{
+		close(server.getFd());
         throw LauncherException("socket failed");
+	}
 	if (server.getFd() > max_sd)
 		max_sd = server.getFd();
 	if ((rc = setsockopt(server.getFd(), SOL_SOCKET,  SO_REUSEADDR, (char *)&on, sizeof(on)) < 0))
 	{
-		// close(server.getFd());
 		throw LauncherException("setsockopt failed");
 	}
 	std::memset(&server.address, 0, sizeof(server.address));
@@ -284,13 +273,12 @@ int Launcher::initServer(Server &server, int port)
 	server.address.sin_addr.s_addr = server.getHost();
 	server.address.sin_port = htons(port);
 	server.setPort(port);
+	std::cout << "Listening on port: " << server.getPort() << std::endl;
     if (bind(server.getFd(), (struct sockaddr *)&server.address, sizeof(server.address)) < 0)
 	{
-        // close(server.getFd());
         throw LauncherException("bind failed");
     }
 	Servers[server.getFd()] = server;
-	// max_sd = server.getFd();
     return (0);
 }
 
@@ -368,6 +356,8 @@ int Launcher::checkServers(void)
 {
     std::vector<int> keys;
 
+	if (Servers.size() <= 0)
+		throw LauncherException("No Server");
     for (std::map<int, Server>::iterator it = Servers.begin(); it != Servers.end(); ++it)
     {
 		int root = 0;

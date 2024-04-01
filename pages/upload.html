@@ -7,12 +7,14 @@
     <title>Upload</title>
 </head>
 <body>
-    <h1 class="title">Upload</h1>
+    <h1 class="pagesTitle">Upload</h1>
     <form enctype="multipart/form-data" action="./" method="POST">
-        <input type="hidden" name="MAX_FILE_SIZE" value="30000" />
-        Send this file: <input name="userfile" type="file" required/>
-        <input type="submit" value="Send File" />
+        Select a file:
+        <input type="file" name="userfile" required/>
+        <input type="submit" value="Upload" />
     </form>
-    <a href="/site_index.html"><button>Index</button></a>
+    <div class="index">
+        <a class="indexButton" href="/site_index.html">Index</a>
+    </div>
 </body>
 </html>

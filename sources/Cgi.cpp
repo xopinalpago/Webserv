@@ -27,7 +27,6 @@ Cgi& Cgi::operator=(const Cgi& rhs) {
 Cgi::Cgi(std::string filePath, s_socketInfo* infos) {
     
     _infos = infos;
-    // std::cerr << "TEST : socket maxsd = " << infos->max_sd << std::endl; 
     _filePath = filePath;
     _cgiFile = ".cgi.txt";
     _cgiFd = open(_cgiFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC);
@@ -45,12 +44,10 @@ Cgi::~Cgi(void) {
 
     if (fcntl(_cgiFd, F_GETFL) == -1)
         close(_cgiFd);
-    // remove(_cgiFile.c_str());
 }
 
 void    Cgi::closeAllConnection(void)
 {
-    // std::cerr << "max_sd : " << _infos->max_sd << std::endl;
     for (int i = 3; i <= _infos->max_sd; ++i)
     {
 		closeConnection(i);
@@ -67,7 +64,6 @@ void    Cgi::closeConnection(int fd)
 	{
         _infos->max_sd--;
 	}
-	// std::cout << "Connection: " << fd << " closed..." << std::endl;
     close(fd);
 }
 
@@ -137,11 +133,11 @@ void Cgi::freeEnv() {
 
 int Cgi::create_env(Request request) {
 
-    _env["SERVER_NAME"] = request.getServer().getServerName(); // conf
+    _env["SERVER_NAME"] = request.getServer().getServerName();
     _env["SERVER_PROTOCOL"] = "HTTP/1.1";
     _env["GATEWAY_INTERFACE"] = "CGI/1.1";
     _env["REQUEST_METHOD"] = request.getMethod();
-    _env["CONTENT_TYPE"] = request.getContentType(); // user
+    _env["CONTENT_TYPE"] = request.getContentType();
     _env["CONTENT_LENGTH"] = request.getContentLength();
 
     if (request.getMethod() == "GET") {
@@ -155,7 +151,6 @@ int Cgi::create_env(Request request) {
     } else
         _env["QUERY_STRING"] = "";
     _env["SCRIPT_FILENAME"] = _filePath;
-    // _env["QUERY_STRING"] = decodeQuery(_env["QUERY_STRING"]);
     _env["REQUEST_URI"] = request.getUri();
     return (mapToChar());
 }
@@ -189,7 +184,6 @@ int Cgi::writePipe(int *fd_in, int *fd_out, std::string body) {
         return 500;
     }
     if (pid == 0) {
-        // alarm(3);
         dup2(*fd_out, STDOUT_FILENO);
         close(*fd_out);
         close(*fd_in);

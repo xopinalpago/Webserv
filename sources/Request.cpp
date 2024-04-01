@@ -65,10 +65,6 @@ std::string		Request::getUri(void)
 
 std::string		Request::getVersion(void)
 {
-	// std::cout << "version: " << version << std::endl;
-	// std::cout << "size: " << version.size() << std::endl;
-	// std::cout << "last: " << version[version.size()-2] << std::endl;
-
 	return (this->version);
 }
 
@@ -86,11 +82,6 @@ std::string		Request::getContentId(void)
 {
 	return (this->contentId);
 }
-
-// std::string		Request::getPathFile(void)
-// {
-// 	return (this->pathFile);
-// }
 
 unsigned int	Request::getContentLength(void)
 {
@@ -123,36 +114,6 @@ int Request::setBody(std::string body)
 	return (0);
 }
 
-// int	Request::setMethod(std::string method)
-// {
-//     if (method.length() == 0)
-//     {
-//         return (1);
-//     }
-// 	this->method = method;
-//     return (0);
-// }
-
-// int	Request::setUri(std::string uri)
-// {
-//     if (uri.length() == 0)
-//     {
-//         return (1);
-//     }
-// 	this->uri = uri;
-//     return (0);
-// }
-
-// int	Request::setVersion(std::string version)
-// {
-//     if (version.length() == 0)
-//     {
-//         return (1);
-//     }
-// 	this->version = version;
-//     return (0);
-// }
-
 int	Request::setHost(std::string host)
 {
     if (host.length() == 0)
@@ -162,26 +123,6 @@ int	Request::setHost(std::string host)
 	this->host = host;
     return (0);
 }
-
-// int		Request::setContentType(std::string cType)
-// {
-//     if (cType.length() == 0)
-//     {
-//         return (1);
-//     }
-// 	this->contentType = cType;
-//     return (0);
-// }
-
-// int		Request::setPathFile(std::string pathFile)
-// {
-//     if (pathFile.length() == 0)
-//     {
-//         return (1);
-//     }
-// 	this->pathFile = pathFile;
-//     return (0);
-// }
 
 unsigned int	Request::setContentLength(unsigned int cLength)
 {
@@ -268,11 +209,6 @@ int	Request::parseRequest(std::vector<Server> servers)
 
 	if (method.length() == 0 || uri.length() == 0 || version.length() == 0)
 		return (1);
-	// std::cout << std::endl;
-	// std::cout << "method= " << method << std::endl;
-	// std::cout << "uri= " << uri << std::endl;
-	// std::cout << "version= " << version << std::endl;
-	// std::cout << std::endl;
 	
 	for (size_t i = 0; i < vAllRequest.size(); i++)
 	{
@@ -318,12 +254,10 @@ int	Request::parseRequest(std::vector<Server> servers)
 			if (contentType == "multipart/form-data") {
 				pos = vAllRequest[i].find("boundary=");
 				contentId = vAllRequest[i].substr(pos + 9, vAllRequest[i].size() - (pos + 9) - 1);
-				// std::cout << "contentId : " << contentId << std::endl;
 			}
 		}
 	}
 	setServer(servers);
-	// contentLength = allRequest.size();
 	return (0);
 }
 

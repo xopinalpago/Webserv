@@ -20,7 +20,6 @@ class Request
 		std::string		contentId;
 		std::string     referer;
 		std::string     accept;
-		// std::string		pathFile;
 		unsigned int	contentLength;
 		int				keepAlive;
 		std::vector<std::string> vAllRequest;
@@ -41,7 +40,6 @@ class Request
 		std::string		getHost(void);
 		std::string		getContentType(void);
 		std::string		getContentId(void);
-		// std::string		getPathFile(void);
 		unsigned int	getContentLength(void);
 		int				getKeepAlive(void);
 		Server			getServer(void) const;
@@ -50,12 +48,7 @@ class Request
 		int		setAllRequest(std::string request);
 		int		setBody(std::string body);
 		int		setLocation(std::map<std::string, Location> locations);
-		// int		setMethod(std::string method);
-		// int		setUri(std::string uri);
-		// int		setVersion(std::string version);
 		int		setHost(std::string host);
-		// int		setContentType(std::string cType);
-		// int		setPathFile(std::string str);
 		unsigned int		setContentLength(unsigned int cLength);
 		int		setKeepAlive(int alive);
 		int		setServer(std::vector<Server> servers);

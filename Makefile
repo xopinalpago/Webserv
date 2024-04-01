@@ -1,5 +1,5 @@
 CC = c++
-CFLAGS = -Wall -Wextra -Werror -g3 -std=c++98 -MMD
+CFLAGS = -Wall -Wextra -Werror -std=c++98 -MMD
 RM = rm -rf
 NAME = webserv
 
@@ -34,15 +34,13 @@ objects/%.o: sources/%.cpp
 clean:
 	$(RM) objects
 
-fclean: clean clean_cgi clean_uploads
+fclean: clean clean_cgi
 	$(RM) $(NAME)
 
 clean_cgi:
 	rm -f .cgi.txt
 
-clean_uploads:
-	rm -rf uploads
+re: fclean 
+	make all
 
-re: fclean all
-
-.PHONY: all clean fclean re clean_cgi clean_uploads
+.PHONY: all clean fclean re clean_cgi

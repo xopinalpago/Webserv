@@ -30,7 +30,7 @@ class Config {
         int         makeUploadDir(Location &loc, std::string str, int &nbUploadDir);
         int         makeClientMax(Server &server, std::string str, int &nbClientMax);
         int         makeAutoIndex(Location &loc, std::string str, int &nbAutoIndex);
-        int         makeRedirection(Location &loc, std::string str, int &nbRedirection, Server &server);
+        int         makeRedirection(Location &loc, std::string str, int &nbRedirection);
         int	        fillLocation(Server &server);
         int         makeMethod(Location &loc, std::string str, int &nbAllowMethods);
         int         missElementListFiles(Location &loc);

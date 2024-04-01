@@ -9,17 +9,14 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <errno.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <cstdio>
 #include <sstream>
 #include <fstream>
-#include <sys/stat.h> // chmod
+#include <sys/stat.h>
 
 #include "Request.hpp"
-// #include "User.hpp"
-// class User;
 
 typedef struct socketInfo {
 	fd_set					readfds;

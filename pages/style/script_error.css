@@ -1,0 +1,30 @@
+body {
+    display: grid;
+    grid-template-rows: 1fr 0fr 2fr 1fr;
+    margin: 0;
+}
+
+p {
+    color: #BF8282
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#script_button {
+    width: 100px;
+    height: 100px;
+    text-align: center;
+    border: 2px solid white;
+    background-color: white;
+    font-family: 'Times';
+    text-transform: uppercase;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

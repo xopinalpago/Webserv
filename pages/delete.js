@@ -4,15 +4,15 @@ document.getElementById('deleteButton').addEventListener('click', function() {
     var source = selectElement.getAttribute("data-source");
     
     if (!selectedResource) {
-        alert("Veuillez sélectionner une ressource avant de la supprimer.");
+        alert("Please select a resource before deleting it.");
         return;
     } else if (selectedResource === "No files available") {
         alert("No files are available.");
         return;
     }
-    var confirmation = confirm("Êtes-vous sûr de vouloir supprimer la ressource ?");
+    var confirmation = confirm("Are you sure you want to delete the resource?");
     if (confirmation) {
-        console.log("La suppression de la ressource est confirmée.");
+        console.log("The deletion of the resource is confirmed.");
         
         var xhr = new XMLHttpRequest();
         xhr.open('DELETE', 'listFiles/upload/' + selectedResource, true);
@@ -23,12 +23,12 @@ document.getElementById('deleteButton').addEventListener('click', function() {
                 document.write(xhr.responseText);
                 document.close();
                 if (xhr.status != 200) {
-                    alert('Une erreur s\'est produite lors de la suppression de la ressource.');
+                    alert("An error occurred while deleting the resource.");
                 }
             }
         };
         xhr.send();
     } else {
-        console.log("La suppression de la ressource est annulée.");
+        console.log("The deletion of the resource is canceled.");
     }
 });

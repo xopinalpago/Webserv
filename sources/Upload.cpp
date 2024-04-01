@@ -56,7 +56,6 @@ void Upload::parseUpload() {
         line = next;
     }
     fileBody = res.str();
-    // std::cout << "fileBody = " << fileBody << std::endl;
 }
 
 #include <sys/stat.h>
@@ -67,7 +66,7 @@ int Upload::doUpload() {
     if (_request.getLocation().getUploadDir() != "")
         folder_name = _request.getLocation().getUploadDir();
     else
-        folder_name = "uploads";
+        folder_name = "upload";
     if (access(folder_name.c_str(), F_OK | R_OK | X_OK) != 0) {
         if (mkdir(folder_name.c_str(), S_IRWXU | S_IRWXG | S_IRWXO))
             return 2;

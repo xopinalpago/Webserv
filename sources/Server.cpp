@@ -3,7 +3,6 @@
 Server::Server(void)
 {
 	this->fd = 0;
-	// this->port = 0;
 	this->client_max_body_size = 0;
     this->host = 0;
 	this->server_name = "";
@@ -133,58 +132,6 @@ int Server::setRoot(std::string root)
     return (0);
 }
 
-// int Server::setDirectory(std::string directory_listing)
-// {
-//     if (directory_listing.length() == 0)
-//     {
-//         return (1);
-//     }
-// 	this->directory_listing = directory_listing;
-//     return (0);
-// }
-
-// void Server::setMethod(std::string tmp)
-// {
-//     if (Utils::inVector(this->method, tmp)) 
-//     {
-//         this->method.push_back(tmp);
-//     }
-//     return ;
-// }
-
-// std::vector<std::string> Server::getMethod(void) const
-// {
-//     return (this->method);
-// }
-
-// std::string Server::getMethodi(int i) const
-// {
-//     if (i < 0 || i >= (int)this->method.size())
-//         return ("");
-//     return (this->method[i]);
-// }
-
-// void Server::setCgiEx(std::string tmp)
-// {
-//     if (Utils::inVector(this->cgi_extension, tmp)) 
-//     {
-//         this->cgi_extension.push_back(tmp);
-//     }
-//     return ;
-// }
-
-// std::vector<std::string> Server::getCgiEx(void) const
-// {
-//     return (this->cgi_extension);
-// }
-
-// std::string Server::getCgiExi(int i) const
-// {
-//     if (i < 0 || i >= (int)this->cgi_extension.size())
-//             return ("");
-//     return (this->cgi_extension[i]);
-// }
-
 void Server::setErrorPage(int key, std::string tmp)
 {
     this->error_page[key] = tmp;
@@ -256,11 +203,6 @@ unsigned int Server::getClientMax(void) const
 {
     return (this->client_max_body_size);
 }
-
-// std::string Server::getDirectory(void) const
-// {
-//     return (this->directory_listing);
-// }
 
 int Server::setLoc(std::string key, Location data)
 {
